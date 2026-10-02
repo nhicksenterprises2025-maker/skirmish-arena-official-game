@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-set-game-fullscreen"
+description = "Enables the set_game_fullscreen command without any pre-configured scope."
+commands.allow = ["set_game_fullscreen"]
+
+[[permission]]
+identifier = "deny-set-game-fullscreen"
+description = "Denies the set_game_fullscreen command without any pre-configured scope."
+commands.deny = ["set_game_fullscreen"]

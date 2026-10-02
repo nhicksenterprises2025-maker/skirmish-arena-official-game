@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Skirmish Arena Reimagined",
+  "version": "1.9.3",
+  "identifier": "com.skirmisharena.launcher",
+  "build": {
+    "beforeBuildCommand": "node scripts/stage-backend.cjs",
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "security": {
+      "csp": "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; connect-src ipc: http://ipc.localhost"
+    },
+    "windows": [
+      {
+        "minWidth": 640,
+        "title": "Skirmish Arena",
+        "minHeight": 580,
+        "center": true,
+        "label": "main",
+        "width": 940,
+        "height": 740
+      }
+    ],
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "resources": {
+      "../backend-bundle/": "backend/"
+    },
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "targets": [
+      "nsis"
+    ],
+    "createUpdaterArtifacts": true,
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerHooks": "installer-hooks.nsh",
+        "customLanguageFiles": {
+          "English": "installer-english.nsh"
+        }
+      }
+    },
+    "active": true
+  },
+  "plugins": {
+    "updater": {
+      "dangerousInsecureTransportProtocol": true,
+      "windows": {
+        "installMode": "passive"
+      },
+      "endpoints": [],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEI3OTk4NUI2QUQxRkQwRDMKUldUVDBCK3R0b1dadDhxejhUSEdvRFNqbldGeUxmcE5DMG1TblE1MFVuWWxhVkdwSUtqbHdzOUsK",
+      "requireSignedVersion": true
+    }
+  }
+}

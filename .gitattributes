@@ -1,0 +1,11 @@
+* text=auto
+*.sh text eol=lf
+*.cmd text eol=crlf
+*.png binary
+*.ico binary
+*.glb binary
+*.blend binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
+*.zip binary

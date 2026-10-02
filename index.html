@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Skirmish Arena — 1.9 STARTUP REPAIR</title>
+  <meta name="theme-color" content="#172a23" />
+  <meta name="application-name" content="Skirmish Arena" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="app-icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="boot.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="ai-ui.css" />
+</head>
+<body>
+  <script src="boot.js"></script>
+  <canvas id="game"></canvas>
+  <div id="finalCountdown" class="final-countdown hidden" aria-label="Match ending countdown" aria-live="polite"></div>
+
+  <div id="menu" class="screen visible">
+    <div class="hero-card glass">
+      <div class="lobby-command">
+      <div class="eyebrow home-edition"><i class="dot live"></i> VERSION 1.9 <span>02 OCT / 2026</span></div>
+      <div class="lobby-brand-row"><h1>SKIRMISH<br><span>ARENA</span></h1><div id="lobbyProgression" class="lobby-progression" aria-label="Account level"></div></div>
+      <p class="home-deck">YOUR KIT. YOUR RIVALS. YOUR CIRCUIT.</p>
+      
+      <div class="menu-grid">
+        <button id="queueButton" class="primary" data-action="play">PLAY</button>
+        <button data-action="spectate">SPECTATE <span aria-hidden="true">↗</span></button>
+        <button data-action="loadout">LOADOUT</button>
+        <button data-action="operator">OPERATOR</button>
+        <button data-action="meta">WEAPON META</button>
+        <button data-action="bots">BOT LEADERBOARD</button>
+        <button data-action="player-profile">PLAYER PROFILE</button>
+        <button data-action="messages">PHONE</button>
+        <button data-action="tournaments">TOURNAMENTS</button>
+        <button data-action="settings">SETTINGS</button>
+        <button data-action="save">SAVE DATA</button>
+      </div>
+      <div class="lobby-update">
+        <button id="sarUpdateApp" type="button"><span aria-hidden="true">↻</span> <strong>UPDATE GAME</strong></button>
+        <button type="button" data-fullscreen-toggle>FULLSCREEN</button>
+        <span id="sarBuildLabel">BUILD 1.9.3</span>
+      </div>
+      <div id="sarUpdateStatus" class="lobby-update-status" role="status" aria-live="polite">Ready when you are.</div>
+      <div id="queueStatus" class="queue-status hidden">
+        <strong>STARTING MATCH</strong>
+        <span id="queueDetail">An instant player slot is always available. Your 5v5 starts immediately.</span>
+      </div>
+      </div>
+      <aside class="lobby-armory" aria-label="Your equipped operator and primary weapon">
+        <div class="armory-heading"><span>EQUIPPED OPERATOR</span><span>FIELD KIT / 01</span></div>
+        <canvas id="lobbyOperator" width="360" height="380" aria-label="Equipped operator illustration"></canvas>
+        <div class="armory-caption"><strong id="lobbyOperatorName">URBAN ASSAULT</strong><button data-action="operator">CHANGE ↗</button></div>
+        <div class="armory-weapon"><canvas id="lobbyWeapon" width="360" height="105" aria-label="Equipped primary weapon illustration"></canvas><div><span id="lobbyWeaponName">AR-15</span><button data-action="loadout">LOADOUT ↗</button></div></div>
+      </aside>
+      <div class="live-matches">
+        <div class="live-title"><span><i class="dot live"></i> LIVE MATCHES</span><span class="live-instruction">SELECT A MATCH TO WATCH ↗</span></div>
+        <div id="liveMatchStrip" class="live-match-strip"></div>
+      </div>
+      <div class="season-strip">
+        <div><span class="label">CURRENT SEASON</span><strong id="seasonNumber">SEASON 1</strong></div>
+        <div><span class="label">ENDS IN</span><strong id="seasonRemaining">15D 0H</strong></div>
+        <div><span class="label">CURRENT LEADER</span><strong id="seasonLeader">—</strong></div>
+        <div><span class="label">LAST CHAMPION</span><strong id="seasonChampion">NO CHAMPION YET</strong></div>
+      </div>
+      <div class="status-row">
+        
+      </div>
+    </div>
+  </div>
+
+  <div id="pause" class="screen">
+    <div class="modal glass compact">
+      <div class="eyebrow">SKIRMISH ARENA / IN MATCH</div>
+      <h2>PAUSED</h2>
+      <p class="pause-caption">Take a breath. Your match is here.</p>
+      <div class="stack">
+        <button class="primary" data-action="resume">RESUME</button>
+        <button data-action="meta">WEAPON META</button>
+        <button data-action="bots">BOT LEADERBOARD</button>
+        <button data-action="settings">SETTINGS</button>
+        <button data-action="exit">LEAVE MATCH</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="screen">
+    <div class="modal glass wide" role="dialog" aria-modal="true" aria-label="Game panel" tabindex="-1">
+      <button id="closeModal" class="close" aria-label="Close panel">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <div id="hud" class="hud hidden">
+    <div class="topbar glass thin match-hud">
+      <div><span class="label">MAP</span><strong>BRIGHTFIELD BLOCKS</strong></div>
+      <div><span class="label">MODE</span><strong id="hudModeLabel">5V5 TDM</strong></div>
+      <div><span id="hudScoreHeading" class="label">SCORE</span><strong id="teamScoreLabel">0 — 0</strong></div>
+      <div><span class="label">TARGET</span><strong id="hudTargetLabel">60 KILLS</strong></div>
+      <div><span class="label">TIME</span><strong id="uptimeLabel">00:00</strong></div>
+    </div>
+    <div id="killfeed" class="killfeed"></div>
+    <div class="player-hud glass combat-hud">
+      <div class="hp-line"><span class="label">HEALTH</span><strong id="hpText">250</strong></div>
+      <div class="hp-track"><div id="hpFill"></div></div>
+      <div class="weapon-line">
+        <div><span class="label">WEAPON</span><strong id="weaponName">AR-15</strong></div>
+        <div class="ammo"><strong id="ammoText">40</strong><span id="reserveText">/ 120</span></div>
+      </div>
+      <div id="reloadText" class="reload hidden">RELOADING</div>
+      <div id="abilityText" class="ability-status">DASH READY</div>
+    </div>
+    <div class="rank-card glass combat-team">
+      <span id="hudIdentityHeading" class="label">YOUR TEAM</span>
+      <strong id="teamLabel">GREEN</strong>
+      <span id="kdText">0 K / 0 D / 0 A</span>
+    </div>
+    <div id="respawnText" class="respawn hidden">RESPAWNING IN 2</div>
+  </div>
+
+
+  <div id="spectatorHud" class="spectator-hud hidden">
+    <div class="spectate-top glass">
+      <div><span class="label">SPECTATING</span><button id="spectateName" type="button" title="Open this bot profile">BOT</button><small id="spectatePower"></small></div>
+      <div><span class="label">MATCH</span><strong id="spectateGame">GAME 1</strong></div>
+      <div><span id="spectateScoreHeading" class="label">SCORE</span><strong id="spectateScore">0 — 0</strong></div>
+      <div><span class="label">TIME</span><strong id="spectateClock">05:00</strong></div>
+      <div><span class="label">WEAPON</span><strong id="spectateWeapon">AR-15</strong></div>
+    </div>
+    <div class="spectate-help glass spectate-controls">
+      <div class="observer-matches" aria-label="Active matches"><span>LIVE</span><button data-spectator-match="0" aria-label="Watch match 1">01</button><button data-spectator-match="1" aria-label="Watch match 2">02</button><button data-spectator-match="2" aria-label="Watch match 3">03</button><button data-spectator-match="3" aria-label="Watch match 4">04</button></div>
+      <button data-spectator="previous-bot" title="Left arrow">Previous Bot</button><button data-spectator="next-bot" title="Right arrow">Next Bot</button>
+      <button data-spectator="previous-match" title="Up arrow">Previous Match</button><button data-spectator="next-match" title="Down arrow">Next Match</button>
+      <details><summary>CAMERA &amp; BOT</summary><div>
+        <button data-spectator="follow">Follow Bot</button><button data-spectator="blue">Cycle Blue Team</button><button data-spectator="red">Cycle Green Team</button>
+        <button data-spectator="loadout">View Bot Loadout</button><button data-spectator="stats">View Bot Stats</button>
+        <button data-spectator="tactical">Tactical Camera</button><button data-spectator="25d">2.5D Follow</button>
+      </div></details><small>TAB: SCOREBOARD · ESC: LOBBY</small>
+    </div>
+  </div>
+
+  <div id="scoreboard" class="scoreboard glass hidden">
+    <div class="score-title"><strong id="scoreModeLabel">TDM · TARGET 60</strong><span>Hold TAB</span></div>
+    <div class="score-head"><span id="scoreGroupHeading">Team</span><span>Operator</span><span>PWR</span><span>K</span><span>D</span><span>A</span><span>K/D</span><span>DMG</span><span>Weapon</span></div>
+    <div id="scoreRows"></div>
+  </div>
+
+  <div id="crosshair" class="crosshair hidden"><i></i><i></i><i></i><i></i></div>
+  <div id="matchCountdown" class="match-countdown hidden" aria-live="polite"><span>MATCH STARTS IN</span><strong>3</strong></div>
+  <script src="fullscreen.js"></script>
+  <script src="audio.js"></script>
+  <script src="ai-ui.js"></script>
+  <script src="build-meta.js"></script>
+  <script src="progression.js"></script>
+  <script src="tactical-instinct.js"></script>
+  <script src="tournaments-ui.js"></script>
+  <script src="cloud.js"></script>
+  <script src="updater.js"></script>
+</body>
+</html>

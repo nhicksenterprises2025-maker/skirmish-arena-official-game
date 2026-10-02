@@ -1,0 +1,19 @@
+{
+  "name": "Skirmish Arena",
+  "short_name": "Skirmish Arena",
+  "description": "Competitive 5v5 arena matches, a persistent bot league, tournaments and live weapon meta.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#15251e",
+  "theme_color": "#294434",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

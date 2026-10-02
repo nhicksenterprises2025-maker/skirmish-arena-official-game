@@ -1,0 +1,14 @@
+{
+  "name": "skirmish-arena-launcher",
+  "version": "1.9.3",
+  "private": true,
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "check": "node scripts/check.cjs"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.0"
+  }
+}

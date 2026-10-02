@@ -1,0 +1,10 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{engine}=require('./simulate.cjs'),{validateWorld}=require('../server/world.cjs');
+const baseline=process.argv[2];assert.ok(baseline,'Supply the actual preceding game.js baseline');
+const oldEngine=engine({},fs.readFileSync(path.resolve(baseline),'utf8'));for(let i=0;i<1800;i++)oldEngine.step();
+const old=oldEngine.context.SAR.getUniverse(),e=engine(),migrated=e.dev.normalizeSave(old),sample=migrated.patchState.aiSamples['pre-tactical-instinct'];
+assert.ok(sample);assert.equal(migrated.patchState.id,old.patchState.id);assert.equal(migrated.patchState.fingerprint,old.patchState.fingerprint);assert.deepEqual(migrated.patchState.meta,old.patchState.meta);assert.deepEqual(sample.meta,old.patchState.meta);assert.deepEqual(sample.perBot,old.patchState.perBot);assert.deepEqual(sample.skillStrata,old.patchState.skillStrata);assert.equal(migrated.patchState.aiSamples[migrated.aiRevision].completedMatches,0);
+for(const key of ['bots','playerCareer','seasons','playerSeasons','patchArchives','balancePatchHistory'])assert.deepEqual(migrated[key],old[key],key+' retained');validateWorld(migrated,{save:old});
+const again=e.dev.normalizeSave(migrated);assert.deepEqual(again.patchState.aiSamples,migrated.patchState.aiSamples,'Restart cannot reset revision samples');
+const forged=JSON.parse(JSON.stringify(again));forged.patchState.aiSamples['pre-tactical-instinct'].meta['AR-15'].damage++;assert.throws(()=>validateWorld(forged,{save:migrated}),/Historical AI revision changed|samples disagree/);
+console.log('PASS actual 1.7 baseline with 60 seconds of combat migrates without changing balance, lifetime careers, identities, seasons, archives or old samples; repeat migration is stable and historical mutations are refused');

@@ -1,0 +1,22 @@
+{
+  "name": "skirmish-arena-reimagined",
+  "version": "1.9.3",
+  "private": true,
+  "description": "Skirmish Arena game and persistent account server",
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "scripts": {
+    "start": "node server/index.cjs",
+    "test": "npm run test:server && npm run test:game && npm run test:client",
+    "test:server": "node --test server/tests/*.test.cjs",
+    "test:client": "node dev/cloud-client-check.cjs && node dev/offline-client-check.cjs && node dev/social-ui-check.cjs && node dev/cloud-cache-quota-check.cjs && node dev/tournaments-ui-check.cjs",
+    "test:game": "node dev/mechanics.cjs && node dev/district-check.cjs && node dev/meta-check.cjs && node dev/platform-game-check.cjs && node dev/p90-range-check.cjs && node dev/player-match.cjs && node dev/balance-update-check.cjs && node dev/update-five-check.cjs && node dev/models-25d-check.mjs && node dev/environment-25d-check.mjs && node tools/blender_validate.mjs && node dev/audio-check.cjs && node dev/input-capture-check.cjs && node dev/damage-numbers-check.cjs && npm run test:spread",
+    "test:spread": "node dev/spread-distance-check.cjs",
+    "test:live-circuit": "node dev/live-circuit-tournament-check.cjs && node dev/live-circuit-profile-check.cjs && node dev/audio-identity-check.cjs && node dev/live-circuit-assets-check.mjs",
+    "test:release": "node launcher/scripts/backend-bundle-check.cjs && node dev/updater-lifecycle-check.cjs"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.3"
+  }
+}

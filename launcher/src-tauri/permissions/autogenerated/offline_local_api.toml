@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-offline-local-api"
+description = "Enables the offline_local_api command without any pre-configured scope."
+commands.allow = ["offline_local_api"]
+
+[[permission]]
+identifier = "deny-offline-local-api"
+description = "Denies the offline_local_api command without any pre-configured scope."
+commands.deny = ["offline_local_api"]

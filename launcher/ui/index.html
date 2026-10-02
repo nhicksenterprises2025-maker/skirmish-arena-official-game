@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Skirmish Arena — Launcher</title><link rel="stylesheet" href="launcher.css"></head>
+<body>
+<div class="shell">
+  <header><div class="wordmark"><span class="eyebrow">STARTUP REPAIR / DESKTOP</span><h1>SKIRMISH <span>ARENA</span></h1></div><div class="edition"><span class="eyebrow">CURRENT VERSION</span><strong id="version">1.9.3</strong><span id="channel">LIVE RELEASE</span></div></header>
+  <main>
+    <section class="briefing"><div class="section-heading"><span class="eyebrow">FIELD NOTES</span><span class="date">02 OCT 2026</span></div><h2>Built for the<br>next match.</h2><p class="deck">The equipment, the competition, the world you keep.</p><ul id="news"><li>Situation-aware opponents and purposeful teamwork.</li><li>Deathmatch and flexible custom sessions.</li><li>Clear results, final countdowns and custom tournament management.</li></ul><div class="rule"></div><p class="data-note">Sign in with your existing account to continue your world. Careers, seasons and tournament records stay with you.</p></section>
+    <section class="operations"><div class="section-heading"><span class="eyebrow">02 / OPERATIONS</span><span class="status-dot" id="status-dot"></span></div><div class="connection"><span class="eyebrow">CONNECTION</span><strong id="connection">Checking server…</strong><span id="game-version">—</span></div><button class="play" id="play" disabled>PLAY <span aria-hidden="true">↗</span></button><p id="play-note">Your account lives on the server.</p><div class="update-box"><span class="eyebrow" id="update-label">LAUNCHER UPDATE</span><h3 id="update-title">Ready to check</h3><p id="update-info">Updates preserve your account and saved careers.</p><progress id="progress" max="100" value="0" hidden></progress><button class="secondary" id="update">CHECK FOR UPDATE</button></div><p role="status" aria-live="polite" id="notice"></p></section>
+  </main>
+  <footer><details id="server-details"><summary>CONNECTION SETTINGS</summary><form id="server-form"><label for="server">Server origin</label><div class="server-row"><input id="server" type="url" spellcheck="false" required value="http://127.0.0.1:8803"><button class="secondary" type="submit">SAVE</button></div><p>Use your hosted HTTPS server, or the included local server at 127.0.0.1:8803.</p></form></details><span class="footer-mark">SKIRMISH ARENA / STARTUP REPAIR</span></footer>
+</div><script src="launcher.js"></script>
+</body></html>
+

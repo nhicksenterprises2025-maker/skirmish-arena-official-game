@@ -1,0 +1,49 @@
+'use strict';
+// The installed desktop app must not depend on the release checkout, npm, or a PATH Node install.
+const fs = require('node:fs');
+const path = require('node:path');
+const {spawnSync} = require('node:child_process');
+const launcher = path.resolve(__dirname, '..');
+const release = path.resolve(launcher, '..');
+const destination = path.join(launcher, 'backend-bundle');
+const version = spawnSync(process.execPath, ['--version'], {encoding:'utf8'});
+const [major, minor] = version.stdout.trim().slice(1).split('.').map(Number);
+if (version.status || major < 24 || major === 24 && minor < 15) throw Error('Backend bundling requires Node 24.15 or later.');
+if (path.dirname(destination) !== launcher || path.basename(destination) !== 'backend-bundle') throw Error('Invalid staging directory.');
+if (fs.existsSync(destination)) fs.rmSync(destination, {recursive:true});
+fs.mkdirSync(destination, {recursive:true});
+const copy = (relative, target=relative) => {
+  const output = path.join(destination, target);
+  fs.mkdirSync(path.dirname(output), {recursive:true});
+  fs.cpSync(path.join(release, relative), output, {recursive:true});
+};
+fs.copyFileSync(process.execPath, path.join(destination, 'node.exe'));
+for (const name of fs.readdirSync(path.join(release, 'server'))) {
+  if (name.endsWith('.cjs')) copy('server/' + name);
+}
+copy('server/migrations');
+// Existing authoritative server validation imports this exact engine harness.
+copy('dev/simulate.cjs');
+copy('node_modules/bcryptjs');
+const shell = [
+  'index.html','styles.css','game.js','cloud.js','ai-ui.js','ai-ui.css','fullscreen.js','audio.js','assets/audio/LICENSES.json',
+  'renderer-25d.mjs','environment-25d.mjs','models-25d.mjs','inspect-25d.mjs','asset-loader-25d.mjs',
+  'updater.js','sw.js','version.json','manifest.webmanifest','app-icon.svg',
+  'vendor/three.module.js','vendor/three.core.js','vendor/addons/loaders/GLTFLoader.js',
+  'vendor/addons/utils/BufferGeometryUtils.js','vendor/addons/utils/SkeletonUtils.js',
+  'assets/25d/manifest.json','assets/25d/brightfield-props.glb'
+];
+shell.push('progression.js','boot.js','boot.css','tactical-instinct.js','desktop-entry.html','desktop-launch.html','desktop-launch.js','build-meta.js','tournaments-ui.js','assets/25d/live-circuit-details.glb');
+const audioManifest=JSON.parse(fs.readFileSync(path.join(release,'assets/audio/LICENSES.json'),'utf8'));
+for(const asset of Object.values(audioManifest.assets)){if(!/^(weapons|handling|combat|impacts|movement|ui|match|ambience)\/[a-z0-9_]+\.(wav|ogg)$/.test(asset.file))throw Error('Invalid audio asset path');shell.push('assets/audio/'+asset.file);}
+for (const asset of shell) copy(asset);
+fs.writeFileSync(path.join(destination, 'desktop-shell.json'), JSON.stringify(shell));
+// Compile the expected essential payload into the launcher. An interrupted
+// install must be identified before executing mixed modules or migrating saves.
+const hashes={};
+function hashFiles(directory){for(const item of fs.readdirSync(directory,{withFileTypes:true})){const file=path.join(directory,item.name),relative=path.relative(destination,file).replaceAll('\\','/');if(item.isDirectory())hashFiles(file);else if(!relative.startsWith('assets/')&&!relative.startsWith('node_modules/'))hashes[relative]=require('node:crypto').createHash('sha256').update(fs.readFileSync(file)).digest('hex');}}
+hashFiles(destination);
+fs.writeFileSync(path.join(destination,'desktop-integrity.json'),JSON.stringify(hashes));
+// Build resources contain no user databases, cookies, recovery codes, or signing keys.
+console.log('Staged bundled Node, backend, and ' + shell.length + ' game shell assets.');
+require('./backend-bundle-check.cjs');

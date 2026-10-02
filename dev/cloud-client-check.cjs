@@ -1,0 +1,175 @@
+/* Behavioral reliability checks of the shipped cloud client and PWA updater.
+   A controlled HTTP peer/clock/DOM makes races and outages repeatable without
+   replacing client logic. This does not test the server's save validator. */
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const root=path.resolve(__dirname,'..'),cloudSource=fs.readFileSync(path.join(root,'cloud.js'),'utf8'),updaterSource=fs.readFileSync(path.join(root,'updater.js'),'utf8');
+const clone=value=>JSON.parse(JSON.stringify(value)),checks=[];
+function deferred(){let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};}
+async function settle(){for(let i=0;i<8;i++)await Promise.resolve();await new Promise(resolve=>setImmediate(resolve));}
+function response(body,status=200){return {ok:status>=200&&status<300,status,headers:{get:key=>key.toLowerCase()==='content-type'?'application/json':null},json:async()=>clone(body)};}
+function events(target={}){const listeners=new Map();Object.assign(target,{addEventListener(type,fn){if(!listeners.has(type))listeners.set(type,new Set());listeners.get(type).add(fn);},removeEventListener(type,fn){listeners.get(type)?.delete(fn);},dispatchEvent(event){for(const fn of [...(listeners.get(event.type)||[])])fn(event);return true;}});return target;}
+function surface(storage={}){
+ const data=storage instanceof Map?new Map(storage):new Map(Object.entries(storage)),nodes=new Map(),timers=new Map(),scripts=[],alerts=[],calls=[],downloads=[],blobs=new Map();
+ let nextTimer=0,performanceTime=1000,reloads=0,suspended=false,prepares=0,resumes=0;
+ function node(tag='div'){
+  const classes=new Set(),children=new Map(),n=events({tagName:tag.toUpperCase(),style:{},dataset:{},childNodes:[],textContent:'',innerHTML:'',value:'',disabled:false,className:'',focus(){},setAttribute(key,value){this[key]=value;},querySelector(selector){if(!children.has(selector))children.set(selector,node());return children.get(selector);},closest(){return null;},click(){if(this.tagName==='A')downloads.push({name:this.download,blob:blobs.get(this.href)});},remove(){this.removed=true;if(this.id)nodes.delete(this.id);}});
+  n.classList={add:c=>classes.add(c),remove:c=>classes.delete(c),contains:c=>classes.has(c),toggle(c,on){on=on??!classes.has(c);if(on)classes.add(c);else classes.delete(c);return on;}};
+  n.appendChild=child=>{n.childNodes.push(child);if(child.id)nodes.set(child.id,child);if(child.tagName==='SCRIPT')scripts.push(child.src);};return n;
+ }
+ const document=events({hidden:false,body:node('body'),createElement:tag=>node(tag),getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);},querySelector(selector){return selector.startsWith('#')?this.getElementById(selector.slice(1)):null;}});
+ const localStorage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,String(value)),removeItem:key=>data.delete(key)};
+ const context=events({console,document,localStorage,JSON,Date,Promise,Blob,URL:{createObjectURL(blob){const url='blob:fixture-'+blobs.size;blobs.set(url,blob);return url;},revokeObjectURL:url=>blobs.delete(url)},Event:class {constructor(type){this.type=type;}},performance:{now:()=>performanceTime},navigator:{onLine:true,clipboard:{writeText:async()=>{}}},isSecureContext:true,location:{protocol:'http:',hostname:'127.0.0.1',origin:'http://127.0.0.1:4173',reload(){reloads++;}},alert:message=>alerts.push(message),setTimeout(fn,delay){const id=++nextTimer;timers.set(id,{fn,delay});return id;},clearTimeout:id=>timers.delete(id),setInterval:()=>++nextTimer,AbortSignal:{timeout(delay){const signal=events({aborted:false,reason:null});signal.timer=++nextTimer;timers.set(signal.timer,{delay,fn(){signal.aborted=true;signal.reason=Object.assign(new Error('HTTP request timed out'),{name:'TimeoutError'});signal.dispatchEvent({type:'abort'});}});return signal;}},matchMedia:()=>({matches:false}),SAR:{prepareReload(){prepares++;suspended=true;return ()=>{resumes++;suspended=false;};}}});
+ context.window=context;context.fetch=async(url,options={})=>{const call={url,method:options.method||'GET',body:options.body?JSON.parse(options.body):null,options};calls.push(call);if(!context.http)throw new Error('HTTP peer missing');const request=Promise.resolve().then(()=>context.http(call)),signal=options.signal;if(!signal)return request;return new Promise((resolve,reject)=>{const abort=()=>{cleanup();reject(signal.reason);},cleanup=()=>{signal.removeEventListener('abort',abort);timers.delete(signal.timer);};signal.addEventListener('abort',abort);request.then(value=>{cleanup();resolve(value);},error=>{cleanup();reject(error);});if(signal.aborted)abort();});};
+ const click=action=>({type:'click',target:{closest:selector=>selector==='[data-cloud-action]'?{dataset:{cloudAction:action}}:null}});
+ return {context,data,document,timers,scripts,alerts,calls,downloads,run(source){vm.runInNewContext(source,context,{filename:'shipped-client.js'});},advancePerformance(ms){performanceTime+=ms;},async cloudAction(action){document.dispatchEvent(click(action));await settle();},async gateAction(action){document.getElementById('accountGate').dispatchEvent(click(action));await settle();},async timer(delay){const item=[...timers.entries()].find(([,value])=>value.delay===delay);assert.ok(item,'timer '+delay+' was scheduled');timers.delete(item[0]);await item[1].fn();await settle();},get reloads(){return reloads;},get suspended(){return suspended;},get prepares(){return prepares;},get resumes(){return resumes;}};
+}
+const account={id:'user_fixture_1',username:'Noah',revision:7},baseSave={schema:17,fixture:'original',playerCareer:{kills:12},config:{primary:'P90'}};
+async function cloudFixture({storage={},revision=7,save=baseSave,http}={}){
+ const e=surface(storage);e.context.http=async call=>{
+  if(call.url==='/api/bootstrap')return response({authenticated:true,account:{...account,revision},serverNow:2000000,gptAvailable:false});
+  if(http){const result=await http(call,e);if(result!==undefined)return result;}
+  if(call.url==='/api/world'&&call.method==='GET')return response({world:save?{save,revision,updatedAt:1999900}:null,serverNow:2000000});
+  throw new Error('Unexpected HTTP '+call.method+' '+call.url);
+ };
+ e.run(cloudSource);await settle();return e;
+}
+function queue(e,save){e.data.set('sar-persistent-save',JSON.stringify(save));e.context.SARCloud.queueSave(save);}
+function puts(e){return e.calls.filter(call=>call.url==='/api/world'&&call.method==='PUT');}
+async function test(name,fn){await fn();checks.push({test:name,result:'PASS'});console.log('PASS',name);}
+
+async function main(){
+ await test('Cloud boot hydrates the authenticated authoritative world, revision and server clock before loading the game',async()=>{
+  const old={...baseSave,fixture:'old local'},e=await cloudFixture({storage:{'sar-persistent-save':JSON.stringify(old),'sar-cloud-owner':account.id}}),cloud=e.context.SARCloud;
+  assert.equal(cloud.state.available,true);assert.equal(cloud.state.loaded,true);assert.equal(cloud.state.account.id,account.id);assert.equal(cloud.state.revision,7);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),baseSave);assert.deepEqual(JSON.parse(e.data.get('sar-cloud-previous-local')),old);assert.deepEqual(e.scripts,['game.js']);
+  assert.equal(cloud.now(),2000000);e.advancePerformance(1250);assert.equal(cloud.now(),2001250);assert.equal(puts(e).length,0);
+ });
+ await test('Match completion immediately publishes its immutable profile checkpoint once online and keeps an account-owned local checkpoint offline',async()=>{
+  const acknowledgment=deferred(),e=await cloudFixture({http:call=>call.method==='PUT'?acknowledgment.promise:undefined}),cloud=e.context.SARCloud,completed={...baseSave,updatedAt:2000001,playerCareer:{games:1,wins:1,kills:14,weapons:{'AR-15':{k:2,games:1}}}};
+  e.data.set('sar-persistent-save',JSON.stringify(completed));cloud.commitMatch(completed,'match-1');await settle();assert.equal(puts(e).length,1,'no periodic-save delay');assert.equal(puts(e)[0].body.baseRevision,7);assert.deepEqual(puts(e)[0].body.save,completed);assert.equal(cloud.state.retry,null);assert.deepEqual(clone(cloud.state.profileCommit.career),completed.playerCareer);
+  const checkpoint=clone(completed);completed.playerCareer.kills=999;cloud.commitMatch(completed,'match-1');await settle();assert.equal(puts(e).length,1);assert.deepEqual(clone(cloud.state.profileCommit.career),checkpoint.playerCareer,'later mutations cannot alter the completed profile');assert.deepEqual(JSON.parse(JSON.parse(e.data.get('sar-cloud-pending')).save),checkpoint);
+  acknowledgment.resolve(response({revision:8,updatedAt:2000010}));await settle();assert.equal(cloud.state.revision,8);assert.equal(e.data.has('sar-cloud-pending'),false);cloud.commitMatch(completed,'match-1');await settle();assert.equal(puts(e).length,1,'repeated finalization after acknowledgment is ignored');
+  cloud.state.localMode=true;const offline={...baseSave,updatedAt:2000020,playerCareer:{games:2,wins:1,kills:15}};cloud.commitMatch(offline,'match-2');await settle();assert.equal(puts(e).length,1,'offline completion needs no working backend');assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),offline);const pending=JSON.parse(e.data.get('sar-cloud-pending'));assert.equal(pending.owner,account.id);assert.equal(pending.baseRevision,8);assert.deepEqual(JSON.parse(pending.save),offline);assert.deepEqual(clone(cloud.state.profileCommit.career),offline.playerCareer);
+ });
+ await test('Checkpoint waits for an in-flight save and a newer queued world, using the acknowledged revision for the next write',async()=>{
+  const first=deferred(),second=deferred();let n=0;
+  const e=await cloudFixture({http:call=>{if(call.url==='/api/world'&&call.method==='PUT')return (++n===1?first:second).promise;}}),cloud=e.context.SARCloud;
+  const one={...baseSave,fixture:'first',playerCareer:{kills:13}},two={...baseSave,fixture:'latest',playerCareer:{kills:14}};queue(e,one);const flushing=cloud.flush();await settle();assert.equal(puts(e).length,1);
+  queue(e,two);let ready=false;const waiting=cloud.checkpoint().then(resume=>{ready=true;return resume;});await settle();assert.equal(ready,false);assert.equal(e.suspended,true);
+  first.resolve(response({revision:8,updatedAt:2000010,serverNow:2000010}));await settle();assert.equal(ready,false);assert.equal(puts(e).length,2);assert.equal(puts(e)[1].body.baseRevision,8);assert.deepEqual(puts(e)[1].body.save,two);
+  second.resolve(response({revision:9,updatedAt:2000020,serverNow:2000020}));const resume=await waiting;await flushing;assert.equal(cloud.state.revision,9);assert.equal(cloud.state.dirty,null);assert.equal(e.data.has('sar-cloud-pending'),false);assert.equal(e.suspended,true);assert.equal(cloud.state.suspending,true);resume();assert.equal(e.suspended,false);assert.equal(cloud.state.suspending,false);assert.equal(e.resumes,1);
+ });
+ await test('Offline checkpoint preserves pending progress, blocks the action and resumes play; a successful retry permits it',async()=>{
+  let online=false;const e=await cloudFixture({http:call=>{if(call.url==='/api/world'&&call.method==='PUT'){if(!online)throw new TypeError('Network unavailable');return response({revision:8,updatedAt:2000100});}}}),cloud=e.context.SARCloud,latest={...baseSave,fixture:'offline',playerCareer:{kills:13}};
+  queue(e,latest);await assert.rejects(cloud.checkpoint(),/waiting for cloud sync/);assert.equal(e.suspended,false);assert.equal(cloud.state.suspending,false);assert.deepEqual(JSON.parse(cloud.state.dirty),latest);assert.deepEqual(JSON.parse(JSON.parse(e.data.get('sar-cloud-pending')).save),latest);assert.ok([...e.timers.values()].some(timer=>timer.delay===10000));
+  online=true;await cloud.flush();assert.equal(cloud.state.revision,8);assert.equal(e.data.has('sar-cloud-pending'),false);const resume=await cloud.checkpoint();assert.equal(e.suspended,true);resume();assert.equal(e.suspended,false);
+ });
+ await test('A stalled cloud request times out, preserves pending progress and releases the blocked checkpoint',async()=>{
+  const held=deferred(),e=await cloudFixture({http:call=>call.method==='PUT'?held.promise:undefined}),latest={...baseSave,fixture:'request stalled'};queue(e,latest);const rejected=assert.rejects(e.context.SARCloud.checkpoint(),/waiting for cloud sync/);await settle();assert.equal(e.suspended,true);await e.timer(20000);await rejected;assert.equal(e.suspended,false);assert.equal(e.context.SARCloud.state.suspending,false);assert.deepEqual(JSON.parse(JSON.parse(e.data.get('sar-cloud-pending')).save),latest);assert.deepEqual(JSON.parse(e.context.SARCloud.state.dirty),latest);
+ });
+ await test('Rejected save blocks checkpoint and retains an exportable local backup until a valid save succeeds',async()=>{
+  let valid=false;const e=await cloudFixture({http:call=>call.url==='/api/world'&&call.method==='PUT'?valid?response({revision:8,updatedAt:2000100}):response({error:'Fixture revision rejected',code:'SAVE_REJECTED'},422):undefined}),cloud=e.context.SARCloud,latest={...baseSave,fixture:'rejected'};
+  queue(e,latest);await assert.rejects(cloud.checkpoint(),/Cloud rejected this save/);assert.equal(e.suspended,false);assert.equal(cloud.state.suspending,false);assert.deepEqual(JSON.parse(e.data.get('sar-cloud-rejected-backup')),latest);assert.ok(e.data.has('sar-cloud-pending'));assert.equal(cloud.state.revision,7);
+  valid=true;await cloud.flush();assert.equal(cloud.state.saveRejected,null);assert.equal(cloud.state.revision,8);const resume=await cloud.checkpoint();resume();assert.equal(e.suspended,false);
+ });
+ await test('Queued pending progress persists across a new client boot and is recovered only against its original revision',async()=>{
+  const original=await cloudFixture(),latest={...baseSave,fixture:'survived close',playerCareer:{kills:13}};queue(original,latest);
+  const pending=JSON.parse(original.data.get('sar-cloud-pending'));assert.equal(pending.owner,account.id);assert.equal(pending.baseRevision,7);assert.deepEqual(JSON.parse(pending.save),latest);
+  const next=await cloudFixture({storage:original.data,http:call=>call.url==='/api/world'&&call.method==='PUT'?response({revision:8,updatedAt:2000200}):undefined});
+  assert.equal(puts(next).length,1);assert.equal(puts(next)[0].body.baseRevision,7);assert.deepEqual(puts(next)[0].body.save,latest);assert.equal(next.context.SARCloud.state.revision,8);assert.deepEqual(JSON.parse(next.data.get('sar-persistent-save')),latest);assert.equal(next.data.has('sar-cloud-pending'),false);assert.deepEqual(next.scripts,['game.js']);
+ });
+ await test('A stale pending world becomes a conflict backup and cannot overwrite a newer authoritative world',async()=>{
+  const pendingSave={...baseSave,fixture:'unsynced old branch'},newer={...baseSave,fixture:'other device',playerCareer:{kills:99}},pending={owner:account.id,baseRevision:6,save:JSON.stringify(pendingSave),at:1900000};
+  const e=await cloudFixture({storage:{'sar-cloud-owner':account.id,'sar-cloud-pending':JSON.stringify(pending)},revision:7,save:newer});
+  assert.equal(puts(e).length,0);assert.deepEqual(JSON.parse(e.data.get('sar-cloud-conflict-backup')),pendingSave);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),newer);assert.equal(e.context.SARCloud.state.revision,7);assert.equal(e.data.has('sar-cloud-pending'),false);
+ });
+ await test('Recovery while offline keeps pending progress and automatically starts the cached authenticated world in local mode',async()=>{
+  const latest={...baseSave,fixture:'pending offline'},pending={owner:account.id,baseRevision:7,save:JSON.stringify(latest),at:1900000},e=await cloudFixture({storage:{'sar-cloud-owner':account.id,'sar-persistent-save':JSON.stringify(latest),'sar-cloud-pending':JSON.stringify(pending)},http:call=>{if(call.method==='PUT')throw new TypeError('Offline');}});
+  assert.equal(e.context.SARCloud.state.loaded,true);assert.equal(e.context.SARCloud.state.available,false);assert.equal(e.context.SARCloud.state.localMode,true);assert.deepEqual(e.scripts,['game.js']);const retained=JSON.parse(e.data.get('sar-cloud-pending'));assert.equal(retained.owner,account.id);assert.equal(retained.baseRevision,7);assert.deepEqual(JSON.parse(retained.save),latest);assert.equal(e.document.getElementById('accountGate').classList.contains('hidden'),true);assert.equal(e.document.getElementById('cloudBadge').textContent,'CLOUD OFFLINE — LOCAL MODE');
+ });
+ await test('HTTP401/429/503 during boot recovery retain pending progress and permit cached local play; a later boot recovers the same revision',async()=>{
+  for(const status of [401,429,503]){
+   const latest={...baseSave,fixture:'transient '+status,playerCareer:{kills:13}},pending={owner:account.id,baseRevision:7,save:JSON.stringify(latest),at:1900000},raw=JSON.stringify(pending),e=await cloudFixture({storage:{'sar-cloud-owner':account.id,'sar-persistent-save':JSON.stringify(latest),'sar-cloud-pending':raw},http:call=>call.method==='PUT'?response({error:'Temporarily unavailable'},status):undefined});
+   assert.equal(e.context.SARCloud.state.loaded,true);assert.equal(e.context.SARCloud.state.available,false);assert.equal(e.context.SARCloud.state.localMode,true);if(status===401)assert.equal(e.context.SARCloud.state.reauthNeeded,true);assert.deepEqual(e.scripts,['game.js']);const retained=JSON.parse(e.data.get('sar-cloud-pending'));assert.equal(retained.owner,account.id);assert.equal(retained.baseRevision,7);assert.deepEqual(JSON.parse(retained.save),latest);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),latest);assert.equal(e.data.has('sar-cloud-rejected-backup'),false);assert.equal(e.document.getElementById('accountGate').classList.contains('hidden'),true);
+   const next=await cloudFixture({storage:e.data,http:call=>call.method==='PUT'?response({revision:8,updatedAt:2000200}):undefined});assert.equal(puts(next).length,1);assert.equal(puts(next)[0].body.baseRevision,7);assert.deepEqual(puts(next)[0].body.save,latest);assert.equal(next.context.SARCloud.state.revision,8);assert.equal(next.context.SARCloud.state.loaded,true);assert.equal(next.data.has('sar-cloud-pending'),false);assert.deepEqual(JSON.parse(next.data.get('sar-persistent-save')),latest);
+  }
+ });
+ await test('A recovery PUT conflict fetches the newer world before starting the game and retains the unsynced branch visibly',async()=>{
+  const latest=deferred(),pendingSave={...baseSave,fixture:'pending raced',playerCareer:{kills:13}},newer={...baseSave,fixture:'latest after conflict',playerCareer:{kills:99}},pending={owner:account.id,baseRevision:7,save:JSON.stringify(pendingSave),at:1900000},raw=JSON.stringify(pending);let gets=0;
+  const e=await cloudFixture({storage:{'sar-cloud-owner':account.id,'sar-persistent-save':JSON.stringify(pendingSave),'sar-cloud-pending':raw},http:call=>{if(call.method==='PUT')return response({error:'Changed between read and recovery',code:'REVISION_CONFLICT'},409);if(call.url==='/api/world'&&call.method==='GET'&&++gets>1)return latest.promise;}});
+  assert.equal(gets,2);assert.equal(e.context.SARCloud.state.loaded,false);assert.deepEqual(e.scripts,[]);assert.equal(e.data.get('sar-cloud-pending'),raw);latest.resolve(response({world:{save:newer,revision:8,updatedAt:2000400}}));await settle();
+  assert.equal(e.context.SARCloud.state.loaded,true);assert.equal(e.context.SARCloud.state.revision,8);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),newer);assert.deepEqual(JSON.parse(e.data.get('sar-cloud-conflict-backup')),pendingSave);assert.equal(e.data.has('sar-cloud-pending'),false);const notice=e.document.getElementById('cloudRecoveryNotice');assert.equal(notice.role,'alert');assert.match(notice.innerHTML,/Another session changed/);assert.match(notice.innerHTML,/EXPORT BACKUP/);
+ });
+ await test('Explicitly rejected recovery retains an exportable branch and a persistent visible notice while loading the accepted cloud world',async()=>{
+  for(const status of [400,413,422]){
+   const rejected={...baseSave,fixture:'rejected pending '+status},pending={owner:account.id,baseRevision:7,save:JSON.stringify(rejected),at:1900000},e=await cloudFixture({storage:{'sar-cloud-owner':account.id,'sar-persistent-save':JSON.stringify(rejected),'sar-cloud-pending':JSON.stringify(pending)},http:call=>call.method==='PUT'?response({error:'Fixture save was rejected',...(status===422?{code:'SAVE_REJECTED'}:{})},status):undefined});
+   assert.equal(e.context.SARCloud.state.loaded,true);assert.equal(e.context.SARCloud.state.revision,7);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),baseSave);assert.deepEqual(JSON.parse(e.data.get('sar-cloud-rejected-backup')),rejected);assert.equal(e.data.has('sar-cloud-pending'),false);const notice=e.document.getElementById('cloudRecoveryNotice');assert.equal(notice.role,'alert');assert.equal(notice.className,'cloud-recovery-notice');assert.match(notice.innerHTML,/Fixture save was rejected/);assert.match(notice.innerHTML,/EXPORT BACKUP/);await e.cloudAction('export-recovery');assert.equal(e.downloads.length,1);assert.equal(e.downloads[0].name,'skirmish-unsynced-backup.json');assert.deepEqual(JSON.parse(await e.downloads[0].blob.text()),rejected);
+   const next=await cloudFixture({storage:e.data});assert.equal(puts(next).length,0);assert.match(next.document.getElementById('cloudRecoveryNotice').innerHTML,/Fixture save was rejected/);const shown=next.document.getElementById('cloudRecoveryNotice');await next.cloudAction('dismiss-recovery');assert.equal(next.data.has('sar-cloud-recovery-notice'),false);assert.equal(shown.removed,true);assert.deepEqual(JSON.parse(next.data.get('sar-cloud-rejected-backup')),rejected);
+  }
+ });
+ await test('Recovery export follows the current conflict notice even when an older rejected backup also exists',async()=>{
+  const older={...baseSave,fixture:'older rejection'},latest={...baseSave,fixture:'newer conflict',playerCareer:{kills:14}},pending={owner:account.id,baseRevision:6,save:JSON.stringify(latest),at:1900000},e=await cloudFixture({storage:{'sar-cloud-owner':account.id,'sar-cloud-pending':JSON.stringify(pending),'sar-cloud-rejected-backup':JSON.stringify(older)}});
+  assert.match(e.document.getElementById('cloudRecoveryNotice').innerHTML,/Another session changed/);await e.cloudAction('export-recovery');assert.equal(e.downloads.length,1);assert.deepEqual(JSON.parse(await e.downloads[0].blob.text()),latest);assert.deepEqual(JSON.parse(e.data.get('sar-cloud-rejected-backup')),older);
+ });
+ await test('An expired live session keeps the latest world playable locally and safely recovers on automatic reconnection',async()=>{
+  const expired=deferred();let authenticated=false;const e=await cloudFixture({http:call=>{if(call.url==='/api/world'&&call.method==='PUT')return authenticated?response({revision:8,updatedAt:2000600}):expired.promise;}}),cloud=e.context.SARCloud,first={...baseSave,fixture:'first expired',playerCareer:{kills:13}},latest={...baseSave,fixture:'newest expired',playerCareer:{kills:14}};
+  queue(e,first);const sending=cloud.flush();await settle();queue(e,latest);expired.resolve(response({error:'Session expired',code:'UNAUTHENTICATED'},401));await sending;assert.equal(cloud.state.reauthNeeded,true);assert.equal(cloud.state.localMode,true);assert.equal(cloud.state.suspending,false);assert.equal(e.suspended,false);assert.equal(e.document.getElementById('accountGate').classList.contains('hidden'),true);assert.deepEqual(JSON.parse(JSON.parse(e.data.get('sar-cloud-pending')).save),latest);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),latest);
+  authenticated=true;await cloud.reconnect();assert.equal(puts(e).length,2);assert.equal(puts(e)[1].body.baseRevision,7);assert.deepEqual(puts(e)[1].body.save,latest);assert.equal(cloud.state.reauthNeeded,false);assert.equal(cloud.state.localMode,false);assert.equal(cloud.state.revision,8);assert.equal(e.data.has('sar-cloud-pending'),false);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),latest);assert.equal(e.reloads,0);assert.deepEqual(e.scripts,['game.js']);
+ });
+ await test('A session expiry during checkpoint blocks the unsafe action while resuming cached local play with pending progress intact',async()=>{
+  const e=await cloudFixture({http:call=>call.method==='PUT'?response({error:'Session expired'},401):undefined}),latest={...baseSave,fixture:'checkpoint session expired'};queue(e,latest);await assert.rejects(e.context.SARCloud.checkpoint(),/waiting for cloud sync/);assert.equal(e.suspended,false);assert.equal(e.resumes,1);assert.equal(e.context.SARCloud.state.suspending,false);assert.equal(e.context.SARCloud.state.localMode,true);assert.equal(e.context.SARCloud.state.reauthNeeded,true);assert.deepEqual(JSON.parse(JSON.parse(e.data.get('sar-cloud-pending')).save),latest);
+ });
+ await test('Import waits for pending progress, sends a revision-checked PUT and preserves the previous local world',async()=>{
+  const first=deferred();let n=0;const e=await cloudFixture({http:call=>call.url==='/api/world'&&call.method==='PUT'?++n===1?first.promise:response({revision:9,updatedAt:2000300}):undefined}),cloud=e.context.SARCloud,queued={...baseSave,fixture:'before import',playerCareer:{kills:13}},imported={...baseSave,fixture:'imported',playerCareer:{kills:14}};
+  queue(e,queued);const importing=cloud.importWorld(imported);await settle();assert.equal(puts(e).length,1);assert.equal(e.suspended,true);first.resolve(response({revision:8,updatedAt:2000200}));await importing;assert.equal(puts(e).length,2);assert.equal(puts(e)[1].body.baseRevision,8);assert.deepEqual(puts(e)[1].body.save,imported);assert.deepEqual(JSON.parse(e.data.get('sar-import-backup')),queued);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),imported);assert.equal(cloud.state.revision,9);assert.equal(e.suspended,false);
+ });
+ await test('Replacing a live world prevents the old game from re-queuing or writing over the accepted replacement',async()=>{
+  const e=await cloudFixture({http:call=>call.method==='PUT'?response({revision:8,updatedAt:2000700}):undefined}),cloud=e.context.SARCloud,imported={...baseSave,fixture:'replacement accepted',playerCareer:{kills:14}},older={...baseSave,fixture:'old game state'};await cloud.importWorld(imported);assert.equal(cloud.state.replacing,true);cloud.queueSave(older);assert.equal(cloud.state.dirty,null);assert.equal(e.data.has('sar-cloud-pending'),false);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),imported);
+  const runtime=require('./simulate.cjs').engine();runtime.context.SARCloud=cloud;runtime.data.set('sar-persistent-save',JSON.stringify(imported));runtime.dev.saveTelemetry();assert.deepEqual(JSON.parse(runtime.data.get('sar-persistent-save')),imported);assert.equal(e.data.has('sar-cloud-pending'),false);
+ });
+ await test('Logout waits for acknowledged progress and retains a local account backup before reloading',async()=>{
+  const save=deferred();const e=await cloudFixture({http:call=>call.url==='/api/world'&&call.method==='PUT'?save.promise:call.url==='/api/auth/logout'?response({ok:true}):undefined}),cloud=e.context.SARCloud,latest={...baseSave,fixture:'logout progress',playerCareer:{kills:13}};
+  queue(e,latest);const loggingOut=cloud.logout();await settle();assert.equal(e.calls.some(call=>call.url==='/api/auth/logout'),false);assert.equal(e.reloads,0);save.resolve(response({revision:8,updatedAt:2000300}));await loggingOut;assert.equal(e.calls.filter(call=>call.url==='/api/auth/logout').length,1);assert.equal(e.reloads,1);assert.equal(e.data.has('sar-persistent-save'),false);assert.deepEqual(JSON.parse(e.data.get('sar-cloud-logout-backup-'+account.id)),latest);
+ });
+ await test('Offline logout stays logged in, retains progress and resumes play without requesting logout',async()=>{
+  const e=await cloudFixture({http:call=>{if(call.url==='/api/world'&&call.method==='PUT')throw new TypeError('Offline');}}),latest={...baseSave,fixture:'logout blocked'};queue(e,latest);await e.context.SARCloud.logout();assert.equal(e.calls.some(call=>call.url==='/api/auth/logout'),false);assert.equal(e.reloads,0);assert.equal(e.suspended,false);assert.equal(e.context.SARCloud.state.account.id,account.id);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),latest);assert.equal(e.alerts.length,1);assert.match(e.alerts[0],/waiting for cloud sync/);
+ });
+ await test('A revision conflict preserves the newest queued progress, including saves queued during the failed request',async()=>{
+  const conflict=deferred(),authoritative={...baseSave,fixture:'other session',playerCareer:{kills:99}};let worldGets=0;
+  const e=await cloudFixture({http:call=>{if(call.url==='/api/world'&&call.method==='GET'&&++worldGets>1)return response({world:{save:authoritative,revision:8,updatedAt:2000400}});if(call.url==='/api/world'&&call.method==='PUT')return conflict.promise;}}),cloud=e.context.SARCloud,first={...baseSave,fixture:'first unsynced',playerCareer:{kills:13}},latest={...baseSave,fixture:'newest unsynced',playerCareer:{kills:14}};
+  queue(e,first);const sending=cloud.flush();await settle();queue(e,latest);conflict.resolve(response({error:'Changed in another session',code:'REVISION_CONFLICT'},409));await sending;assert.deepEqual(JSON.parse(e.data.get('sar-cloud-conflict-backup')),latest);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),authoritative);assert.equal(e.reloads,1);
+ });
+ await test('The actual cloud client and updater preserve unsynced progress through an offline Update click, then install after reconnection',async()=>{
+  let online=false;const e=await cloudFixture({http:call=>{if(call.url==='/api/world'&&call.method==='PUT'){if(!online)throw new TypeError('Cloud disconnected');return response({revision:8,updatedAt:2000500});}}}),latest={...baseSave,fixture:'update while offline',playerCareer:{kills:13}};queue(e,latest);await attachUpdater(e);
+  assert.equal(await e.context.SARUpdater.apply(),false);assert.equal(e.worker.messages.length,0);assert.equal(e.reloads,0);assert.equal(e.suspended,false);assert.deepEqual(JSON.parse(e.context.SARCloud.state.dirty),latest);assert.ok(e.data.has('sar-cloud-pending'));assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),latest);
+  online=true;await e.context.SARCloud.flush();const applying=e.context.SARUpdater.apply();await settle();assert.deepEqual(clone(e.worker.messages),[{type:'SKIP_WAITING'}]);e.serviceWorker.dispatchEvent({type:'controllerchange'});assert.equal(await applying,true);assert.equal(e.reloads,1);assert.equal(e.data.has('sar-cloud-pending'),false);assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),latest);
+ });
+ await updaterTests();
+ fs.writeFileSync(path.join(__dirname,'cloud-client-results.json'),JSON.stringify({result:'PASS',cloudHash:crypto.createHash('sha256').update(cloudSource).digest('hex'),updaterHash:crypto.createHash('sha256').update(updaterSource).digest('hex'),checks},null,2));
+}
+async function updaterFixture(checkpoint){
+ const e=surface();e.context.SARCloud={checkpoint};e.context.http=async()=>response({version:'1.5.0'});return attachUpdater(e);
+}
+async function attachUpdater(e){
+ e.run(fs.readFileSync(path.join(root,'build-meta.js'),'utf8'));
+ const serviceWorker=events({controller:{}}),worker=events({state:'installed'}),reg=events({waiting:worker,installing:null,updates:0,async update(){this.updates++;}});
+ worker.messages=[];worker.postMessage=message=>worker.messages.push(message);serviceWorker.register=async()=>reg;e.context.navigator.serviceWorker=serviceWorker;e.run(updaterSource);await settle();return Object.assign(e,{serviceWorker,worker,reg});
+}
+async function updaterTests(){
+ await test('PWA activation waits for cloud checkpoint and never skips waiting when saving is rejected',async()=>{
+  const hold=deferred();let checkpoints=0;const e=await updaterFixture(()=>{checkpoints++;return hold.promise;}),app=e.context.SARUpdater;let done=false;const applying=app.apply().then(result=>{done=true;return result;});await settle();assert.equal(done,false);assert.equal(e.worker.messages.length,0);hold.reject(new Error('Progress is waiting for cloud sync.'));assert.equal(await applying,false);assert.equal(e.worker.messages.length,0);assert.equal(e.reloads,0);assert.match(app.getStatus(),/waiting for cloud sync/);assert.equal(checkpoints,1);
+ });
+ await test('Successful PWA activation posts SKIP_WAITING after checkpoint and reloads once without a second checkpoint',async()=>{
+  const hold=deferred();let checkpoints=0;const e=await updaterFixture(()=>{checkpoints++;return hold.promise;}),app=e.context.SARUpdater,applying=app.apply();await settle();assert.equal(e.worker.messages.length,0);hold.resolve(()=>{});await settle();assert.deepEqual(clone(e.worker.messages),[{type:'SKIP_WAITING'}]);e.serviceWorker.dispatchEvent({type:'controllerchange'});assert.equal(await applying,true);await settle();assert.equal(e.reloads,1);assert.equal(checkpoints,1);
+ });
+ await test('PWA activation timeout resumes the game and leaves the cached release active',async()=>{
+  let resumed=0;const e=await updaterFixture(async()=>()=>{resumed++;}),app=e.context.SARUpdater,applying=app.apply();await settle();assert.equal(e.worker.messages.length,1);await e.timer(15000);assert.equal(await applying,false);assert.equal(resumed,1);assert.equal(e.reloads,0);assert.match(app.getStatus(),/did not activate/);
+ });
+ await test('Offline Update and Refresh clicks perform no activation, network update or cloud checkpoint',async()=>{
+  let checkpoints=0;const e=await updaterFixture(async()=>{checkpoints++;return ()=>{};}),updates=e.reg.updates;e.context.navigator.onLine=false;assert.equal(await e.context.SARUpdater.check(),false);assert.equal(await e.context.SARUpdater.apply(),false);assert.equal(e.reg.updates,updates);assert.equal(checkpoints,0);assert.equal(e.worker.messages.length,0);assert.equal(e.reloads,0);assert.match(e.context.SARUpdater.getStatus(),/offline/);
+ });
+ await test('An unsolicited service-worker controller change cannot reload while the cloud checkpoint is blocked',async()=>{
+  const hold=deferred();let checkpoints=0;const e=await updaterFixture(()=>{checkpoints++;return hold.promise;});e.serviceWorker.dispatchEvent({type:'controllerchange'});await settle();assert.equal(checkpoints,1);assert.equal(e.reloads,0);hold.reject(new Error('Progress is waiting for cloud sync.'));await settle();assert.equal(e.reloads,0);assert.match(e.context.SARUpdater.getStatus(),/waiting for cloud sync/);
+ });
+}
+module.exports={surface,events,response,settle,deferred,cloudFixture,cloudSource,account,baseSave,queue,puts};
+if(require.main===module)main().catch(error=>{console.error(error);process.exitCode=1;});

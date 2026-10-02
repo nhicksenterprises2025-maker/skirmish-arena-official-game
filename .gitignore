@@ -1,0 +1,47 @@
+node_modules/
+server/data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.key
+*.key.pub
+launcher/src-tauri/target/
+launcher/node_modules/
+
+# Local accounts, machine configuration and credentials
+.env
+.env.*
+!.env.example
+*.db
+*.db-wal
+*.db-shm
+*.pem
+*.pfx
+*.p12
+*.log
+desktop-local-paths.json
+release-config.json
+account-webview/
+
+# Generated installers, staging and test output
+launcher/dist/
+launcher/backend-bundle/
+launcher/src-tauri/gen/
+server/releases/
+launcher/*results*.json
+launcher/verification*.json
+dev/*.json
+dev/*.png
+dev/*.log
+verification-results.json
+__pycache__/
+*.pyc
+*.blend1
+
+# Old unpacked copies and scratch files (retained locally)
+/skirmish-arena-reimagined-live-update-1.5.0-pwa/
+/skirmish-startup-fix/
+/n+m.kills
+
+# Large editable audio library is distributed as a GitHub release asset.
+/assets/audio/source/prepared-firearm-library.zip

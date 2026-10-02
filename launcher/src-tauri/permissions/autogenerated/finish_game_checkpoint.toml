@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-finish-game-checkpoint"
+description = "Enables the finish_game_checkpoint command without any pre-configured scope."
+commands.allow = ["finish_game_checkpoint"]
+
+[[permission]]
+identifier = "deny-finish-game-checkpoint"
+description = "Denies the finish_game_checkpoint command without any pre-configured scope."
+commands.deny = ["finish_game_checkpoint"]

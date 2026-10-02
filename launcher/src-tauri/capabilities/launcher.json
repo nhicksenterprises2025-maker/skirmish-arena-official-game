@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "launcher-local",
+  "description": "Only the bundled launcher UI receives native capabilities. The remote game receives none.",
+  "windows": ["main"],
+  "permissions": ["core:default", "allow-launcher-settings", "allow-save-server", "allow-server-status", "allow-check-launcher-update", "allow-play", "allow-install-launcher-update"]
+}

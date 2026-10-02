@@ -1,0 +1,447 @@
+{
+  "schema": 1,
+  "version": "brightfield-fieldcraft-visual-fix-1",
+  "units": "game-world-units",
+  "upAxis": "Y",
+  "origin": "ground-center",
+  "generator": "Blender 5.2.2 LTS; tools/blender_assets.py",
+  "models": [
+    {
+      "name": "mailbox",
+      "node": "mailbox",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 29.8,
+        "y": 60.0,
+        "z": 16.25
+      },
+      "castShadow": true
+    },
+    {
+      "name": "streetlamp",
+      "node": "streetlamp",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 42.108,
+        "y": 131.5,
+        "z": 16.0
+      },
+      "castShadow": true
+    },
+    {
+      "name": "bench",
+      "node": "bench",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 68.0,
+        "y": 41.22,
+        "z": 31.853
+      },
+      "castShadow": true
+    },
+    {
+      "name": "parked_car",
+      "node": "parked_car",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 142.7,
+        "y": 57.5,
+        "z": 70.5
+      },
+      "castShadow": true
+    },
+    {
+      "name": "shrub",
+      "node": "shrub",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 66.842,
+        "y": 42.45,
+        "z": 43.0
+      },
+      "castShadow": true
+    },
+    {
+      "name": "tree_round",
+      "node": "tree_round",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 109.476,
+        "y": 148.3,
+        "z": 98.0
+      },
+      "castShadow": true
+    },
+    {
+      "name": "tree_columnar",
+      "node": "tree_columnar",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 55.161,
+        "y": 116.5,
+        "z": 58.0
+      },
+      "castShadow": true
+    },
+    {
+      "name": "crate",
+      "node": "crate",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 65.0,
+        "y": 61.0,
+        "z": 68.0
+      },
+      "castShadow": true
+    },
+    {
+      "name": "utility_box",
+      "node": "utility_box",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 42.0,
+        "y": 54.1,
+        "z": 31.5
+      },
+      "castShadow": true
+    },
+    {
+      "name": "trash_can",
+      "node": "trash_can",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 32.0,
+        "y": 40.0,
+        "z": 32.0
+      },
+      "castShadow": true
+    },
+    {
+      "name": "fence_panel",
+      "node": "fence_panel",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 92.0,
+        "y": 50.75,
+        "z": 10.45
+      },
+      "castShadow": true
+    },
+    {
+      "name": "roof_module",
+      "node": "roof_module",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 247.0,
+        "y": 68.5,
+        "z": 215.0
+      },
+      "castShadow": true
+    },
+    {
+      "name": "drain_grate",
+      "node": "drain_grate",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 33.0,
+        "y": 3.0,
+        "z": 23.0
+      },
+      "castShadow": false
+    },
+    {
+      "name": "planter",
+      "node": "planter",
+      "file": "brightfield-props.glb",
+      "dimensions": {
+        "x": 44.0,
+        "y": 25.4,
+        "z": 28.6
+      },
+      "castShadow": true
+    },
+    {
+      "name": "operator-detail",
+      "node": "operator-detail",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 22.85,
+        "y": 44.35,
+        "z": 34.6
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "torso": "operator-detail__torso",
+        "pelvis": "operator-detail__pelvis",
+        "foot": "operator-detail__foot",
+        "cuff": "operator-detail__cuff"
+      },
+      "paletteMaterials": {
+        "sar_vest": "vest",
+        "sar_accent": "accent"
+      },
+      "appliesTo": "all-existing-operator-palettes"
+    },
+    {
+      "name": "weapon-detail-auto12",
+      "node": "weapon-detail-auto12",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 70.5,
+        "y": 15.15,
+        "z": 12.1
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-auto12__body",
+        "mag": "weapon-detail-auto12__mag"
+      },
+      "weapon": "Auto 12"
+    },
+    {
+      "name": "weapon-detail-war-head",
+      "node": "weapon-detail-war-head",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 67.4,
+        "y": 19.45,
+        "z": 14.725
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-war-head__body",
+        "mag": "weapon-detail-war-head__mag"
+      },
+      "weapon": "War Head LMG"
+    },
+    {
+      "name": "weapon-detail-p90",
+      "node": "weapon-detail-p90",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 60.05,
+        "y": 17.25,
+        "z": 11.3
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-p90__body",
+        "mag": "weapon-detail-p90__mag"
+      },
+      "weapon": "P90"
+    },
+    {
+      "name": "weapon-detail-sr-aug",
+      "node": "weapon-detail-sr-aug",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 71.6,
+        "y": 12.95,
+        "z": 11.5
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-sr-aug__body"
+      },
+      "weapon": "SR-Aug"
+    },
+    {
+      "name": "weapon-detail-spas12",
+      "node": "weapon-detail-spas12",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 85.6,
+        "y": 18.65,
+        "z": 11.9
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-spas12__body"
+      },
+      "weapon": "SPAS-12"
+    },
+    {
+      "name": "weapon-detail-x16-auto",
+      "node": "weapon-detail-x16-auto",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 43.25,
+        "y": 28.2,
+        "z": 10.0
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-x16-auto__body",
+        "slide": "weapon-detail-x16-auto__slide",
+        "mag": "weapon-detail-x16-auto__mag"
+      },
+      "weapon": "X-16 Auto"
+    },
+    {
+      "name": "weapon-detail-ar15",
+      "node": "weapon-detail-ar15",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 68.05,
+        "y": 9.1,
+        "z": 11.15
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-ar15__body"
+      },
+      "weapon": "AR-15"
+    },
+    {
+      "name": "weapon-detail-ak47",
+      "node": "weapon-detail-ak47",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 79.5,
+        "y": 31.833,
+        "z": 11.4
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-ak47__body",
+        "mag": "weapon-detail-ak47__mag"
+      },
+      "weapon": "AK47"
+    },
+    {
+      "name": "weapon-detail-smg9",
+      "node": "weapon-detail-smg9",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 56.8,
+        "y": 11.75,
+        "z": 11.15
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-smg9__body"
+      },
+      "weapon": "SMG-9"
+    },
+    {
+      "name": "weapon-detail-pump",
+      "node": "weapon-detail-pump",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 90.0,
+        "y": 9.95,
+        "z": 11.6
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-pump__body",
+        "pump": "weapon-detail-pump__pump"
+      },
+      "weapon": "Pump Shotgun"
+    },
+    {
+      "name": "weapon-detail-lr762",
+      "node": "weapon-detail-lr762",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 74.533,
+        "y": 23.09,
+        "z": 11.9
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-lr762__body"
+      },
+      "weapon": "LR-762"
+    },
+    {
+      "name": "weapon-detail-tundra",
+      "node": "weapon-detail-tundra",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 69.411,
+        "y": 26.9,
+        "z": 12.6
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-tundra__body",
+        "mag": "weapon-detail-tundra__mag"
+      },
+      "weapon": "LW Tundra"
+    },
+    {
+      "name": "weapon-detail-9mm",
+      "node": "weapon-detail-9mm",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 31.5,
+        "y": 18.1,
+        "z": 9.25
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-9mm__body",
+        "slide": "weapon-detail-9mm__slide",
+        "mag": "weapon-detail-9mm__mag"
+      },
+      "weapon": "9mm"
+    },
+    {
+      "name": "weapon-detail-x16",
+      "node": "weapon-detail-x16",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 31.5,
+        "y": 17.5,
+        "z": 8.5
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-x16__body",
+        "slide": "weapon-detail-x16__slide",
+        "mag": "weapon-detail-x16__mag"
+      },
+      "weapon": "X16"
+    },
+    {
+      "name": "phone-device",
+      "node": "phone-device",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 176.2,
+        "y": 330.65,
+        "z": 22.5
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "screen": {
+        "width": 151,
+        "height": 287,
+        "center": {
+          "x": 0,
+          "y": -1.5,
+          "z": 9.7
+        },
+        "normal": "+Z",
+        "safeInset": 5
+      }
+    }
+  ],
+  "detailGenerator": "Blender 5.2.2 LTS; tools/blender_live_circuit.py"
+}

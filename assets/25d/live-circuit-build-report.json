@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "blender": "5.2.2 LTS",
+  "assets": 16,
+  "operators": "all existing operator palettes via shared kit",
+  "detailedWeapons": [
+    "Auto 12",
+    "War Head LMG",
+    "P90",
+    "SR-Aug",
+    "SPAS-12",
+    "X-16 Auto",
+    "AR-15",
+    "AK47",
+    "SMG-9",
+    "Pump Shotgun",
+    "LR-762",
+    "LW Tundra",
+    "9mm",
+    "X16"
+  ],
+  "meshes": 53,
+  "triangles": 11708,
+  "glbBytes": 871148,
+  "contract": "named local-coordinate attachments; +X forward, Y up; no collision or animation authority",
+  "source": "editable local Blender authoring"
+}

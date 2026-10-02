@@ -1,0 +1,8 @@
+{
+  "blender": "5.2.2 LTS",
+  "assets": 14,
+  "meshes": 57,
+  "triangles": 10342,
+  "glbBytes": 820456,
+  "source": "local Blender procedural authoring; no remote AI generation"
+}

@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),http=require('node:http'),AI=require('../local-ai.cjs'),{createDatabase}=require('../db.cjs'),{writeWorld}=require('../world.cjs'),{engine}=require('../../dev/simulate.cjs');
-test('Balance7 factual context derives all six changed weapons from the active configuration',()=>{
- const db=createDatabase(':memory:'),id='balance-seven-context',now=Date.now(),expected=require('../../dev/fixtures/balance-7.0.json');try{
+test('Balance8 factual context derives weapon values from the active configuration',()=>{
+ const db=createDatabase(':memory:'),id='balance-eight-context',now=Date.now(),expected=require('../../dev/fixtures/balance-8.0.json');try{
   db.prepare('INSERT INTO users(id,username,username_key,password_hash,created_at,updated_at) VALUES(?,?,?,?,?,?)').run(id,id,id,'isolated',now,now);writeWorld(db,id,engine().context.SAR.getUniverse(),0);
   for(const name of ['AK47','SMG-9','LR-762','LW Tundra','SR-Aug','SPAS-12']){const context=AI.botContext(db,id,'bot_0001',{weapon:name}),w=context.authoritativeGameFacts.weapons.find(w=>w.name===name);assert.ok(w,name+' context');for(const key of ['damage','head','spread','walkSpread','sprintSpread','adsSpread','falloffStart','falloff','hitSpeed','mag','reload'])assert.equal(w.stats[key],expected.weapons[name][key],name+' '+key);assert.equal(w.mechanics.preferredTiles,expected.weapons[name].preferred/70);}
  }finally{AI.dispose(db);db.close();}
@@ -9,7 +9,7 @@ test('Balance7 factual context derives all six changed weapons from the active c
 test('SR-Aug dialogue uses real cadence and rejects confusing round spacing with burst cycles',()=>{
  const db=createDatabase(':memory:'),id='sr-context',now=Date.now();try{
  db.prepare('INSERT INTO users(id,username,username_key,password_hash,created_at,updated_at) VALUES(?,?,?,?,?,?)').run(id,id,id,'isolated',now,now);writeWorld(db,id,engine().context.SAR.getUniverse(),0);
- const context=AI.botContext(db,id,'bot_0001',{weapon:'SR-Aug'}),w=context.authoritativeGameFacts.weapons.find(w=>w.name==='SR-Aug');assert.equal(w.role,'Triple Burst AR');assert.equal(w.stats.damage,24);assert.equal(w.stats.head,49);assert.equal(w.stats.pellets,1);assert.equal(w.mechanics.roundsPerBurst,3);assert.ok(Math.abs(w.mechanics.bodyTTK-2.165)<1e-9);assert.ok(Math.abs(w.mechanics.headTTK-.83)<1e-9);assert.equal(w.mechanics.preferredTiles,750/70);
+ const context=AI.botContext(db,id,'bot_0001',{weapon:'SR-Aug'}),w=context.authoritativeGameFacts.weapons.find(w=>w.name==='SR-Aug');assert.equal(w.role,'Triple Burst AR');assert.equal(w.stats.damage,23);assert.equal(w.stats.head,45);assert.equal(w.stats.pellets,1);assert.equal(w.mechanics.roundsPerBurst,3);assert.ok(Math.abs(w.mechanics.bodyTTK-2.165)<1e-9);assert.ok(Math.abs(w.mechanics.headTTK-.83)<1e-9);assert.equal(w.mechanics.preferredTiles,750/70);
  assert.throws(()=>AI.mechanicalGuard({body:'SR-Aug fires 3-shot bursts every 0.065 s.'},context),/burst STARTS/);assert.throws(()=>AI.mechanicalGuard({body:'SR-Aug fires three pellets.'},context),/independent bullets/);assert.doesNotThrow(()=>AI.mechanicalGuard({body:'SR-Aug starts bursts every 0.70 seconds, with individual bullets 65 ms apart.'},context));
  assert.throws(()=>AI.mechanicalGuard({body:'Each trigger pull of the SR\u2011Aug shoots a 3\u2011bullet burst\u2014one bullet per burst.'},context),/3 independent bullets PER BURST/);
  assert.throws(()=>AI.mechanicalGuard({body:'SR-Aug fires two rounds in each burst.'},context),/3 independent bullets PER BURST/);
@@ -31,7 +31,7 @@ test('a contradictory actual-style SR-Aug reply is repaired before it reaches th
 test('SPAS-12 dialogue context derives its shell, pellet, range and TTK facts from the active patch',()=>{
  const db=createDatabase(':memory:'),id='spas-context',now=Date.now();try{
   db.prepare('INSERT INTO users(id,username,username_key,password_hash,created_at,updated_at) VALUES(?,?,?,?,?,?)').run(id,id,id,'isolated',now,now);writeWorld(db,id,engine().context.SAR.getUniverse(),0);
-  const context=AI.botContext(db,id,'bot_0001',{weapon:'SPAS-12'}),w=context.authoritativeGameFacts.weapons.find(w=>w.name==='SPAS-12');assert.equal(w.role,'3 Shot Shotgun');assert.equal(w.stats.damage,108);assert.equal(w.stats.head,220);assert.equal(w.stats.pellets,12);assert.equal(w.stats.mag,3);assert.equal(w.mechanics.preferredTiles,6);assert.equal(w.mechanics.bodyTTK,2);assert.equal(w.mechanics.headTTK,1);
+  const context=AI.botContext(db,id,'bot_0001',{weapon:'SPAS-12'}),w=context.authoritativeGameFacts.weapons.find(w=>w.name==='SPAS-12');assert.equal(w.role,'3 Shot Shotgun');assert.equal(w.stats.damage,100);assert.equal(w.stats.head,210);assert.equal(w.stats.pellets,12);assert.equal(w.stats.mag,3);assert.equal(w.mechanics.preferredTiles,6);assert.equal(w.mechanics.bodyTTK,2);assert.equal(w.mechanics.headTTK,1);
   assert.doesNotThrow(()=>AI.mechanicalGuard({body:'SPAS-12 has 3 shells and 12 pellets per discharge.'},context));
  }finally{AI.dispose(db);db.close();}
 });

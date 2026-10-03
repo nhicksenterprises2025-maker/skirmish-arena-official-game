@@ -17,8 +17,9 @@ function conservation(e,mode='tdm'){
  validateWorld(e.context.SAR.getUniverse());
 }
 {
- const e=engine(),{state,match,player}=humanMatch(e),enemy=state.actors.find(a=>a.matchId===match.id&&a.team!==player.team),ally=state.actors.find(a=>a.matchId===match.id&&a!==player&&a.team===player.team);
+ const e=engine();
  e.context.SARCloud.state={account:{id:'account-stable-719',username:'Display name changes'}};
+ const {state,match,player}=humanMatch(e),enemy=state.actors.find(a=>a.matchId===match.id&&a.team!==player.team),ally=state.actors.find(a=>a.matchId===match.id&&a!==player&&a.team===player.team);
  const before=e.context.SAR.getUniverse(),humanKills=total(query(e,'human'),'kills'),botKills=total(query(e,'bot'),'kills'),enemyWeapon=enemy.slots[0].name;
  hit(e,enemy,player,'AR-15',1000,true);
  assert.equal(total(query(e,'human'),'kills')-humanKills,1);assert.equal(total(query(e,'bot'),'kills')-botKills,0);

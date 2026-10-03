@@ -9,7 +9,7 @@ const strip=value=>value.replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').trim();
 function visibleProfile(e,career){
  e.context.SAR.openPlayerProfile();const modal=e.ui.element('modalContent'),html=modal.innerHTML;
  assert.equal(modal.dataset.view,'player-profile');assert.ok(e.ui.element('modal').classList.contains('visible'));
- const cells=new Map([...html.matchAll(/<span>(.*?)<\/span><strong>(.*?)<\/strong>/g)].map(m=>[strip(m[1]),strip(m[2])]));
+ const cells=new Map([...html.matchAll(/<div><span>([^<]*)<\/span><strong>([^<]*)<\/strong>/g)].map(m=>[strip(m[1]),strip(m[2])]));
  for(const [label,value] of [['GAMES',career.games],['W / L',career.wins+' / '+career.losses],['KILLS',career.kills],['DEATHS',career.deaths],['ASSISTS',career.assists],['HEADSHOTS',career.headshots],['SHOTS / HITS',career.shots+' / '+career.hits],['DAMAGE',Math.round(career.damage).toLocaleString()],['DAMAGE TAKEN',Math.round(career.taken).toLocaleString()],['MOST KILLS IN GAME',career.bestKills],['MOST DAMAGE IN GAME',Math.round(career.bestDamage).toLocaleString()]])assert.equal(cells.get(label),String(value),'visible '+label);
  assert.equal(cells.get('WIN %'),career.games?(100*career.wins/career.games).toFixed(1)+'%':'—');
  assert.equal(cells.get('ACCURACY'),career.shots?(100*career.hits/career.shots).toFixed(1)+'%':'—');

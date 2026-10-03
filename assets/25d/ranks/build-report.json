@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "blender": "5.2.2 LTS",
+  "rankCount": 26,
+  "families": [
+    "Beginner",
+    "Rookie",
+    "Trainer",
+    "Challenger",
+    "Veteran",
+    "Elite Veteran",
+    "Pro",
+    "Master",
+    "Grandmaster",
+    "Champion",
+    "Legend",
+    "Ascendant"
+  ],
+  "triangles": 19348,
+  "meshes": 95,
+  "glbBytes": 1141300,
+  "glbSha256": "ba0c627502c0ede5525cf9d08b16aa8d73e9b05252491a597a5e02a9baa0bebc",
+  "thumbnailBytes": 768768,
+  "source": "editable named geometry in blue-circuit-ranks.blend; exact registry read via Node",
+  "contract": "ranked ELO only; 26 centered Y-up +Z crests; four materials; no texture or decoder dependencies"
+}

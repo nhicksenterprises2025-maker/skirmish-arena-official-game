@@ -5,6 +5,12 @@ weapon balance, accounts, save data, careers, or telemetry. Operators, weapons a
 their previews use the existing 2.5D renderer. Missing required art has a clear
 recovery state; never introduce a flat placeholder or a second simulation.
 
+BLUE CIRCUIT Run 2 adds the separate, lazy ranked crest library through the same
+GLB loader. Its exact registry mapping, editable Blender source, rebuild command,
+export metrics and current weapon-construction audit are in
+[BLUE-CIRCUIT-ASSETS.md](BLUE-CIRCUIT-ASSETS.md). It is staged for the combined
+release; gameplay libraries are unchanged by the new badge library.
+
 ## What was actually used
 
 The installed `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe`

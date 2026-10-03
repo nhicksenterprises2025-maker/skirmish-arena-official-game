@@ -2,11 +2,11 @@
 
 A tactical arena shooter with a persistent league of 50 bots. Pick a loadout, play a match, and watch rivalries, careers and seasons develop around you.
 
-**Version 1.10 · Windows build 1.10.0 · Weapon Balance 8.0 · Beta**
+**Version 1.11 · Windows build 1.11.0 · Weapon Balance 8.0 · Beta**
 
-[Download for Windows (64-bit)](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest/download/Skirmish.Arena.Reimagined_1.10.0_x64-setup.exe) · [Release notes and downloads](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest)
+[Download for Windows (64-bit)](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest/download/Skirmish.Arena.Reimagined_1.11.0_x64-setup.exe) · [Release notes and downloads](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest)
 
-![Skirmish Arena lobby](docs/screenshots/lobby-skyline.png)
+![Skirmish Arena lobby](docs/screenshots/lobby-blue-circuit.png)
 
 ## Install
 
@@ -20,7 +20,7 @@ For an existing installation, run the new installer over it. Accounts and save d
 
 ## The game
 
-- **5v5 Team Deathmatch, ten-player Deathmatch and custom matches.** Practice alone or choose a bot roster and difficulty.
+- **Ranked and ordinary 5v5 Team Deathmatch, ten-player Deathmatch and custom matches.** Practice alone or choose a bot roster and difficulty.
 - **A league that remembers.** Fifty bots keep their careers, weapon familiarity, form and season history.
 - **Four live matches to watch.** Switch matches, follow individual bots or use the tactical camera.
 - **Fourteen weapons and cosmetic operators.** Inspect the 2.5D models, build a primary/sidearm loadout and follow the current Weapon Meta.
@@ -41,15 +41,15 @@ Your username menu opens **Player Profile** and **Settings**. Settings has four 
 
 The [player guide](docs/PLAYER-GUIDE.md) covers modes, careers, seasons, tournaments, Phone and backups.
 
-## Current release: Skyline
+## Current release: Blue Circuit
 
-Build **1.10.0** introduces a focused lobby, five working Phone apps and a new blue identity. Tournament navigation and Settings have been organized around the actions you use while playing.
+Build **1.11.0** adds Ranked TDM with a separate 26-rank ELO ladder for players and named bots. Level and rank progress have their own lobby panels and match breakdowns. The existing XP curve stays the same; a new 5,000-damage reward tier joins the scoring schedule.
 
-Main-menu **Weapon Meta** measures human participants, including their eligible matches against bots. **Phone → Bot Weapon Meta** measures bot participants. Accurate cohort records begin with Skyline; older mixed telemetry is preserved without an invented split. TDM and Deathmatch remain separate.
+Every weapon and operator card has its own rotation, Reset and zoom controls. Exact stat bars, modeled rank crests and clearer typography carry through the existing blue interface.
 
-Your team appears blue and opponents red. Spectating uses a labeled, stable perspective. **Exit Game** saves locally before closing the desktop game; browsers that cannot close themselves explain how to finish closing the window.
+Phone contacts speak as competitors: their own reactions, rivalries, weapon opinions and rank grind. Factual replies use current game records, and a failed generation stays in the normal retry flow. Conversation history and personalities carry forward.
 
-Application version **1.10**, analytics schema **1**, and weapon balance **8.0** are separate. This release does not change weapon values. Full history is available in **Settings → About** and [version.json](version.json).
+Application version **1.11**, analytics schema **1**, and weapon balance **8.0** are separate. This release does not change weapon values or reset telemetry. Full history is available in **Settings → About** and [version.json](version.json).
 
 ## Source and builds
 
@@ -63,7 +63,7 @@ git clone https://github.com/nhicksenterprises2025-maker/skirmish-arena-official
 
 See [Building from source](docs/BUILDING.md) for setup and tests. The large original audio library is a separate release download; it is needed only to rebuild audio, not to run or package the game. Personal saves, credentials, signing keys, dependencies and generated installers are kept out of Git.
 
-Third-party notices are included in [the audio credits](assets/audio/LICENSES.json) and [the renderer license](vendor/THREE-LICENSE.txt).
+Third-party notices are included in [the audio credits](assets/audio/LICENSES.json) and [the renderer license](vendor/THREE-LICENSE.txt), and [font licenses](assets/fonts/README.md).
 
 ## Problems and feedback
 

@@ -1,6 +1,6 @@
 'use strict';
 const {engine}=require('../dev/simulate.cjs');
-const {validateProgression,validateTournamentProgression}=require('./progression.cjs');
+const {validateProgression,validateRankedProgression,validateRewardOwnership,validateTournamentProgression}=require('./progression.cjs');
 const {upsertWorldTables,botId}=require('./db.cjs');
 const {isDeepStrictEqual}=require('node:util');
 const {statSync}=require('node:fs');
@@ -241,6 +241,7 @@ function validateWorld(world,previous=null){
   }
   validateModeScopes(world,previous);
   validateParticipantAnalytics(world,previous?.save);
+  validateRankedProgression(world,previous?.save);
   return serialized;
 }
 function validateParticipantAnalytics(world,old){
@@ -356,10 +357,12 @@ function recordEvents(db,userId,oldWorld,newWorld,now){
   }
   const oldPatches=new Set((oldWorld.balancePatchHistory||[]).map(p=>p.at+':'+p.to));
   for(const patch of newWorld.balancePatchHistory||[])if(!oldPatches.has(patch.at+':'+patch.to)){
-    for(const name of newWorld.activeBotNames){
+    const currentPatch=newWorld.patchState.id;
+    for(const name of require('./social-events.cjs').selectPatchContacts(newWorld,(patch.changes||[]).map(change=>change.weapon),currentPatch)){
       const bot=newWorld.bots[name],favorite=bot.profile.personality?.favoriteWeapon,changes=(patch.changes||[]).filter(c=>c.weapon===favorite);
       if(!changes.length)continue;
       const id=botId(name,bot);
+      if(db.prepare("SELECT 1 FROM structured_events WHERE user_id=? AND bot_id=? AND type IN ('BALANCE_FEEDBACK','NEW_WEAPON') AND json_extract(payload_json,'$.currentPatch')=? LIMIT 1").get(userId,id,currentPatch))continue;
       addStructuredEvent(db,userId,{id:userId+':patch:'+patch.to+':'+id,botId:id,type:'BALANCE_CHANGE',at:now,payload:{botId:id,name,power:bot.profile.power,playstyle:bot.profile.archetype,form:bot.recentForm,weapon:favorite,changes,previousPatch:patch.from,currentPatch:patch.to}});
     }
   }
@@ -369,12 +372,14 @@ function writeWorld(db,userId,world,baseRevision,{importing=false,originalSave=n
   if(previous&&importing)throw fail(409,'This account already has cloud progress');
   if((previous?.revision||0)!==baseRevision)throw fail(409,'Cloud save changed on another session','REVISION_CONFLICT');
   const saveJson=validateWorld(world,previous),revision=baseRevision+1;
+  validateRewardOwnership(userId,world,previous?.save);
   validateTournamentProgression(db,userId,world,previous?.save);
   db.exec('BEGIN IMMEDIATE');
   try{
     if(importing&&originalSave)db.prepare('INSERT INTO world_backups(user_id,revision,save_json,reason,created_at) VALUES(?,?,?,?,?)').run(userId,0,JSON.stringify(originalSave),'original local save before schema migration',now);
-    if(previous&&(baseRevision%30===0||previous.save.patchState?.id!==world.patchState.id||previous.save.patchState?.completedMatches!==world.patchState.completedMatches||previous.save.seasons.current.number!==world.seasons.current.number)){
-      db.prepare('INSERT INTO world_backups(user_id,revision,save_json,reason,created_at) VALUES(?,?,?,?,?)').run(userId,previous.revision,JSON.stringify(previous.save),'before cloud revision '+revision,now);
+    const rankedMigration=previous&&previous.save.ranked===undefined&&world.ranked!==undefined;
+    if(previous&&(rankedMigration||baseRevision%30===0||previous.save.patchState?.id!==world.patchState.id||previous.save.patchState?.completedMatches!==world.patchState.completedMatches||previous.save.seasons.current.number!==world.seasons.current.number)){
+      db.prepare('INSERT INTO world_backups(user_id,revision,save_json,reason,created_at) VALUES(?,?,?,?,?)').run(userId,previous.revision,JSON.stringify(previous.save),rankedMigration?'before ranked progression migration':'before cloud revision '+revision,now);
     }
     db.prepare('INSERT INTO worlds(user_id,revision,schema_version,save_json,updated_at,season_start_at,season_end_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET revision=excluded.revision,schema_version=excluded.schema_version,save_json=excluded.save_json,updated_at=excluded.updated_at,season_start_at=excluded.season_start_at,season_end_at=excluded.season_end_at').run(userId,revision,world.schema,saveJson,now,world.seasons.current.startAt,world.seasons.current.endAt);
     upsertWorldTables(db,userId,world,now);recordEvents(db,userId,previous?.save||null,world,now);

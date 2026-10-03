@@ -1,10 +1,10 @@
 # Skirmish Arena
 
-**VERSION 1.10 — SKYLINE · 2026-10-03**
+**VERSION 1.11 — BLUE CIRCUIT · 2026-10-03**
 
 Skirmish Arena has 5v5 Team Deathmatch, ten-player Deathmatch and custom sessions, with a persistent league of 50 bots. Play a match, follow the four active bot matches, choose an operator and loadout, and track careers, seasons and the current weapon meta. Operators and weapons use 2.5D models throughout the game.
 
-Account progression adds persistent XP and Levels 1–50, a compact lobby/profile display and an expandable match breakdown. Standard TDM and Deathmatch earn XP; official tournaments multiply the final match award by 1.3. Custom and practice games do not earn XP or consume first-use rewards. Level 50 is the current cap; lifetime XP continues accumulating. A clean startup screen remains visible for at least three seconds while the game prepares. The installed update build is 1.10.0; the application version is 1.10 and the active weapon rules remain **Balance 8.0 — Core Tuning**.
+Account progression adds persistent XP and Levels 1–50, a compact lobby/profile display and an expandable match breakdown. Standard TDM and Deathmatch earn XP; official tournaments multiply the final match award by 1.3. Custom and practice games do not earn XP or consume first-use rewards. Level 50 is the current cap; lifetime XP continues accumulating. A clean startup screen remains visible for at least three seconds while the game prepares. The installed update build is 1.11.0; the application version is 1.11 and the active weapon rules remain **Balance 8.0 — Core Tuning**.
 
 ## Install and update
 
@@ -16,15 +16,17 @@ Use **Settings → About → Check for Updates** to install a release published 
 
 ## Play and controls
 
-Choose **Play** for Team Deathmatch, Deathmatch or Custom, or **Phone → Spectate** to watch. Deathmatch ends at 30 kills or four minutes. Custom matches support solo practice, selected roster bots and four difficulties; they award no official progress. A player match begins with the countdown; results show the team score and the ten participants. **Play Again**, **Lobby** and **Spectate** are available afterward.
+Choose **Play** for Ranked TDM, Team Deathmatch, Deathmatch or Custom, or **Phone → Spectate** to watch. Deathmatch ends at 30 kills or four minutes. Custom matches support solo practice, selected roster bots and four difficulties; they award no official progress. A player match begins with the countdown; results show the team score and the ten participants. **Play Again**, **Lobby** and **Spectate** are available afterward.
 
 Move with the keyboard and aim with the mouse. Gameplay captures the mouse; opening menus releases it. Use the game's **Game → Controls** settings for the current bindings, mouse sensitivity and ADS sensitivity. F11 toggles fullscreen, Tab shows the scoreboard during combat, and Windows Alt+Tab remains available.
 
 Weapon spread follows stationary, walking, sprinting and ADS states. Moving the cursor changes aim position and direction. Headshots require a projectile or pellet to hit the head. Damage numbers show the HP actually removed and can be toggled in Gameplay settings.
 
+Ranked TDM uses the same combat rules, a 60-kill target and a five-minute clock. Each participant has a separate ELO rating and full rank title, from Beginner I to Ascendant. Ranked streaks count only eligible Ranked wins. Account level and bot Power are separate from rank. Results explain both XP and ELO, including the actual applied change at the zero-rating floor.
+
 ## Operators and loadouts
 
-Operators are cosmetic choices with the same gameplay statistics. Inspect their 2.5D models and choose a primary weapon and sidearm in Loadout.
+Operators are cosmetic choices with the same gameplay statistics. Drag any card’s 2.5D model to rotate it, use its keyboard or zoom controls, and Reset to restore the starting view. Choose a primary weapon and sidearm in Loadout.
 
 Weapon cards show role, damage, body/headshot TTK, ammunition, reload time, preferred range and current meta measurements. Advanced statistics provide deeper mechanical values. The armory contains 14 weapons, including the ranged-SMG P90, the three-round-burst SR-Aug and the SPAS-12. Audio settings control Master, Weapons, SFX, UI and Ambience volumes.
 
@@ -48,7 +50,7 @@ Select any of the four active bot matches directly and cycle bots or either team
 
 Open **Phone**, then **Messages**, to reach all 50 bot contacts. Contacts show unread state and conversation previews. Open a contact to read its history, inspect its profile or send a reply. **Back** and **Home** navigate within the phone.
 
-Conversations persist with your account. Replies arrive asynchronously while the game continues. Bot conversations reflect their personalities and recorded matches, weapons, rivalries and tournament events. **Settings → Game → Messaging** controls conversation preferences. Messaging availability is separate from the account connection.
+Conversations persist with your account. Replies arrive asynchronously while the game continues. Bot contacts speak about their own results, weapon opinions, rivalries and tournament feelings. Direct questions about leaderboards and ranked use separate current records; unavailable facts are not filled in with invented results. **Settings → Game → Messaging** controls conversation preferences. Messaging availability is separate from the account connection.
 
 ## Tournaments and Calendar
 

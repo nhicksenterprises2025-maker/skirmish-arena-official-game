@@ -1,28 +1,60 @@
 {
-  "version": "1.10.0",
-  "applicationVersion": "1.10",
+  "version": "1.11.0",
+  "applicationVersion": "1.11",
   "weaponBalance": "8.0",
   "analyticsSchema": 1,
-  "updateName": "SKYLINE",
-  "shellRevision": "skyline-1",
+  "updateName": "BLUE CIRCUIT",
+  "shellRevision": "blue-circuit-1",
   "channel": "live",
-  "releasedAt": "2026-10-03T11:46:55.647Z",
-  "notes": "SKYLINE brings a focused lobby, five Phone apps, separate player and bot weapon statistics, a light-blue identity and a clearer tournament hub. Weapon Balance 8.0 is unchanged.",
+  "releasedAt": "2026-10-03T19:56:15.146Z",
+  "notes": "BLUE CIRCUIT adds Ranked TDM, a separate ELO ladder, rank crests, clearer progression and equipment cards, and competitor conversations grounded in current game data. Weapon Balance 8.0 is unchanged.",
   "categories": {
-    "New Features": [
-      "Phone now contains Messages, Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta, with compact and expanded statistics views.",
-      "Human and bot Weapon Meta use separately attributed participant statistics. Previous mixed records are retained; accurate cohort collection begins with SKYLINE.",
-      "Exit Game saves locally before closing the desktop game, with an honest close-window message in unsupported browsers."
+    "Gameplay": [
+      "Ranked TDM adds a separate 26-rank ELO ladder for players and named bots, with ranked streaks and match-by-match reward breakdowns.",
+      "Official tournament participant reservations prevent overlapping appearances."
     ],
-    "Improvements": [
-      "A simplified Play menu and six lobby choices. Player Profile and Settings are available from your username menu.",
-      "A new original wordmark and SA emblem, with a consistent navy and light-blue interface.",
-      "Own-team blue and opponent red indicators use your local perspective; neutral spectating keeps a stable team mapping.",
-      "A clearer tournament hub, event filters, registration details, brackets and per-player earnings.",
-      "Settings now has Game, Audio, Account and About tabs. Data Management is in Account; updates, release history and the player guide are in About. Player-facing debug settings are removed."
+    "Progression": [
+      "A 5,000-damage reward tier and exact fractional scoring join the existing XP system. Existing levels, XP thresholds, careers and discovery history carry forward.",
+      "Separate Level and Ranked panels, modeled rank crests and clearer Profile and result progress. Match receipts retain rewards across retries and reconnects."
+    ],
+    "Equipment": [
+      "Every weapon and operator card has independent rotation, Reset and zoom controls. Operators face forward unarmed; equipped weapons keep their separate showcase.",
+      "Weapon stat bars pair consistent comparisons with exact values and an optional advanced sheet."
+    ],
+    "Presentation": [
+      "Self-hosted Inter and Oxanium improve headings, messages and numeric readability while preserving the blue interface and existing wordmark."
+    ],
+    "Messages": [
+      "Bot contacts react as competitors, with distinct voices and their own rivalries, weapon opinions and tournament feelings.",
+      "Direct factual replies use current scoped leaderboards, ranked results, weapon data and public events. Unsupported answers stay in the existing retry flow."
     ]
   },
   "history": [
+    {
+      "version": "1.10.0",
+      "applicationVersion": "1.10",
+      "weaponBalance": "8.0",
+      "analyticsSchema": 1,
+      "updateName": "SKYLINE",
+      "shellRevision": "skyline-1",
+      "channel": "live",
+      "releasedAt": "2026-10-03T11:46:55.647Z",
+      "notes": "SKYLINE brings a focused lobby, five Phone apps, separate player and bot weapon statistics, a light-blue identity and a clearer tournament hub. Weapon Balance 8.0 is unchanged.",
+      "categories": {
+        "New Features": [
+          "Phone now contains Messages, Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta, with compact and expanded statistics views.",
+          "Human and bot Weapon Meta use separately attributed participant statistics. Previous mixed records are retained; accurate cohort collection begins with SKYLINE.",
+          "Exit Game saves locally before closing the desktop game, with an honest close-window message in unsupported browsers."
+        ],
+        "Improvements": [
+          "A simplified Play menu and six lobby choices. Player Profile and Settings are available from your username menu.",
+          "A new original wordmark and SA emblem, with a consistent navy and light-blue interface.",
+          "Own-team blue and opponent red indicators use your local perspective; neutral spectating keeps a stable team mapping.",
+          "A clearer tournament hub, event filters, registration details, brackets and per-player earnings.",
+          "Settings now has Game, Audio, Account and About tabs. Data Management is in Account; updates, release history and the player guide are in About. Player-facing debug settings are removed."
+        ]
+      }
+    },
     {
       "version": "1.9.3",
       "applicationVersion": "1.9",

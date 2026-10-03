@@ -1,6 +1,6 @@
-# SKYLINE maintenance and verification
+# BLUE CIRCUIT maintenance and verification
 
-This internal document carries operational details moved out of the public README. It routes work within the existing project; it is not a replacement architecture. **1.10.0 — SKYLINE** is the current application release; Balance 8.0 and analytics schema 1 remain separate. See [Tactical Adaptation](TACTICAL-ADAPTATION.md) for the bot-only changes and checks. See [Core Tuning](CORE-TUNING.md) for the changed rules, scheduler, movement and balance checks. See [Tactical Instinct](TACTICAL-INSTINCT.md) for mode, tactical-revision and deletion routes. Completion of the acceptance checks below must be established by current test output, not inferred from this document. This historical document path remains stable for existing project routing.
+This internal document carries operational details moved out of the public README. It routes work within the existing project; it is not a replacement architecture. **1.11.0 — BLUE CIRCUIT** is the current application release; Balance 8.0 and analytics schema 1 remain separate. See [Tactical Adaptation](TACTICAL-ADAPTATION.md) for the bot-only changes and checks. See [Core Tuning](CORE-TUNING.md) for the changed rules, scheduler, movement and balance checks. See [Tactical Instinct](TACTICAL-INSTINCT.md) for mode, tactical-revision and deletion routes. Completion of the acceptance checks below must be established by current test output, not inferred from this document. This historical document path remains stable for existing project routing.
 
 ## SKYLINE routes
 
@@ -13,6 +13,8 @@ This internal document carries operational details moved out of the public READM
 - Tournament presentation: `tournaments-ui.js`, `skyline-tournaments.css`; engine and payouts unchanged.
 
 ## Targeted routes
+
+BLUE CIRCUIT integration paths and acceptance evidence are in [blue-circuit-handoff.md](blue-circuit-handoff.md): Ranked/XP schemas, per-card preview APIs, badges/fonts, scoped competitor dialogue and release verification. Weapon balance and telemetry versions remain unchanged.
 
 | System | Entry points |
 | --- | --- |

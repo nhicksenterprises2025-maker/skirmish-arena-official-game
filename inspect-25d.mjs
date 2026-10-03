@@ -2,62 +2,176 @@ import * as THREE from './vendor/three.module.js';
 import {buildWeapon,buildOperator,setOperatorWeapon,animateOperator,poseUnarmedShowcase,disposeModel,ensureModelAssets} from './models-25d.mjs';
 import {loadAssetLibrary} from './asset-loader-25d.mjs';
 
-// One on-demand renderer; inspections reuse presentation meshes and never tick a match.
-let renderer,inspection;
-const thumbnails=new Map();
+// Presentation only: one on-demand WebGL context copies into ordinary card
+// canvases. Each mounted card owns its pose, mesh instance and framing envelope.
+let renderer,renderQueue=Promise.resolve(),frame=0,observer,resizeObserver,detachObserver;
+const cards=new Map(),pending=new Set(),staticModels=new Map(),thumbnails=new Map(),requests=new WeakMap();
+const metrics={renders:0,cacheHits:0,modelBuilds:0,disposedModels:0,frames:0,maxFrameMs:0,maxRenderMs:0,totalRenderMs:0};
+const rankManifest=new URL('./assets/25d/ranks/manifest.json',import.meta.url);
+const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+const normalizedAngle=value=>((value+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;
+
 function visibleBounds(object,view=null){
   const result=new THREE.Box3();object.updateMatrixWorld(true);
   object.traverseVisible(node=>{if(!node.isMesh)return;if(!node.geometry.boundingBox)node.geometry.computeBoundingBox();const matrix=view?new THREE.Matrix4().multiplyMatrices(view,node.matrixWorld):node.matrixWorld;result.union(node.geometry.boundingBox.clone().applyMatrix4(matrix));});
   return result;
 }
 function copyCanvas(target,source){const g=target.getContext('2d');g.save();g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,target.width,target.height);g.drawImage(source,0,0,target.width,target.height);g.restore();}
-export async function paintInspection(canvas,{kind,weapon,skin=0,palette=null,rotation=0,unarmed=false}){
-  await ensureModelAssets();
-  if(canvas.isConnected===false)return;
-  renderer??=new THREE.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:true});
-  const width=canvas.width,height=canvas.height;
-  const interactive=canvas.id==='inspectionCanvas'||rotation!==0;
-  const cacheKey=rotation===0?JSON.stringify([kind,weapon,skin,palette,unarmed,width,height,interactive]):null;
-  if(cacheKey&&thumbnails.has(cacheKey)){copyCanvas(canvas,thumbnails.get(cacheKey));return;}
-  renderer.setSize(width,height,false);renderer.setClearColor(typeof getComputedStyle==='function'?getComputedStyle(document.documentElement).getPropertyValue('--sky-panel-light').trim()||'#DFEBF5':'#DFEBF5',1);
+function modelKey(options){return JSON.stringify([options.kind,options.weapon,options.skin??0,options.palette??null,!!options.unarmed,options.rankIndex,options.badge]);}
+function releaseEntry(entry){if(!entry)return;disposeModel(entry.pivot);metrics.disposedModels++;}
+function currentBackground(){return typeof getComputedStyle==='function'?getComputedStyle(document.documentElement).getPropertyValue('--sky-panel-light').trim()||'#DFEBF5':'#DFEBF5';}
+function ensureRenderer(){
+  if(renderer)return renderer;
+  renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;
-  const modelKey=JSON.stringify([kind,weapon,skin,palette,unarmed]);
-  if(!inspection||inspection.key!==modelKey){
-  if(inspection)disposeModel(inspection.pivot);
-  const scene=new THREE.Scene();scene.add(new THREE.HemisphereLight(0xf0f4e9,0x384b3d,1.55));
+  return renderer;
+}
+async function createEntry(options){
+  const {kind,weapon,skin=0,palette=null,unarmed=false,rankIndex=0,badge}=options;
+  let object;
+  if(kind==='rank'){
+    const library=await loadAssetLibrary(rankManifest),entry=badge?library.entries.find(value=>value.name===badge):library.entries.find(value=>value.rankIndex===Number(rankIndex));
+    if(!entry)throw new Error('Rank badge unavailable: '+(badge??rankIndex));
+    object=library.cloneModel(entry.name);
+  }else{
+    await ensureModelAssets();
+    if(kind==='phone')object=(await loadAssetLibrary()).cloneModel('phone-device');
+    else if(kind==='operator'){
+      const entity=buildOperator(1,skin,palette);
+      // The rig's face points +X. This existing preview-only pose rotates it
+      // -90 degrees toward our +Z camera; zero card rotation is true front.
+      if(unarmed)poseUnarmedShowcase(entity);
+      else {setOperatorWeapon(entity,weapon);animateOperator(entity,{x:0,y:0,angle:0,vx:0,vy:0,adsBlend:0,weapon,skinIndex:skin},0,0);}
+      object=entity.group;
+    }else object=buildWeapon(weapon);
+  }
+  if(!object)throw new Error('Model unavailable: '+kind);
+  object.updateMatrixWorld(true);
+  const bounds=visibleBounds(object),center=bounds.getCenter(new THREE.Vector3());
+  if(bounds.isEmpty()){disposeModel(object);throw new Error('Model has no visible geometry: '+kind);}
+  const pivot=new THREE.Group();object.position.sub(center);pivot.add(object);
+  const scene=new THREE.Scene();scene.add(pivot,new THREE.HemisphereLight(0xf0f4e9,0x384b3d,1.55));
   const sun=new THREE.DirectionalLight(0xfff1d6,2.6);sun.position.set(80,150,140);scene.add(sun);
   const rim=new THREE.DirectionalLight(0xc5dfe0,1.8);rim.position.set(-130,65,-90);scene.add(rim);
   const fill=new THREE.DirectionalLight(0xe6efd7,.65);fill.position.set(-100,5,160);scene.add(fill);
-  let object,entity;
-  if(kind==='phone')object=(await loadAssetLibrary()).cloneModel('phone-device');
-  else if(kind==='operator'){
-    entity=buildOperator(1,skin,palette);if(unarmed)poseUnarmedShowcase(entity);else {setOperatorWeapon(entity,weapon);
-    animateOperator(entity,{x:0,y:0,angle:0,vx:0,vy:0,adsBlend:0,weapon,skinIndex:skin},0,0);}
-    object=entity.group;
-  }else object=buildWeapon(weapon);
-  object.updateMatrixWorld(true);
-  const bounds=visibleBounds(object),center=bounds.getCenter(new THREE.Vector3()),size=bounds.getSize(new THREE.Vector3());
-  const pivot=new THREE.Group();object.position.sub(center);pivot.add(object);scene.add(pivot);
-  inspection={key:modelKey,scene,pivot,size,framing:new Map()};
-  }
-  const {scene,pivot,size}=inspection;pivot.rotation.y=rotation;
-  const aspect=width/height,camera=new THREE.OrthographicCamera(-1,1,1,-1,.1,2000);
-  camera.position.copy(kind==='phone'?new THREE.Vector3(0,0,500):kind==='operator'?new THREE.Vector3(unarmed?0:110,unarmed?8:55,230):new THREE.Vector3(90,30,250));camera.lookAt(0,0,0);camera.updateMatrixWorld(true);
-  // A centered turntable with one fixed framing envelope avoids size pumping
-  // during drag. The existing mesh/rig is reused for consecutive rotation frames.
-  const framingKey=aspect+':'+interactive;
-  if(!inspection.framing.has(framingKey)){
-    let span=0;
-    for(let i=0;i<(interactive?16:1);i++){
-      pivot.rotation.y=interactive?i*Math.PI/8:rotation;
-      const projected=visibleBounds(pivot,camera.matrixWorldInverse),extent=projected.getSize(new THREE.Vector3());
-      span=Math.max(span,extent.y,extent.x/aspect);
-    }
-    inspection.framing.set(framingKey,span*(kind==='phone'?1:1.1));
-  }
-  const span=inspection.framing.get(framingKey);pivot.rotation.y=rotation;
-  camera.left=-span*aspect/2;camera.right=span*aspect/2;camera.top=span/2;camera.bottom=-span/2;camera.updateProjectionMatrix();
-  renderer.render(scene,camera);copyCanvas(canvas,renderer.domElement);
-  if(cacheKey){const copy=document.createElement('canvas');copy.width=width;copy.height=height;copy.getContext('2d').drawImage(canvas,0,0);thumbnails.set(cacheKey,copy);if(thumbnails.size>32)thumbnails.delete(thumbnails.keys().next().value);}
+  metrics.modelBuilds++;
+  return {key:modelKey(options),scene,pivot,kind,unarmed,framing:new Map()};
 }
+function cameraFor(entry,aspect){
+  const camera=new THREE.OrthographicCamera(-1,1,1,-1,.1,2000);
+  camera.position.copy(entry.kind==='rank'?new THREE.Vector3(45,24,500):entry.kind==='phone'?new THREE.Vector3(0,0,500):entry.kind==='operator'?new THREE.Vector3(entry.unarmed?0:110,entry.unarmed?8:55,230):new THREE.Vector3(90,30,250));
+  camera.lookAt(0,0,0);camera.updateMatrixWorld(true);
+  const framingKey=aspect.toFixed(4);
+  if(!entry.framing.has(framingKey)){
+    let span=0;
+    // One complete turntable envelope includes every orientation, including
+    // zero. Dragging never changes model scale or clips the ends of a rifle.
+    const count=entry.kind==='phone'?1:32;
+    for(let i=0;i<count;i++){
+      entry.pivot.rotation.y=i*Math.PI*2/count;
+      const projected=visibleBounds(entry.pivot,camera.matrixWorldInverse);
+      span=Math.max(span,2*Math.abs(projected.min.y),2*Math.abs(projected.max.y),2*Math.abs(projected.min.x)/aspect,2*Math.abs(projected.max.x)/aspect);
+    }
+    entry.framing.set(framingKey,span*(entry.kind==='phone'?1:1.13));
+    if(entry.framing.size>8)entry.framing.delete(entry.framing.keys().next().value);
+  }
+  return {camera,span:entry.framing.get(framingKey)};
+}
+function renderEntry(canvas,entry,{rotation=0,zoom=1}={}){
+  const width=canvas.width,height=canvas.height;if(!width||!height)return;
+  const started=performance.now();
+  const gl=ensureRenderer(),aspect=width/height,{camera,span}=cameraFor(entry,aspect);
+  const viewSpan=span/clamp(Number(zoom)||1,.8,1.08);
+  entry.pivot.rotation.y=rotation;
+  camera.left=-viewSpan*aspect/2;camera.right=viewSpan*aspect/2;camera.top=viewSpan/2;camera.bottom=-viewSpan/2;camera.updateProjectionMatrix();
+  gl.setSize(width,height,false);gl.setClearColor(currentBackground(),entry.kind==='rank'?0:1);gl.render(entry.scene,camera);copyCanvas(canvas,gl.domElement);metrics.renders++;
+  const elapsed=performance.now()-started;metrics.maxRenderMs=Math.max(metrics.maxRenderMs,elapsed);metrics.totalRenderMs+=elapsed;
+}
+function serialize(task){const result=renderQueue.then(task);renderQueue=result.catch(()=>{});return result;}
+
+export function paintInspection(canvas,options){
+  const token={};requests.set(canvas,token);
+  return serialize(async()=>{
+    if(canvas.isConnected===false||requests.get(canvas)!==token)return;
+    const key=modelKey(options),rotation=options.rotation??0,zoom=options.zoom??1;
+    const cacheKey=rotation===0&&zoom===1?JSON.stringify([key,canvas.width,canvas.height,currentBackground()]):null;
+    if(cacheKey&&thumbnails.has(cacheKey)){copyCanvas(canvas,thumbnails.get(cacheKey));metrics.cacheHits++;return;}
+    let entry=staticModels.get(key);
+    if(!entry){entry=await createEntry(options);staticModels.set(key,entry);if(staticModels.size>3){const old=staticModels.keys().next().value;releaseEntry(staticModels.get(old));staticModels.delete(old);}}
+    if(canvas.isConnected===false||requests.get(canvas)!==token)return;
+    renderEntry(canvas,entry,options);
+    if(cacheKey){const copy=document.createElement('canvas');copy.width=canvas.width;copy.height=canvas.height;copy.getContext('2d').drawImage(canvas,0,0);thumbnails.set(cacheKey,copy);if(thumbnails.size>48)thumbnails.delete(thumbnails.keys().next().value);}
+  });
+}
+
+function canvasSize(canvas){const bounds=canvas.getBoundingClientRect(),scale=Math.min(window.devicePixelRatio||1,2);const width=Math.max(1,Math.round(bounds.width*scale)),height=Math.max(1,Math.round(bounds.height*scale));if(canvas.width!==width)canvas.width=width;if(canvas.height!==height)canvas.height=height;}
+function inViewport(canvas){const bounds=canvas.getBoundingClientRect();return bounds.width>0&&bounds.height>0&&bounds.bottom>0&&bounds.right>0&&bounds.top<window.innerHeight&&bounds.left<window.innerWidth;}
+function queueCard(card){if(card.disposed)return;card.dirty=true;if(card.visible&&!document.hidden){pending.add(card);schedule();}}
+function schedule(){if(!frame&&pending.size&&!document.hidden)frame=requestAnimationFrame(flush);}
+async function flush(){
+  frame=0;const started=performance.now();metrics.frames++;
+  // Limit first-time mesh construction to two visible cards per frame.
+  const batch=[...pending].slice(0,2);for(const card of batch)pending.delete(card);
+  await serialize(async()=>{
+    for(const card of batch){
+      if(card.disposed||!card.canvas.isConnected||!card.visible||document.hidden)continue;
+      try{
+        if(!card.entry){
+          const generation=card.generation,entry=await createEntry(card.options);
+          if(card.disposed||generation!==card.generation){releaseEntry(entry);continue;}
+          card.entry=entry;
+        }
+        if(!card.canvas.isConnected||!card.visible||document.hidden)continue;
+        canvasSize(card.canvas);renderEntry(card.canvas,card.entry,card);card.dirty=false;
+        card.canvas.dataset.previewReady='true';card.canvas.removeAttribute('aria-busy');
+      }catch(error){
+        card.canvas.dataset.previewReady='error';card.canvas.removeAttribute('aria-busy');
+        card.canvas.dispatchEvent(new CustomEvent('previewerror',{bubbles:true,detail:{message:error.message}}));
+        const g=card.canvas.getContext('2d');g.clearRect(0,0,card.canvas.width,card.canvas.height);g.fillStyle='#35473c';g.font='14px Inter, sans-serif';g.fillText('Model unavailable',14,28);console.warn('Card model preview:',error.message);
+      }
+    }
+  });
+  metrics.maxFrameMs=Math.max(metrics.maxFrameMs,performance.now()-started);schedule();
+}
+function sweep(){for(const card of cards.values())if(!card.canvas.isConnected)card.api.dispose();}
+function visibilityChanged(){if(document.hidden){if(frame)cancelAnimationFrame(frame);frame=0;pending.clear();}else for(const card of cards.values()){card.visible=inViewport(card.canvas);if(card.visible&&card.dirty)queueCard(card);}}
+function setupObservers(){
+  if(observer||detachObserver)return;
+  if(typeof IntersectionObserver!=='undefined')observer=new IntersectionObserver(entries=>{for(const item of entries){const card=cards.get(item.target);if(!card)continue;card.visible=item.isIntersecting;if(card.visible&&card.dirty)queueCard(card);else if(!card.visible)pending.delete(card);}});
+  if(typeof ResizeObserver!=='undefined')resizeObserver=new ResizeObserver(entries=>{for(const item of entries){const card=cards.get(item.target);if(card)queueCard(card);}});
+  detachObserver=new MutationObserver(sweep);detachObserver.observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('visibilitychange',visibilityChanged);
+}
+function stopObservers(){if(cards.size)return;observer?.disconnect();resizeObserver?.disconnect();detachObserver?.disconnect();observer=resizeObserver=detachObserver=null;document.removeEventListener('visibilitychange',visibilityChanged);if(frame)cancelAnimationFrame(frame);frame=0;pending.clear();renderer?.renderLists.dispose();}
+
+export function mountCardPreview(canvas,options){
+  const existing=cards.get(canvas),safeOptions={...options,...(options.kind==='operator'?{unarmed:true}:{})};
+  if(existing){if(modelKey(existing.options)!==modelKey(safeOptions)){existing.generation++;releaseEntry(existing.entry);existing.entry=null;existing.options=safeOptions;existing.api.reset();}return existing.api;}
+  setupObservers();
+  const card={canvas,options:safeOptions,entry:null,generation:0,rotation:0,zoom:1,visible:inViewport(canvas),dirty:true,disposed:false,drag:null,listeners:[]};
+  const listen=(target,type,handler)=>{target.addEventListener(type,handler);card.listeners.push(()=>target.removeEventListener(type,handler));};
+  const update=()=>{canvas.dataset.previewRotation=String(Math.round(card.rotation*180/Math.PI));canvas.dataset.previewZoom=card.zoom.toFixed(2);queueCard(card);};
+  card.api={
+    rotateBy(radians){card.rotation=normalizedAngle(card.rotation+radians);update();},
+    zoomBy(amount){card.zoom=clamp(card.zoom+amount,.8,1.08);update();},
+    reset(){card.rotation=0;card.zoom=1;update();},
+    state(){return {rotation:card.rotation,zoom:card.zoom,visible:card.visible,ready:!!card.entry,unarmed:!!card.options.unarmed};},
+    dispose(){if(card.disposed)return;card.disposed=true;if(card.drag&&canvas.hasPointerCapture?.(card.drag.id))canvas.releasePointerCapture(card.drag.id);card.drag=null;pending.delete(card);cards.delete(canvas);observer?.unobserve(canvas);resizeObserver?.unobserve(canvas);for(const remove of card.listeners)remove();releaseEntry(card.entry);card.entry=null;stopObservers();}
+  };
+  cards.set(canvas,card);canvas.tabIndex=canvas.tabIndex<0?0:canvas.tabIndex;canvas.setAttribute('aria-busy','true');
+  // Only horizontal touch movement is captured; wheel and vertical scrolling
+  // remain native. Capture begins on the preview canvas, never Equip/Select.
+  canvas.style.touchAction='pan-y';
+  listen(canvas,'pointerdown',event=>{if(event.button!==0)return;card.drag={id:event.pointerId,x:event.clientX,y:event.clientY,rotating:false};canvas.focus({preventScroll:true});});
+  listen(canvas,'pointermove',event=>{const drag=card.drag;if(!drag||drag.id!==event.pointerId)return;const dx=event.clientX-drag.x,dy=event.clientY-drag.y;if(!drag.rotating){if(Math.abs(dx)<4)return;if(event.pointerType==='touch'&&Math.abs(dy)>Math.abs(dx)){card.drag=null;return;}drag.rotating=true;canvas.setPointerCapture?.(event.pointerId);}card.api.rotateBy(dx*.012);drag.x=event.clientX;drag.y=event.clientY;});
+  const endDrag=event=>{if(card.drag?.id===event.pointerId){if(canvas.hasPointerCapture?.(event.pointerId))canvas.releasePointerCapture(event.pointerId);card.drag=null;}};
+  listen(canvas,'pointerup',endDrag);listen(canvas,'pointercancel',endDrag);listen(canvas,'lostpointercapture',()=>{card.drag=null;});
+  const actions={left:()=>card.api.rotateBy(-Math.PI/12),right:()=>card.api.rotateBy(Math.PI/12),reset:()=>card.api.reset(),'zoom-in':()=>card.api.zoomBy(.04),'zoom-out':()=>card.api.zoomBy(-.04)};
+  listen(canvas,'keydown',event=>{const action=({ArrowLeft:'left',ArrowRight:'right',Home:'reset','+':'zoom-in','=':'zoom-in','-':'zoom-out'})[event.key];if(action){event.preventDefault();actions[action]();}});
+  for(const button of canvas.closest('.card-model-viewer')?.querySelectorAll('[data-preview-action]')||[]){const action=actions[button.dataset.previewAction];if(action)listen(button,'click',event=>{event.preventDefault();action();});}
+  observer?.observe(canvas);resizeObserver?.observe(canvas);update();return card.api;
+}
+
+export function clearCardPreviews(root=null){for(const card of [...cards.values()])if(!root||root===card.canvas||root.contains(card.canvas))card.api.dispose();}
+export function previewDiagnostics(){return {...metrics,webglContexts:renderer?1:0,mountedCards:cards.size,visibleCards:[...cards.values()].filter(card=>card.visible).length,residentCardModels:[...cards.values()].filter(card=>card.entry).length,pendingCards:pending.size,staticModels:staticModels.size,thumbnailCount:thumbnails.size,animationScheduled:!!frame};}

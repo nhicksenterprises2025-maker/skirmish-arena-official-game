@@ -1,0 +1,512 @@
+{
+  "schema": 1,
+  "version": "blue-circuit-ranks-ba0c627502c0",
+  "units": "game-world-units",
+  "upAxis": "Y",
+  "frontAxis": "+Z",
+  "origin": "center",
+  "generator": "Blender 5.2.2 LTS; tools/blender_blue_circuit_ranks.py",
+  "rankSource": "progression.js SARProgression.ranks",
+  "files": {
+    "blue-circuit-ranks.glb": {
+      "sha256": "ba0c627502c0ede5525cf9d08b16aa8d73e9b05252491a597a5e02a9baa0bebc",
+      "bytes": 1141300
+    }
+  },
+  "models": [
+    {
+      "name": "rank-badge-beginner-i",
+      "node": "rank-badge-beginner-i",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Beginner I",
+      "rankIndex": 0,
+      "threshold": 0,
+      "family": "Beginner",
+      "division": 1,
+      "thumbnail": "beginner-i.png",
+      "dimensions": {
+        "x": 51.945,
+        "y": 57.861,
+        "z": 6.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "98d45e1bf9be368354946bf35900f808e6677848eed9a3f22300d93c1c5a1ab6"
+    },
+    {
+      "name": "rank-badge-beginner-ii",
+      "node": "rank-badge-beginner-ii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Beginner II",
+      "rankIndex": 1,
+      "threshold": 100,
+      "family": "Beginner",
+      "division": 2,
+      "thumbnail": "beginner-ii.png",
+      "dimensions": {
+        "x": 51.945,
+        "y": 57.861,
+        "z": 6.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "e19fec1f6c1d278cec70f9430b8940a2045429a4a172e2eaba6a354ce7eaed1f"
+    },
+    {
+      "name": "rank-badge-beginner-iii",
+      "node": "rank-badge-beginner-iii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Beginner III",
+      "rankIndex": 2,
+      "threshold": 200,
+      "family": "Beginner",
+      "division": 3,
+      "thumbnail": "beginner-iii.png",
+      "dimensions": {
+        "x": 51.945,
+        "y": 57.861,
+        "z": 6.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "862d025efc1e00b3cafd11851721f04c05610fd5411d48227b0df47bece51718"
+    },
+    {
+      "name": "rank-badge-rookie-i",
+      "node": "rank-badge-rookie-i",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Rookie I",
+      "rankIndex": 3,
+      "threshold": 350,
+      "family": "Rookie",
+      "division": 1,
+      "thumbnail": "rookie-i.png",
+      "dimensions": {
+        "x": 51.945,
+        "y": 57.861,
+        "z": 6.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "1f2f2f1fb07b8c63ca9c05ab98c8e413fb6b827ba216814852fb245f5ad56fa7"
+    },
+    {
+      "name": "rank-badge-rookie-ii",
+      "node": "rank-badge-rookie-ii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Rookie II",
+      "rankIndex": 4,
+      "threshold": 500,
+      "family": "Rookie",
+      "division": 2,
+      "thumbnail": "rookie-ii.png",
+      "dimensions": {
+        "x": 51.945,
+        "y": 57.861,
+        "z": 6.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "7adb98945940eb217e173af159afc84b97bd4fcea4a638f5b9b9c28be4b2dc1d"
+    },
+    {
+      "name": "rank-badge-rookie-iii",
+      "node": "rank-badge-rookie-iii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Rookie III",
+      "rankIndex": 5,
+      "threshold": 650,
+      "family": "Rookie",
+      "division": 3,
+      "thumbnail": "rookie-iii.png",
+      "dimensions": {
+        "x": 51.945,
+        "y": 57.861,
+        "z": 6.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "c47355e6202c7d2811987bf1d7f9dcf1c4f146f6a0c6345372d671689550b4e6"
+    },
+    {
+      "name": "rank-badge-trainer-i",
+      "node": "rank-badge-trainer-i",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Trainer I",
+      "rankIndex": 6,
+      "threshold": 850,
+      "family": "Trainer",
+      "division": 1,
+      "thumbnail": "trainer-i.png",
+      "dimensions": {
+        "x": 51.945,
+        "y": 57.861,
+        "z": 6.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "7fdf69de2e2e51823e991196f30165d6da119a2f991bec0e6564fb8805807529"
+    },
+    {
+      "name": "rank-badge-trainer-ii",
+      "node": "rank-badge-trainer-ii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Trainer II",
+      "rankIndex": 7,
+      "threshold": 1050,
+      "family": "Trainer",
+      "division": 2,
+      "thumbnail": "trainer-ii.png",
+      "dimensions": {
+        "x": 51.945,
+        "y": 57.861,
+        "z": 6.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "96650ea268e177c432c3cc60fe3a6b647ff5db15739d4621c2ee1829fa7d8f17"
+    },
+    {
+      "name": "rank-badge-trainer-iii",
+      "node": "rank-badge-trainer-iii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Trainer III",
+      "rankIndex": 8,
+      "threshold": 1250,
+      "family": "Trainer",
+      "division": 3,
+      "thumbnail": "trainer-iii.png",
+      "dimensions": {
+        "x": 51.945,
+        "y": 57.861,
+        "z": 6.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "91af941f3c41ad186d3f5719c73f8bb95f197a6b612bfac84e5580754b3c11fc"
+    },
+    {
+      "name": "rank-badge-challenger-i",
+      "node": "rank-badge-challenger-i",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Challenger I",
+      "rankIndex": 9,
+      "threshold": 1500,
+      "family": "Challenger",
+      "division": 1,
+      "thumbnail": "challenger-i.png",
+      "dimensions": {
+        "x": 64.045,
+        "y": 57.861,
+        "z": 8.1
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "24adaaa84adb56fd5c600eb07ee5f3f5ca0e63973983a777ce1f26b557702fa2"
+    },
+    {
+      "name": "rank-badge-challenger-ii",
+      "node": "rank-badge-challenger-ii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Challenger II",
+      "rankIndex": 10,
+      "threshold": 1750,
+      "family": "Challenger",
+      "division": 2,
+      "thumbnail": "challenger-ii.png",
+      "dimensions": {
+        "x": 64.045,
+        "y": 57.861,
+        "z": 8.1
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "78f206b806b277ca64afef3099fe5d8aa5b7452225659e108d01374e6ccdd6f8"
+    },
+    {
+      "name": "rank-badge-challenger-iii",
+      "node": "rank-badge-challenger-iii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Challenger III",
+      "rankIndex": 11,
+      "threshold": 2000,
+      "family": "Challenger",
+      "division": 3,
+      "thumbnail": "challenger-iii.png",
+      "dimensions": {
+        "x": 64.045,
+        "y": 57.861,
+        "z": 8.1
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "cbebaf76ba7e42e6d4efd8acb63603d2cc54e50fcaa458b762409fd0f70ddc51"
+    },
+    {
+      "name": "rank-badge-veteran-i",
+      "node": "rank-badge-veteran-i",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Veteran I",
+      "rankIndex": 12,
+      "threshold": 2350,
+      "family": "Veteran",
+      "division": 1,
+      "thumbnail": "veteran-i.png",
+      "dimensions": {
+        "x": 64.745,
+        "y": 57.861,
+        "z": 8.4
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "83cff7feff62f7642a3655dd6f0cdad6c775e72e39a7425726856b7de54d1336"
+    },
+    {
+      "name": "rank-badge-veteran-ii",
+      "node": "rank-badge-veteran-ii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Veteran II",
+      "rankIndex": 13,
+      "threshold": 2700,
+      "family": "Veteran",
+      "division": 2,
+      "thumbnail": "veteran-ii.png",
+      "dimensions": {
+        "x": 64.745,
+        "y": 57.861,
+        "z": 8.4
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "0a82533afef7b15061f5b9d1b4880d65256627b37dd3844ec15b37d551bc39c4"
+    },
+    {
+      "name": "rank-badge-veteran-iii",
+      "node": "rank-badge-veteran-iii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Veteran III",
+      "rankIndex": 14,
+      "threshold": 3000,
+      "family": "Veteran",
+      "division": 3,
+      "thumbnail": "veteran-iii.png",
+      "dimensions": {
+        "x": 64.745,
+        "y": 57.861,
+        "z": 8.4
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "6a44665ca31c4571b73c5d8ec2d7025680e9363077ecb888cf7060d043f9a60f"
+    },
+    {
+      "name": "rank-badge-elite-veteran-i",
+      "node": "rank-badge-elite-veteran-i",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Elite Veteran I",
+      "rankIndex": 15,
+      "threshold": 3400,
+      "family": "Elite Veteran",
+      "division": 1,
+      "thumbnail": "elite-veteran-i.png",
+      "dimensions": {
+        "x": 65.445,
+        "y": 57.861,
+        "z": 8.4
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "1e6666771df2cce016f94a2e683f81eb7843e628ea97292724b34b58de4dd71d"
+    },
+    {
+      "name": "rank-badge-elite-veteran-ii",
+      "node": "rank-badge-elite-veteran-ii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Elite Veteran II",
+      "rankIndex": 16,
+      "threshold": 3800,
+      "family": "Elite Veteran",
+      "division": 2,
+      "thumbnail": "elite-veteran-ii.png",
+      "dimensions": {
+        "x": 65.445,
+        "y": 57.861,
+        "z": 8.4
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "f949fb5760897c809c2e4913a637df599c1cf8919127d7dfe82a2f7e6d577416"
+    },
+    {
+      "name": "rank-badge-pro-i",
+      "node": "rank-badge-pro-i",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Pro I",
+      "rankIndex": 17,
+      "threshold": 4250,
+      "family": "Pro",
+      "division": 1,
+      "thumbnail": "pro-i.png",
+      "dimensions": {
+        "x": 66.145,
+        "y": 65.782,
+        "z": 8.5
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "de59fdfec299416ef70744b4d10009420aa1cd78d7e6e6fac6159dfb622ae6a8"
+    },
+    {
+      "name": "rank-badge-pro-ii",
+      "node": "rank-badge-pro-ii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Pro II",
+      "rankIndex": 18,
+      "threshold": 4700,
+      "family": "Pro",
+      "division": 2,
+      "thumbnail": "pro-ii.png",
+      "dimensions": {
+        "x": 66.145,
+        "y": 65.782,
+        "z": 8.5
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "92b799b7013279607f236fe8faa1ed71b0eca2c81841bcad0516384d3e85a95d"
+    },
+    {
+      "name": "rank-badge-master-i",
+      "node": "rank-badge-master-i",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Master I",
+      "rankIndex": 19,
+      "threshold": 5200,
+      "family": "Master",
+      "division": 1,
+      "thumbnail": "master-i.png",
+      "dimensions": {
+        "x": 66.845,
+        "y": 65.782,
+        "z": 8.5
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "0980243476db4bd31353e848bb5a330f5c0e1e3c3422c644717fa76fd1f7e53f"
+    },
+    {
+      "name": "rank-badge-master-ii",
+      "node": "rank-badge-master-ii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Master II",
+      "rankIndex": 20,
+      "threshold": 5700,
+      "family": "Master",
+      "division": 2,
+      "thumbnail": "master-ii.png",
+      "dimensions": {
+        "x": 66.845,
+        "y": 65.782,
+        "z": 8.5
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "b869e3069a706348d01fd101ee6ed5daa8137863ade137411003f042bbfffee4"
+    },
+    {
+      "name": "rank-badge-grandmaster-i",
+      "node": "rank-badge-grandmaster-i",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Grandmaster I",
+      "rankIndex": 21,
+      "threshold": 6300,
+      "family": "Grandmaster",
+      "division": 1,
+      "thumbnail": "grandmaster-i.png",
+      "dimensions": {
+        "x": 67.545,
+        "y": 65.782,
+        "z": 8.5
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "473f921aa0e216fa11c2dcfcabcb8bbc23e4a2140cd417075dd9b12690d41a54"
+    },
+    {
+      "name": "rank-badge-grandmaster-ii",
+      "node": "rank-badge-grandmaster-ii",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Grandmaster II",
+      "rankIndex": 22,
+      "threshold": 6900,
+      "family": "Grandmaster",
+      "division": 2,
+      "thumbnail": "grandmaster-ii.png",
+      "dimensions": {
+        "x": 67.545,
+        "y": 65.782,
+        "z": 8.5
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "8293e707c54367fd206e00a85a03a3c800e612e2774822e3770281a6cc49b3b3"
+    },
+    {
+      "name": "rank-badge-champion",
+      "node": "rank-badge-champion",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Champion",
+      "rankIndex": 23,
+      "threshold": 7750,
+      "family": "Champion",
+      "division": 0,
+      "thumbnail": "champion.png",
+      "dimensions": {
+        "x": 68.245,
+        "y": 67.782,
+        "z": 8.5
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "a910622f4d0cd6cb3a6c07ac2a0934bc5a97c59159aa5b7565d34e09064b48c4"
+    },
+    {
+      "name": "rank-badge-legend",
+      "node": "rank-badge-legend",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Legend",
+      "rankIndex": 24,
+      "threshold": 8750,
+      "family": "Legend",
+      "division": 0,
+      "thumbnail": "legend.png",
+      "dimensions": {
+        "x": 68.945,
+        "y": 69.782,
+        "z": 8.5
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "e77901784d762d0401fb9a6e8715695366cafaf91f412a2e51867b89af813abf"
+    },
+    {
+      "name": "rank-badge-ascendant",
+      "node": "rank-badge-ascendant",
+      "file": "blue-circuit-ranks.glb",
+      "rankName": "Ascendant",
+      "rankIndex": 25,
+      "threshold": 10000,
+      "family": "Ascendant",
+      "division": 0,
+      "thumbnail": "ascendant.png",
+      "dimensions": {
+        "x": 69.645,
+        "y": 71.782,
+        "z": 8.5
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "thumbnailSha256": "479cc8066d0d999001d1f15f49204bb227f685018fe05a89053d48a3eab4d37a"
+    }
+  ]
+}

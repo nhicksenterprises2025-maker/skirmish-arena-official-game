@@ -1,6 +1,6 @@
 [package]
 name = "skirmish-launcher"
-version = "1.10.0"
+version = "1.11.0"
 description = "Skirmish Arena desktop launcher"
 authors = ["Skirmish Arena"]
 edition = "2021"

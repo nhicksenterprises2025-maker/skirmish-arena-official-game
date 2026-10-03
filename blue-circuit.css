@@ -1,0 +1,104 @@
+/* BLUE CIRCUIT presentation. No simulation or reward values come from this file. */
+.lobby-command{display:flex;flex-direction:column}
+.hero-card .lobby-brand-row>h1{flex-basis:auto}
+.hero-card .lobby-progress-panels{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.35fr);gap:22px;margin-top:auto;padding-top:28px}
+.hero-card .lobby-progression,.hero-card .lobby-ranked{min-width:0;width:auto;flex-basis:auto;border:0;border-top:1px solid var(--sky-border-dark);padding:15px 0 0;align-self:stretch}
+.hero-card .lobby-progression{display:flex;flex-direction:column;gap:8px}
+.hero-card .lobby-progression strong{font:600 26px/1.15 var(--font-display);color:var(--sky-text-dark)}
+.hero-card .lobby-progression span{font:400 12px/1.5 var(--font-body);color:var(--sky-muted-dark)}
+.progression-label,.hero-card .lobby-progression .progression-label{font:600 11px/1.4 var(--font-display);letter-spacing:.08em}
+.lobby-ranked{display:flex;gap:8px;align-items:center;color:var(--sky-text-dark)}
+.rank-badge{display:block;width:92px;height:108px;object-fit:contain;flex:0 0 auto}
+.lobby-ranked .rank-badge{width:76px;height:94px}
+.ranked-progress-copy{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.ranked-progress-copy strong{font:600 17px/1.3 var(--font-display);overflow-wrap:break-word}
+.ranked-progress-copy span,.ranked-progress-copy small{font:400 12px/1.45 var(--font-body)}
+.ranked-progress-copy .progression-label{font:600 11px/1.4 var(--font-display);letter-spacing:.08em}
+.lobby-ranked .ranked-progress-copy>span,.lobby-ranked .ranked-progress-copy small{color:var(--sky-muted-dark)}
+.lobby-progression progress,.ranked-progress-copy progress{display:block;appearance:none;border:0;border-radius:0;width:100%;height:4px;margin:3px 0 0;background:var(--sky-panel-mid);color:var(--sky-link)}
+.lobby-progression progress::-webkit-progress-bar,.ranked-progress-copy progress::-webkit-progress-bar{background:var(--sky-panel-mid)}
+.lobby-progression progress::-webkit-progress-value,.ranked-progress-copy progress::-webkit-progress-value{background:var(--sky-link)}
+.hero-card progress::-webkit-progress-bar{background:var(--sky-border-dark)}
+.hero-card progress::-webkit-progress-value{background:var(--sky-accent)}
+.hero-card .lobby-build{margin-top:21px}
+
+.option-grid.loadout-grid,.option-grid.operator-grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:20px}
+.loadout-card,.operator-card{padding:17px;overflow:visible}
+.option-card:focus-within{border-color:var(--sky-link)}
+.option-card>h3{font-size:21px;line-height:1.25;letter-spacing:0;margin:13px 0 6px}
+.option-card .weapon-role{font:600 13px/1.4 var(--font-body)}
+.option-card .weapon-description,.operator-card>p{font:400 13px/1.6 var(--font-body);margin:8px 0 18px}
+.option-card .kit-state{font:600 10px/1.5 var(--font-display);letter-spacing:.09em;padding-bottom:10px}
+.option-card .eyebrow{font-size:10px;line-height:1.5}
+.card-model-viewer{min-width:0;background:var(--sky-panel-light);border:1px solid transparent;border-radius:4px;margin-bottom:14px;overflow:hidden}
+.card-model-viewer:hover,.card-model-viewer:focus-within{border-color:var(--sky-border)}
+.card-model-viewer .weapon-preview,.card-model-viewer .operator-preview{margin:0;border-radius:0;width:100%;max-width:100%;cursor:grab;touch-action:pan-y}
+.card-model-viewer .weapon-preview{height:164px}
+.card-model-viewer .operator-preview{height:252px}
+.card-model-viewer canvas:active{cursor:grabbing}
+.card-model-viewer canvas:focus-visible{outline:2px solid var(--sky-link);outline-offset:-3px}
+.card-model-controls{display:flex;justify-content:center;gap:4px;padding:7px 8px 4px}
+.option-card .card-model-controls button{width:auto;min-width:33px;min-height:30px;height:30px;padding:3px 8px;margin:0;border:1px solid transparent;background:transparent;color:var(--sky-text-light);font:500 13px/1.2 var(--font-body)}
+.option-card .card-model-controls button:hover{border-color:var(--sky-border);background:var(--sky-surface-light)}
+.option-card .card-model-controls button[data-preview-action="reset"]{min-width:58px;font-size:12px}
+.card-model-hint{display:block;text-align:center;padding:2px 6px 9px;color:var(--sky-muted-light);font:400 11px/1.5 var(--font-body)}
+.loadout-section-heading{margin-top:30px}
+.stat-guide{border-bottom:1px solid var(--sky-border);padding:0 0 15px;margin:0 0 22px;max-width:850px}
+.stat-guide summary,.advanced-stats summary{font:600 11px/1.5 var(--font-display);letter-spacing:.035em;cursor:pointer}
+.stat-guide p{font:400 13px/1.65 var(--font-body);margin:10px 0 0}
+.weapon-stat-bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 16px;margin:0 0 17px}
+.weapon-stat-bars>div{display:flex;flex-direction:column;min-width:0;gap:3px}
+.weapon-stat-bars dt{font:400 12px/1.45 var(--font-body);color:var(--sky-muted-light)}
+.weapon-stat-bars dd{font:600 13px/1.5 var(--font-body);font-variant-numeric:tabular-nums;margin:0;color:var(--sky-text-light);overflow-wrap:anywhere}
+.stat-direction{font-size:12px;color:var(--sky-link)}
+.stat-track{display:block;height:4px;background:var(--sky-panel-mid);margin-top:auto;border-radius:0;overflow:hidden}
+.stat-track i{display:block;height:100%;background:var(--sky-link)}
+.loadout-live-meta{line-height:1.65;font:400 12px/1.65 var(--font-body)}
+.loadout-live-meta strong{font-weight:600}
+.advanced-stats{margin:0 0 16px;padding-top:12px}
+.advanced-stats .weapon-sheet{padding-top:13px;gap:13px 12px}
+.advanced-stats .weapon-sheet dt{font:400 12px/1.45 var(--font-body)}
+.advanced-stats .weapon-sheet dd{font:600 13px/1.5 var(--font-body)}
+.option-card>button{flex:0 0 auto;padding:9px 12px;min-height:38px}
+
+.profile-progression{display:grid;grid-template-columns:minmax(150px,.85fr) minmax(180px,1fr) minmax(230px,1.4fr);gap:24px;align-items:center}
+.profile-progression>div:first-child{display:flex;flex-direction:column;gap:7px}
+.profile-progression>div:first-child>strong{font:600 23px/1.2 var(--font-display)}
+.profile-progression>div:first-child>span{font:400 12px/1.5 var(--font-body)}
+.profile-progression>div:first-child>.progression-label{font:600 11px/1.4 var(--font-display)}
+.profile-progression>dl{display:flex;flex-wrap:wrap;gap:18px;margin:0}
+.profile-progression dt{font:600 10px/1.5 var(--font-display);letter-spacing:.05em}
+.profile-progression dd{font:600 16px/1.5 var(--font-body);margin:4px 0 0}
+.profile-ranked{display:flex;align-items:center;gap:12px;min-width:0}
+.profile-ranked .rank-badge{width:76px;height:92px}
+.profile-ranked .ranked-progress-copy strong{font-size:17px}
+.ranked-result-heading{display:flex;align-items:center;gap:15px;min-width:0}
+.ranked-result-heading>div{min-width:0}
+.ranked-result-heading>div>strong{display:block;font:600 21px/1.4 var(--font-display)}
+.ranked-result-heading .rank-badge{width:80px;height:94px}
+.ranked-result>details>p{font:400 13px/1.6 var(--font-body)}
+.ranked-result dl dd{font-variant-numeric:tabular-nums}
+
+@media(max-width:1050px){
+  .hero-card .lobby-progress-panels{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:14px}
+  .lobby-ranked .rank-badge{width:60px;height:80px}
+  .lobby-ranked .ranked-progress-copy strong{font-size:15px}
+  .option-grid.loadout-grid,.option-grid.operator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .profile-progression{grid-template-columns:1fr 1fr;gap:20px}
+  .profile-ranked{grid-column:1/-1;border-top:1px solid var(--sky-border);padding-top:12px;max-width:440px;width:100%}
+}
+@media(max-width:700px){
+  .hero-card .lobby-progress-panels{padding-top:22px}
+  .hero-card .lobby-progression strong{font-size:22px}
+  .hero-card .lobby-progression span,.ranked-progress-copy span,.ranked-progress-copy small{font-size:11px}
+  .loadout-card,.operator-card{padding:13px}
+  .option-grid.loadout-grid,.option-grid.operator-grid{gap:12px}
+  .weapon-stat-bars{gap:12px 10px}
+  .card-model-viewer .operator-preview{height:226px}
+}
+@media(max-width:510px){
+  .option-grid.loadout-grid,.option-grid.operator-grid{grid-template-columns:1fr}
+  .card-model-viewer .weapon-preview{height:180px}
+  .profile-progression{grid-template-columns:1fr}
+  .profile-ranked{grid-column:auto}
+}

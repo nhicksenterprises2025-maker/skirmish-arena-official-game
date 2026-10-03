@@ -1,6 +1,6 @@
 {
   "name": "skirmish-arena-reimagined",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "private": true,
   "description": "Skirmish Arena game and persistent account server",
   "engines": {

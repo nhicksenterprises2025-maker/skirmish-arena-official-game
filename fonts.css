@@ -1,0 +1,22 @@
+/* BLUE CIRCUIT typography. Original, self-hosted OFL fonts; see assets/fonts/README.md.
+   Font families only override older component shorthands; component sizes remain local. */
+@font-face{font-family:Inter;src:url('./assets/fonts/Inter-Variable.ttf') format('truetype');font-style:normal;font-weight:100 900;font-display:swap}
+@font-face{font-family:Oxanium;src:url('./assets/fonts/Oxanium-Variable.ttf') format('truetype');font-style:normal;font-weight:200 800;font-display:swap}
+:root{--font-body:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Arial,sans-serif;--font-display:Oxanium,Inter,ui-sans-serif,system-ui,sans-serif}
+html,body{font-family:var(--font-body);font-variant-numeric:tabular-nums;font-optical-sizing:auto}
+button,input,select,textarea{font-family:var(--font-body)}
+.modal h2,.modal h3,.modal h4,.option-card h3,.hero-card .menu-grid button,.home-edition,
+.hero-card .eyebrow,.armory-heading,.armory-caption strong,.armory-weapon>div,
+.profile-progression>header,.profile-progression>header strong,.xp-summary>header,
+.phone-home-title h2,.phone-app-heading h2,.phone-app-heading h3,.settings-tabs button{
+  font-family:var(--font-display);font-weight:700;line-height:1.2
+}
+/* Dense values and copy deliberately stay in Inter, including legacy monospace UI. */
+body #modalContent :is(p,small,table,th,td,dt,dd,input,textarea,.meta-note,.analytics-note,.weapon-role,.weapon-sheet,.weapon-bars,.kit-state,.profile-stats,.match-report-grid,.xp-breakdown),
+body .phone-screen :is(p,small,time,table,th,td,input,textarea,.phone-contact,.phone-contact-facts,.phone-stat-row,.phone-meta-row,.phone-score-line,.message-card,.message-meta,.message-day,.message-compose),
+.lobby-build,.lobby-progression,.status-row,.season-strip,.cloud-badge,.cloud-account-menu,
+.advanced-stats summary,.meta-tabs button,.inspection-rotation,.control-row,.settings-section>summary{
+  font-family:var(--font-body);font-variant-numeric:tabular-nums
+}
+body #modalContent :is(p,.meta-note,.analytics-note,.weapon-role),body .phone-screen .message-card p{line-height:1.5}
+/* The established wordmark is an SVG and is intentionally not restyled. */

@@ -1,6 +1,6 @@
 # BLUE CIRCUIT validation
 
-Application **1.11.0**, Balance **8.0**, analytics schema **1**. This maintenance record distinguishes completed checks from release gates still awaiting confirmation. Test accounts, databases, browser profiles and generated conversation histories are isolated fixtures. Evidence files live in the directory selected by `SAR_TEST_OUTPUT`; do not commit account backups or local service credentials.
+Application **1.11.0**, Balance **8.0**, analytics schema **1**. BLUE CIRCUIT is published and verified on the existing installation. This maintenance record distinguishes completed checks from the limitations below. Test accounts, databases, browser profiles and generated conversation histories are isolated fixtures. Evidence files live in the directory selected by `SAR_TEST_OUTPUT`; do not commit account backups or local service credentials.
 
 ## Verified implementation
 
@@ -69,6 +69,8 @@ Existing GOOD/BAD/EDIT and export facilities were exercised in a disposable revi
 
 Completed browser evidence: `blue-circuit-ui-check.json`, `blue-circuit-cache-check.json`, `after-lobby-*`, `after-loadout-*`, `after-operator-*`, `after-profile-*`, `after-ranked-result-*`, `after-all26-rank-badges.png`, and `blue-circuit-offline-cache.png`. Server/client results are in `server-tests-verified.log` and `client-tests.log`.
 
-The reviewed live evaluation and protected integration checks are complete with the limitations above. The final advice guard is included in the verified signed installer and physical installation. Publication target: one application release, `v1.11.0`, named BLUE CIRCUIT. Record public download verification after publication. Balance remains 8.0.
+The reviewed live evaluation and protected integration checks are complete with the limitations above. The final advice guard is included in the verified signed installer and physical installation. The five owner launch/reopen checks were repeated successfully on that final package.
+
+Published **[BLUE CIRCUIT v1.11.0](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/tag/v1.11.0)** from application commit `3fba5b7`. The public installer was downloaded and matched the exact size/SHA-256 above; the public signature and checksum file matched their local originals, and the README's latest-download link returned the correct installer. Evidence: `public-download-verification.json`, `public-release-assets-verification.json`. The existing installed update feed also contains the same signed package/manifest. One application release covers all three runs; Balance 8.0 remains unchanged.
 
 A full Windows reboot and installation on a second PC were not repeated in this run. Cached/offline restart and the actual owner installation's close/reopen were exercised. Optional dialogue remains subject to the observed latency and generation failures above.

@@ -34,6 +34,7 @@ function engine(storage={},source=fs.readFileSync(gamePath,'utf8'),options={}){
   const windowEvents=new StubEventTarget(),context={console:{...console,error:noop},document,HTMLElement:StubElement,MutationObserver,localStorage,innerWidth:1440,innerHeight:900,performance:{now:()=>wallTime},Math:math,Date,setInterval:noop,setTimeout:noop,requestAnimationFrame:noop,addEventListener:windowEvents.addEventListener.bind(windowEvents),removeEventListener:windowEvents.removeEventListener.bind(windowEvents),queueMicrotask:fn=>microtasks.push(fn),URL,Blob,TextEncoder,crypto:require('node:crypto').webcrypto,location:{reload:noop,search:'?diagnostics=1'},alert:noop,confirm:()=>false};context.window=context;
   context.SARTactics=options.tactics||require('../tactical-instinct.js');
   context.SARProgression=require('../progression.js');
+  context.SARTeamPresentation=require('../team-presentation.js');
   const clockEpoch=Date.now()-wallTime;
   // Match-slot deadlines use the authoritative wall clock. Advance that clock
   // alongside accelerated simulation, with an override for restart boundaries.
@@ -80,7 +81,9 @@ function migrationTests(){
   const changedSource=fs.readFileSync(gamePath,'utf8').replace("'AK47': { type:'primary', damage:34, spread:4","'AK47': { type:'primary', damage:30, spread:4.2");assert.ok(changedSource!==fs.readFileSync(gamePath,'utf8'),'migration fixture must alter the active AK47 damage and spread');
   const patch=engine(Object.fromEntries(migrated.data),changedSource),ps=patch.dev.inspect().SAVE;assert.equal(ps.patchArchives.length,2);assert.notEqual(ps.patchState.fingerprint,m.patchState.fingerprint);assert.equal(ps.meta.AK47.kills,0);assert.equal(ps.bots.Ace.career.kills,77);assert.equal(ps.balancePatchHistory.at(-1).changes.length,2);
   const future={...s,schema:99};const f=engine({'sar-persistent-save':JSON.stringify(future)});assert.equal(JSON.parse(f.data.get('sar-persistent-save')).schema,99);assert.ok(f.context.SAR.getSaveInfo().writeProtected);
-  const corrupt=engine({'sar-persistent-save':'bad data'});assert.equal(corrupt.data.get('sar-persistent-save'),'bad data');assert.equal(corrupt.data.get('sar-recovery-backup'),'bad data');
+  const corrupt=new Map([['sar-persistent-save','bad data']]);
+  assert.throws(()=>engine({},undefined,{storageAdapter:{get:key=>corrupt.get(key)??null,set(key,value){corrupt.set(key,value);return true;}}}),SyntaxError,'invalid saved data stops initialization instead of creating a blank world');
+  assert.equal(corrupt.get('sar-persistent-save'),'bad data');assert.equal(corrupt.get('sar-recovery-backup'),'bad data');
   const expired=engine(),es=expired.dev.inspect().SAVE,originalEnd=es.seasons.current.endAt;es.seasons.current.stats.Ace.games=12;es.seasons.current.stats.Ace.kills=27;es.seasons.current.stats.Ace.deaths=7;expired.dev.ensureSeasonFresh(originalEnd+15*86400000+1);assert.equal(es.seasons.current.number,3);assert.equal(es.seasons.current.startAt,originalEnd+15*86400000);assert.equal(es.seasons.history.length,2);assert.equal(es.seasons.history[1].winner.name,'Ace');
   return {passed:true,cases:['fresh schema 17','13 → 14 → 15 → 16 → 17','14 → 15 → 16 → 17','reload idempotence','future and nested fields','fixed identity/Power/personality','career/form/familiarity','70 historical seasons','exact season dates and rollover','accounts/session/preferences','complete export','balance edit archive and clean active patch','future schema write protection','corrupt save recovery']};
 }

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import fs from 'node:fs/promises';
 import * as THREE from '../vendor/three.module.js';
-import {buildOperator,buildWeapon,WEAPON_VISUALS,animateOperator,setOperatorWeapon,disposeModel,ensureModelAssets} from '../models-25d.mjs';
+import {buildOperator,buildWeapon,WEAPON_VISUALS,animateOperator,setOperatorWeapon,setOperatorPresentation,disposeModel,ensureModelAssets} from '../models-25d.mjs';
 
 // Exercise the shipped Blender attachments as well as the procedural base.
 // Node's file adapter is test-only; production continues using local HTTP.
@@ -12,6 +12,17 @@ globalThis.fetch=async(request,options)=>{const url=new URL(typeof request==='st
 try{await ensureModelAssets();}finally{globalThis.fetch=fetchOriginal;globalThis.ProgressEvent=progressOriginal;}
 
 const names=Object.keys(WEAPON_VISUALS);
+test('view perspective changes only independent team overlays, leaving shared operator outfits untouched',()=>{
+  const first=buildOperator(0,1),second=buildOperator(0,1),palette=JSON.stringify(first.colors);
+  const materials=[];first.group.traverse(node=>{if(node.isMesh&&node!==first.ring&&node!==first.spawnRing)materials.push([node,node.material]);});
+  assert.equal(first.ring.material,second.ring.material);
+  setOperatorPresentation(first,{color:'#f08a87'});
+  assert.equal(first.ring.material.color.getHexString(),'f08a87');assert.equal(first.spawnRing.material.color.getHexString(),'f08a87');
+  assert.equal(second.ring.material.color.getHexString(),'79c5f3');assert.equal(second.spawnRing.material.color.getHexString(),'79c5f3');
+  assert.equal(JSON.stringify(first.colors),palette);for(const [node,material] of materials)assert.equal(node.material,material);
+  setOperatorPresentation(first,{color:'#79c5f3'});assert.equal(first.ring.material,second.ring.material);
+  disposeModel(first.group);disposeModel(second.group);
+});
 const actor=(weapon='AR-15',extra={})=>({id:1,x:500,y:600,angle:0,team:0,weapon,hp:250,maxHP:250,vx:0,vy:0,shotId:1,shotAge:99,...extra});
 const frame=(entity,value,now=1000,dt=1/60)=>{animateOperator(entity,value,now,dt);entity.group.updateMatrixWorld(true);return entity;};
 function finiteTransforms(object){

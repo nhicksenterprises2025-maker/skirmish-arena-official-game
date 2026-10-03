@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-quit-game"
+description = "Enables the quit_game command without any pre-configured scope."
+commands.allow = ["quit_game"]
+
+[[permission]]
+identifier = "deny-quit-game"
+description = "Denies the quit_game command without any pre-configured scope."
+commands.deny = ["quit_game"]

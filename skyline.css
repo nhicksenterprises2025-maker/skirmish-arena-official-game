@@ -1,0 +1,111 @@
+@import url('./theme.css');
+
+/* SKYLINE changes interface color and navigation hierarchy, retaining the
+   existing dimensions, type families, inspectable models and device shell. */
+html,body{background:var(--sky-background);color:var(--sky-text-light)}
+button,input,select,textarea{accent-color:var(--sky-link)}
+button{background:var(--sky-panel-light);color:var(--sky-text-light);border-color:var(--sky-border)}
+button:hover:not(:disabled){color:var(--sky-text-light);background:var(--sky-panel-mid);border-color:var(--sky-link)}
+button.primary{background:var(--sky-accent);color:var(--sky-text-light);border-color:var(--sky-accent)}
+button.primary:hover:not(:disabled){background:var(--sky-accent-hover);color:var(--sky-text-light);border-color:var(--sky-accent-hover)}
+button:focus-visible,summary:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex="0"]:focus-visible{outline:2px solid var(--sky-link);outline-offset:3px}
+.hero-card button:focus-visible,.phone-screen button:focus-visible,.spectate-controls button:focus-visible{outline-color:var(--sky-accent-hover)}
+a{color:var(--sky-link)}
+.screen{background:rgb(var(--sky-background-rgb) / .7)}
+.hero-card{background:var(--sky-background);border-color:var(--sky-border-dark);color:var(--sky-text-dark)}
+.hero-card:after{display:none}
+.home-edition,.home-edition>span,.home-deck,.lobby-build,.lobby-update-status{color:var(--sky-muted-dark)}
+.dot.live{background:var(--sky-accent);box-shadow:none}
+.hero-card .lobby-brand-row>h1{margin:24px 0 20px;line-height:1;flex:1 1 240px;min-width:0}
+.hero-card .brand-wordmark{display:block;width:100%;max-width:350px;height:auto;margin:0}
+.lobby-brand-row{align-items:center;gap:20px;flex-wrap:nowrap}
+.lobby-progression{flex-basis:128px;width:128px;border-color:var(--sky-border-dark);padding-left:16px}
+.lobby-progression strong{font-size:17px;color:var(--sky-text-dark)}
+.lobby-progression span{color:var(--sky-muted-dark)}
+.lobby-progression progress::-webkit-progress-bar{background:var(--sky-border-dark)}
+.lobby-progression progress::-webkit-progress-value{background:var(--sky-accent)}
+.hero-card .menu-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.hero-card .menu-grid button{background:var(--sky-surface-dark);border-color:var(--sky-border-dark);color:var(--sky-text-dark)}
+.hero-card .menu-grid button:hover{background:var(--sky-surface-raised);border-color:var(--sky-accent);color:var(--sky-text-dark)}
+.hero-card .menu-grid .primary{grid-column:1/-1;background:var(--sky-accent);border-color:var(--sky-accent);color:var(--sky-text-light);margin-bottom:4px}
+.hero-card .menu-grid .primary:hover{background:var(--sky-accent-hover);border-color:var(--sky-accent-hover);color:var(--sky-text-light)}
+.lobby-build{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--sky-border-dark);margin-top:18px;padding-top:13px;font-size:10px;letter-spacing:.035em;line-height:1.5}
+.lobby-armory{background:var(--sky-panel-light);color:var(--sky-text-light);border-color:var(--sky-border)}
+.armory-heading,.armory-caption button,.armory-weapon button{color:var(--sky-muted-light)}
+.armory-weapon{background:rgb(var(--sky-panel-mid-rgb) / .5);border-color:var(--sky-border)}
+.season-strip{background:var(--sky-surface-dark);border-color:var(--sky-border-dark)}
+.season-strip .label{color:var(--sky-muted-dark)}.season-strip strong{color:var(--sky-text-dark)}
+.modal,.glass.modal{background:var(--sky-surface-light);border-color:var(--sky-border);color:var(--sky-text-light)}
+.modal h2,.modal h3,.modal h4,.option-card h3{color:var(--sky-text-light)}
+.modal p,.meta-note,.analytics-note,.weapon-role,.weapon-sheet dt,.kit-state,.eyebrow,.label{color:var(--sky-muted-light)}
+.modal.compact{background:var(--sky-surface-dark);color:var(--sky-text-dark);border-color:var(--sky-border-dark)}
+.modal.compact h2,.modal.compact .eyebrow{color:var(--sky-text-dark)}
+.modal.compact .pause-caption{color:var(--sky-muted-dark)}
+.modal.compact button{background:var(--sky-surface-raised);color:var(--sky-text-dark);border-color:var(--sky-border-dark)}
+.modal.compact button.primary{background:var(--sky-accent);color:var(--sky-text-light);border-color:var(--sky-accent)}
+.option-card{background:var(--sky-surface-light);border-color:var(--sky-border)}
+.option-card.selected{background:var(--sky-panel-light);border-color:var(--sky-link);box-shadow:inset 0 3px var(--sky-link)}
+.option-card.selected>button{background:var(--sky-accent);color:var(--sky-text-light);border-color:var(--sky-accent)}
+.option-card>button{color:var(--sky-text-light);background:var(--sky-panel-light)}
+.option-card.selected .kit-state{color:var(--sky-link)}
+.weapon-preview,.operator-preview,.profile-operator,.model-inspector{background:var(--sky-panel-light)}
+.meta-tabs button.active,.meta-tabs button[aria-selected="true"],.settings-tabs button.active{color:var(--sky-text-light);background:var(--sky-panel-light);border-bottom-color:var(--sky-link)}
+.meta-tabs button,.settings-tabs button{color:var(--sky-muted-light)}
+.meta-tabs button:hover,.settings-tabs button:hover{background:var(--sky-panel-light)}
+.meta-table th,.bot-leaderboard th{background:var(--sky-panel-light);color:var(--sky-muted-light)}
+.meta-table th[aria-sort="descending"],.meta-table th[aria-sort="ascending"]{background:var(--sky-panel-mid);color:var(--sky-text-light)}
+.meta-table tr.selected td,.meta-table tbody tr:hover td{background:var(--sky-panel-light)}
+.meta-table tr.selected td:first-child{box-shadow:inset 3px 0 var(--sky-link)}
+.table-sort:hover,.bot-profile-link:hover{color:var(--sky-link)!important}
+.meta-summary span,.meta-summary small,.meta-detail-grid small,.meta-detail-head p,.meta-formula{color:var(--sky-muted-light)}
+.meta-detail-kpis{background:var(--sky-surface-dark);color:var(--sky-text-dark)}
+.meta-detail-kpis strong{color:var(--sky-text-dark)}.meta-detail-kpis small{color:var(--sky-muted-dark)}
+.topbar.match-hud,.player-hud.combat-hud,.rank-card.combat-team,.spectate-top,.spectate-help,.scoreboard{background:rgb(var(--sky-surface-dark-rgb) / .94);border-color:var(--sky-border-dark);color:var(--sky-text-dark)}
+.match-hud .label,.combat-hud .label,.combat-team .label,.spectate-top .label,.score-head,.score-title span{color:var(--sky-muted-dark)}
+.match-hud strong,.hp-line #hpText,.weapon-line #weaponName,.ammo #ammoText,.spectate-top strong,.spectate-top #spectateName{color:var(--sky-text-dark)}
+.topbar.match-hud,.player-hud.combat-hud,.spectate-top{border-top-color:var(--sky-accent);border-left-color:var(--sky-accent)}
+.ammo #reserveText,.ability-status,.spectate-top #spectatePower,.spectate-top small,.rank-card>span:last-child{color:var(--sky-muted-dark)}
+.hp-track{background:var(--sky-border-dark)}.hp-track>div{background:var(--sky-accent)}
+.spectator-hud[data-team="blue"] .spectate-top{border-left-color:var(--sky-accent)}
+.spectator-hud[data-team="red"] .spectate-top{border-left-color:var(--sky-red)}
+.spectator-hud[data-team] #spectateName{color:var(--sky-text-dark)}
+.spectate-top #spectateGame{max-width:330px;white-space:normal;line-height:1.45}
+.spectate-controls,.spectate-controls details>div{background:var(--sky-surface-dark);border-color:var(--sky-border-dark);color:var(--sky-text-dark)}
+.spectate-controls button,.spectate-controls summary{background:var(--sky-surface-raised);border-color:var(--sky-border-dark);color:var(--sky-text-dark)}
+.spectate-controls button[aria-pressed="true"]{background:var(--sky-accent);border-color:var(--sky-accent);color:var(--sky-text-light)}
+.feed-item{background:rgb(var(--sky-background-rgb) / .88);color:var(--sky-text-dark);text-shadow:none;border-color:var(--sky-border-dark)}
+.feed-item em{color:var(--sky-accent)}.feed-item em small{font-size:8px;font-weight:700;letter-spacing:.03em}
+.team-blue{color:var(--sky-accent)}.team-red{color:var(--sky-red)}
+.phone-screen{background:var(--sky-surface-light);color:var(--sky-text-light)}
+.modal:has(.phone-device),.glass.modal:has(.phone-device){background:transparent;border:0;box-shadow:none}
+.phone-status,.phone-navigation{background:var(--sky-surface-dark);color:var(--sky-text-dark)}
+.phone-screen[data-phone-screen="home"]{background:var(--sky-surface-dark);color:var(--sky-text-dark)}
+.phone-home-title h2,.phone-app-icon{color:var(--sky-text-dark)}
+.phone-screen[data-phone-screen="home"] .phone-home-title h2{color:var(--sky-text-dark)}
+.phone-home-clock>span,.phone-home-title>span,.phone-home-title p,.phone-home-status{color:var(--sky-muted-dark)}
+.phone-app-icon>span{background:var(--sky-accent);color:var(--sky-text-light);border-color:var(--sky-accent-hover);box-shadow:none}
+.phone-app-icon:hover>span{background:var(--sky-accent-hover)}
+.phone-app-icon b{background:var(--sky-text-dark);color:var(--sky-text-light);border-color:var(--sky-surface-dark)}
+.phone-app h2,.phone-app h3,.phone-app .phone-contact strong{color:var(--sky-text-light)}
+.phone-app .phone-contact small,.phone-contact time,.phone-contact .contact-power,.phone-network,.phone-contact-facts,.phone-empty,.phone-compose-label{color:var(--sky-muted-light)}
+.phone-avatar{background:var(--sky-panel-mid);color:var(--sky-text-light)}
+.unread .phone-avatar{background:var(--sky-link);color:var(--sky-text-dark)}
+.phone-app .phone-contact .phone-unread{background:var(--sky-link);color:var(--sky-text-dark)}
+.phone-app .message-card{background:var(--sky-surface-light);border-color:var(--sky-border);color:var(--sky-text-light)}
+.phone-app .message-card.message-sent{background:var(--sky-panel-mid);color:var(--sky-text-light)}
+.phone-app .message-card p,.phone-app .message-card h4{color:var(--sky-text-light)}
+.phone-app .message-card time,.phone-app .message-card .message-meta,.message-day{color:var(--sky-muted-light)}
+.phone-app .message-compose button[data-social-action="send"]{background:var(--sky-accent);color:var(--sky-text-light)}
+.phone-app .message-compose textarea{background:var(--sky-surface-light)}
+.phone-search:focus-within{outline-color:var(--sky-link)}
+.cloud-badge,.cloud-account-menu{background:var(--sky-surface-dark);border-color:var(--sky-border-dark);color:var(--sky-text-dark)}
+.cloud-badge span,.cloud-badge small{color:var(--sky-muted-dark)}
+.cloud-account-menu button{color:var(--sky-text-dark);background:transparent}
+.cloud-account-menu button:hover{background:var(--sky-surface-raised)}
+.cloud-gate-card{background:var(--sky-surface-light);border-color:var(--sky-border);color:var(--sky-text-light)}
+.account-gate-brand h1,.account-gate-brand em{color:var(--sky-text-dark)}
+.account-gate-brand p,.account-gate-brand>span{color:var(--sky-muted-dark)}
+.account-message,.cloud-status.ok{color:var(--sky-link)}.account-message.error{color:var(--sky-error)}
+@media(max-width:850px){.hero-card .lobby-brand-row>h1{flex-basis:180px}.lobby-brand-row{gap:12px}.lobby-progression{flex-basis:106px;width:106px;padding-left:12px}.lobby-progression strong{font-size:15px}}
+@media(max-width:650px){.hero-card .lobby-brand-row>h1{margin:14px 0 18px}.hero-card .brand-wordmark{max-width:270px}.hero-card .menu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-card .menu-grid button{font-size:10px}.lobby-build{font-size:9px}.lobby-progression{flex-basis:98px;width:98px}.lobby-progression span{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.screen.visible{animation:none}button,.option-card,.phone-app-icon>span{transition:none!important}}

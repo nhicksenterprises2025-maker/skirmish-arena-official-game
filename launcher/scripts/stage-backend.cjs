@@ -5,6 +5,7 @@ const path = require('node:path');
 const {spawnSync} = require('node:child_process');
 const launcher = path.resolve(__dirname, '..');
 const release = path.resolve(launcher, '..');
+fs.copyFileSync(path.join(release,'theme.css'),path.join(launcher,'ui/theme.css'));
 const destination = path.join(launcher, 'backend-bundle');
 const version = spawnSync(process.execPath, ['--version'], {encoding:'utf8'});
 const [major, minor] = version.stdout.trim().slice(1).split('.').map(Number);
@@ -33,7 +34,7 @@ const shell = [
   'vendor/addons/utils/BufferGeometryUtils.js','vendor/addons/utils/SkeletonUtils.js',
   'assets/25d/manifest.json','assets/25d/brightfield-props.glb'
 ];
-shell.push('progression.js','boot.js','boot.css','tactical-instinct.js','desktop-entry.html','desktop-launch.html','desktop-launch.js','build-meta.js','tournaments-ui.js','assets/25d/live-circuit-details.glb');
+shell.push('theme.css','skyline.css','phone-apps.css','skyline-tournaments.css','phone-apps.js','team-presentation.js','exit-game.js','assets/branding/wordmark.svg','assets/branding/wordmark-mono.svg','assets/branding/monogram.svg','assets/branding/monogram-mono.svg','assets/branding/app-256.png','assets/branding/app-512.png','progression.js','boot.js','boot.css','tactical-instinct.js','desktop-entry.html','desktop-launch.html','desktop-launch.js','build-meta.js','tournaments-ui.js','assets/25d/live-circuit-details.glb');
 const audioManifest=JSON.parse(fs.readFileSync(path.join(release,'assets/audio/LICENSES.json'),'utf8'));
 for(const asset of Object.values(audioManifest.assets)){if(!/^(weapons|handling|combat|impacts|movement|ui|match|ambience)\/[a-z0-9_]+\.(wav|ogg)$/.test(asset.file))throw Error('Invalid audio asset path');shell.push('assets/audio/'+asset.file);}
 for (const asset of shell) copy(asset);

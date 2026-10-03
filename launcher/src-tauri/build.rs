@@ -11,6 +11,7 @@ fn main() {
             "game_fullscreen_state",
             "set_game_fullscreen",
             "check_local_backend",
+            "quit_game",
             "offline_local_api",
         ]),
     ))

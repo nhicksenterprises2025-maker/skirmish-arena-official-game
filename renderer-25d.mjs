@@ -1,14 +1,15 @@
 import * as THREE from './vendor/three.module.js';
 import {buildEnvironment} from './environment-25d.mjs';
-import {buildOperator,animateOperator,setOperatorWeapon,disposeModel} from './models-25d.mjs';
+import {buildOperator,animateOperator,setOperatorWeapon,setOperatorPresentation,disposeModel} from './models-25d.mjs';
 import {loadAssetLibrary} from './asset-loader-25d.mjs';
 
 // Presentation only: one watched match, driven by the authoritative snapshot.
 // No simulation timers, new colliders or extra telemetry are introduced here.
-const TEAM=['#20d487','#45b4f2'],clamp=THREE.MathUtils.clamp;
+const clamp=THREE.MathUtils.clamp;
 function overlay(id,z){const c=document.createElement('canvas');c.id=id;c.style.cssText=`position:fixed;inset:0;z-index:${z};pointer-events:none;display:none`;document.body.appendChild(c);return c;}
 function round(g,x,y,w,h,r){g.beginPath();g.roundRect(x,y,w,h,r);}
 export function createRenderer(snapshot){
+  const theme=getComputedStyle(document.documentElement),uiColors={panel:theme.getPropertyValue('--sky-surface-dark').trim()||'#192C40',border:theme.getPropertyValue('--sky-border-dark').trim()||'#37556F',text:theme.getPropertyValue('--sky-text-dark').trim()||'#F0F7FC'};
   const canvas=overlay('game3d',1);canvas.setAttribute('aria-label','Brightfield Blocks dimensional battlefield');
   const labels=overlay('game3dLabels',3),mini=overlay('game3dMap',6);mini.style.inset='auto';
   const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
@@ -43,13 +44,13 @@ export function createRenderer(snapshot){
     const full=!!s.fullMap,w=full?Math.min(width-30,690):Math.min(190,width*.23),h=full?Math.min(height-30,455):Math.min(142,width*.172),ratio=Math.min(2,devicePixelRatio||1);
     const pw=Math.round(w*ratio),ph=Math.round(h*ratio);if(mini.width!==pw)mini.width=pw;if(mini.height!==ph)mini.height=ph;
     mini.style.width=w+'px';mini.style.height=h+'px';mini.style.left=full?'50%':'12px';mini.style.top=full?'50%':'75px';mini.style.transform=full?'translate(-50%,-50%)':'none';mini.style.display='block';
-    const g=mini.getContext('2d');g.setTransform(ratio,0,0,ratio,0,0);g.clearRect(0,0,w,h);g.fillStyle='rgba(20,43,34,.96)';round(g,0,0,w,h,6);g.fill();g.strokeStyle='#91a77d';g.lineWidth=1;round(g,.5,.5,w-1,h-1,5.5);g.stroke();
+    const g=mini.getContext('2d');g.setTransform(ratio,0,0,ratio,0,0);g.clearRect(0,0,w,h);g.fillStyle=uiColors.panel;round(g,0,0,w,h,6);g.fill();g.strokeStyle=uiColors.border;g.lineWidth=1;round(g,.5,.5,w-1,h-1,5.5);g.stroke();
     const pad=full?25:12,sx=(w-pad*2)/s.world.w,sy=(h-pad*2)/s.world.h;g.fillStyle='#819f61';g.fillRect(pad,pad,w-pad*2,h-pad*2);
     g.fillStyle='#737f78';for(const r of s.geometry.roads)g.fillRect(pad+r.x*sx,pad+r.y*sy,r.w*sx,r.h*sy);
     g.fillStyle='#d2d5c0';for(const f of s.geometry.floors)g.fillRect(pad+f.x*sx,pad+f.y*sy,f.w*sx,f.h*sy);
     g.fillStyle='#526b4c';for(const t of s.geometry.solids.filter(o=>o.type==='circle')){g.beginPath();g.arc(pad+t.x*sx,pad+t.y*sy,Math.max(.9,t.r*sx),0,Math.PI*2);g.fill();}
-    for(const a of s.actors){if(a.dead||a.mapVisible===false)continue;g.beginPath();g.arc(pad+a.x*sx,pad+a.y*sy,full?4:2.7,0,Math.PI*2);g.fillStyle=a.isPlayer?'#fff1ad':TEAM[a.team];g.fill();g.strokeStyle='#294534';g.lineWidth=.8;g.stroke();}
-    g.strokeStyle='#aec197';g.lineWidth=1;g.strokeRect(pad,pad,w-pad*2,h-pad*2);g.fillStyle='#e9eedc';g.font='700 '+(full?11:8)+'px system-ui';g.fillText(full?'BRIGHTFIELD BLOCKS / TACTICAL MAP':'BRIGHTFIELD',pad,full?18:10);
+    for(const a of s.actors){if(a.dead||a.mapVisible===false)continue;const p=a.presentation,x=pad+a.x*sx,y=pad+a.y*sy,r=full?4:2.7;g.beginPath();if(p.side==='red'){g.moveTo(x,y-r);g.lineTo(x+r,y);g.lineTo(x,y+r);g.lineTo(x-r,y);g.closePath();}else g.arc(x,y,r,0,Math.PI*2);g.fillStyle=p.color;g.fill();g.strokeStyle=p.isFocus?'#f0f7fc':'#101c2a';g.lineWidth=p.isFocus?1.6:.8;g.stroke();}
+    g.strokeStyle=uiColors.border;g.lineWidth=1;g.strokeRect(pad,pad,w-pad*2,h-pad*2);g.fillStyle=uiColors.text;g.font='700 '+(full?11:8)+'px system-ui';g.fillText(full?'BRIGHTFIELD BLOCKS / TACTICAL MAP':'BRIGHTFIELD',pad,full?18:10);
     if(!full){g.textAlign='right';g.fillStyle='#afbf9d';g.fillText('N',w-pad,10);g.textAlign='start';}
   }
   function drawLabels(s){
@@ -60,10 +61,10 @@ export function createRenderer(snapshot){
     for(const a of sorted){
       const entity=actors.get(a.id);if(!entity?.group.visible)continue;
       projected.set(a.x,(entity.labelHeight||68)+8+entity.group.position.y,a.y).project(camera);if(Math.abs(projected.x)>1.07||Math.abs(projected.y)>1.07||projected.z<-1||projected.z>1)continue;
-      const x=(projected.x*.5+.5)*width,y=(-projected.y*.5+.5)*height,friend=a.team===s.focusTeam,health=clamp(a.hp/(a.maxHP||250),0,1),team=TEAM[a.team]||'#bbceb2';
-      const name=a.isPlayer?'YOU':a.name||'OPERATOR';g.font=`700 ${fontSize}px ui-monospace,Consolas,monospace`;const labelW=Math.max(barW,g.measureText(name).width+13),left=x-labelW/2,top=y-21;
+      const x=(projected.x*.5+.5)*width,y=(-projected.y*.5+.5)*height,p=a.presentation,friend=p.relation==='self'||p.relation==='ally'||p.isFocus,health=clamp(a.hp/(a.maxHP||250),0,1),team=p.color;
+      const name=(p.relation==='self'?'YOU':a.name||'OPERATOR')+(s.perspective.mode==='deathmatch'?(p.isFocus?' ◉':''):(p.side==='blue'?' · B':' · R'));g.font=`700 ${fontSize}px ui-monospace,Consolas,monospace`;const labelW=Math.max(barW,g.measureText(name).width+13),left=x-labelW/2,top=y-21;
       const overlap=placed.some(p=>Math.abs(p.x-x)<(p.w+labelW)*.5&&Math.abs(p.y-y)<26);g.globalAlpha=(overlap&&!a.isPlayer)?0.6:1;
-      g.fillStyle=a.isPlayer?'#203f34':'rgba(20,35,30,.88)';round(g,left,top,labelW,16,2);g.fill();g.fillStyle=team;g.fillRect(left,top,2,16);g.fillStyle=friend?'#f1f0d9':'#f6e7d1';g.textAlign='center';g.fillText(name,x+.5,top+11.5);
+      g.fillStyle=p.isFocus?'#192c40':'rgba(16,28,42,.88)';round(g,left,top,labelW,16,2);g.fill();g.fillStyle=team;g.fillRect(left,top,2,16);g.fillStyle=friend?'#f0f7fc':'#faecec';g.textAlign='center';g.fillText(name,x+.5,top+11.5);
       g.fillStyle='rgba(16,29,24,.9)';round(g,x-barW/2-1,y-3,barW+2,7,1.5);g.fill();g.fillStyle=health<=.3?'#ef8070':team;g.fillRect(x-barW/2,y-2,Math.max(0,barW*health),4);
       if(a.isPlayer){g.strokeStyle='#ecf0d5';g.lineWidth=.7;g.strokeRect(x-barW/2-1,y-3,barW+2,7);}
       if(a.reloading){g.fillStyle='#2d3a31';g.fillRect(x-barW/2,y+6,barW,2);g.fillStyle='#e0c484';g.fillRect(x-barW/2,y+6,barW*clamp(a.reloadProgress,0,1),2);}
@@ -93,6 +94,7 @@ export function createRenderer(snapshot){
     for(const a of s.actors){
       seen.add(a.id);let e=actors.get(a.id);
       if(!e){e=buildOperator(a.team,a.skin,a.skinPalette);actors.set(a.id,e);actorRoot.add(e.group);}
+      setOperatorPresentation(e,a.presentation);
       if(e.gunName!==a.weapon)setOperatorWeapon(e,a.weapon);
       animateOperator(e,a,time,dt);
       // The visible interior floor is six units above the lawn. Keep boots on

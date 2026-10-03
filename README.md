@@ -2,11 +2,11 @@
 
 A tactical arena shooter with a persistent league of 50 bots. Pick a loadout, play a match, and watch rivalries, careers and seasons develop around you.
 
-**Version 1.9 · Windows build 1.9.3 · Weapon Balance 8.0 · Beta**
+**Version 1.10 · Windows build 1.10.0 · Weapon Balance 8.0 · Beta**
 
-[Download for Windows (64-bit)](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest/download/Skirmish.Arena.Reimagined_1.9.3_x64-setup.exe) · [Release notes and downloads](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest)
+[Download for Windows (64-bit)](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest/download/Skirmish.Arena.Reimagined_1.10.0_x64-setup.exe) · [Release notes and downloads](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest)
 
-![Skirmish Arena lobby](docs/screenshots/lobby-1.9.png)
+![Skirmish Arena lobby](docs/screenshots/lobby-skyline.png)
 
 ## Install
 
@@ -16,7 +16,7 @@ A tactical arena shooter with a persistent league of 50 bots. Pick a loadout, pl
 
 The installer includes the game's required local runtime. You do not need Node, a terminal or a separately started game server to play. Windows WebView2 is required; setup handles it when needed. The current installer does not have a Windows publisher certificate.
 
-For an existing installation, run the new installer over it. Accounts and save data stay outside the game files. Keep your recovery code and use **Save Data** to export a backup before moving to another PC.
+For an existing installation, run the new installer over it. Accounts and save data stay outside the game files. Keep your recovery code and use **Settings → Account → Data Management** to export a backup before moving to another PC.
 
 ## The game
 
@@ -31,19 +31,25 @@ The current release is built around bot opponents. A hosted account connection i
 
 ## Playing and saving
 
-Aim with the mouse; gameplay captures it and menus release it. Open **Settings → Controls** for bindings and sensitivity. **Tab** shows the combat scoreboard and **F11** toggles fullscreen.
+Aim with the mouse; gameplay captures it and menus release it. Open **Settings → Game → Controls** for bindings and sensitivity. **Tab** shows the combat scoreboard and **F11** toggles fullscreen.
 
 Previously authenticated accounts can use their cached world when the account connection is unavailable. The game shows **CLOUD OFFLINE — LOCAL MODE**, keeps saving locally and synchronizes when the connection returns. First-time login and account creation require a working account service. The desktop app starts its included local service automatically.
 
 Bot replies use an optional local dialogue service. Its availability is separate from the account connection, and it is not required to play matches. The installer does not download the dialogue model.
 
+Your username menu opens **Player Profile** and **Settings**. Settings has four tabs: **Game**, **Audio**, **Account** and **About**. Backups are under **Account → Data Management**. Open **Phone** for Messages, Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta.
+
 The [player guide](docs/PLAYER-GUIDE.md) covers modes, careers, seasons, tournaments, Phone and backups.
 
-## Current release: Startup Repair
+## Current release: Skyline
 
-Build **1.9.3** fixes incomplete desktop updates and the resulting startup failure. The loading screen stays visible for at least three seconds and waits for real initialization to finish. Retry starts a clean attempt, and optional audio or scenery does not block entry.
+Build **1.10.0** introduces a focused lobby, five working Phone apps and a new blue identity. Tournament navigation and Settings have been organized around the actions you use while playing.
 
-Application version **1.9** and weapon balance **8.0** are separate. This repair does not change weapons or reset progression or telemetry. Full patch history is available in the game's **Patch Notes** and in [version.json](version.json).
+Main-menu **Weapon Meta** measures human participants, including their eligible matches against bots. **Phone → Bot Weapon Meta** measures bot participants. Accurate cohort records begin with Skyline; older mixed telemetry is preserved without an invented split. TDM and Deathmatch remain separate.
+
+Your team appears blue and opponents red. Spectating uses a labeled, stable perspective. **Exit Game** saves locally before closing the desktop game; browsers that cannot close themselves explain how to finish closing the window.
+
+Application version **1.10**, analytics schema **1**, and weapon balance **8.0** are separate. This release does not change weapon values. Full history is available in **Settings → About** and [version.json](version.json).
 
 ## Source and builds
 

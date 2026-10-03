@@ -2,7 +2,7 @@ importScripts('./build-meta.js');
 const APP_VERSION = self.SARBuild.version;
 const CACHE_NAME = `sar-shell-${APP_VERSION}-${self.SARBuild.shellRevision||'live-circuit-2'}`;
 const CORE = ['./index.html', './styles.css', './game.js', './cloud.js', './ai-ui.js', './ai-ui.css', './fullscreen.js', './audio.js', './assets/audio/LICENSES.json', './renderer-25d.mjs', './environment-25d.mjs', './models-25d.mjs', './inspect-25d.mjs', './asset-loader-25d.mjs', './vendor/three.module.js', './vendor/three.core.js', './vendor/addons/loaders/GLTFLoader.js', './vendor/addons/utils/BufferGeometryUtils.js', './vendor/addons/utils/SkeletonUtils.js', './assets/25d/manifest.json', './assets/25d/brightfield-props.glb', './updater.js', './manifest.webmanifest', './app-icon.svg'];
-CORE.push('./progression.js','./boot.js','./boot.css','./tactical-instinct.js','./desktop-launch.html','./build-meta.js','./tournaments-ui.js','./assets/25d/live-circuit-details.glb');
+CORE.push('./theme.css','./skyline.css','./phone-apps.css','./skyline-tournaments.css','./phone-apps.js','./team-presentation.js','./exit-game.js','./assets/branding/wordmark.svg','./assets/branding/wordmark-mono.svg','./assets/branding/monogram.svg','./assets/branding/monogram-mono.svg','./assets/branding/app-256.png','./assets/branding/app-512.png','./progression.js','./boot.js','./boot.css','./tactical-instinct.js','./desktop-launch.html','./build-meta.js','./tournaments-ui.js','./assets/25d/live-circuit-details.glb');
 const OPTIONAL=CORE.filter(path=>path.startsWith('./assets/'));
 const ESSENTIAL=CORE.filter(path=>!OPTIONAL.includes(path));
 const shellUrls = new Set(CORE.map(path => new URL(path, self.registration.scope).href));

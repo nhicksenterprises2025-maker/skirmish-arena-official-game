@@ -51,7 +51,7 @@
   function now(){return state.serverNow?state.serverNow+Math.max(0,performance.now()-state.clockPerformance):Date.now();}
   const host=document.createElement('div');host.id='accountGate';host.className='account-gate hidden';document.body.appendChild(host);
   const badge=document.createElement('button');badge.id='cloudBadge';badge.type='button';badge.className='cloud-badge hidden';document.body.appendChild(badge);
-  const accountMenu=document.createElement('div');accountMenu.id='cloudAccountMenu';accountMenu.className='cloud-account-menu hidden';accountMenu.innerHTML='<button data-action="player-profile">PROFILE</button><button data-action="settings">SETTINGS</button><button data-settings-tab="account">ACCOUNT</button><button class="hidden" data-cloud-action="reauth">SIGN IN TO SYNC</button><button data-action="cloud-logout">LOG OUT</button>';document.body.appendChild(accountMenu);
+  const accountMenu=document.createElement('div');accountMenu.id='cloudAccountMenu';accountMenu.className='cloud-account-menu hidden';accountMenu.innerHTML='<button data-action="player-profile">PLAYER PROFILE</button><button data-action="settings">SETTINGS</button><button data-settings-tab="account">ACCOUNT</button><button class="hidden" data-cloud-action="reauth">SIGN IN TO SYNC</button><button data-action="cloud-logout">LOG OUT</button>';document.body.appendChild(accountMenu);
   const safe=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   function localGet(key){return storage.get(key);}
   function localSet(key,value){return storage.set(key,value);}
@@ -319,9 +319,11 @@
     }
   });
   host.addEventListener('keydown',event=>{if(event.key==='Enter'&&['INPUT'].includes(event.target.tagName)){event.preventDefault();authSubmit();}});
-  badge.addEventListener('click',()=>{accountMenu.classList.toggle('hidden');});
+  badge.setAttribute('aria-haspopup','menu');badge.setAttribute('aria-expanded','false');accountMenu.setAttribute('role','menu');for(const button of accountMenu.querySelectorAll('button'))button.setAttribute('role','menuitem');
+  badge.addEventListener('click',()=>{accountMenu.classList.toggle('hidden');badge.setAttribute('aria-expanded',String(!accountMenu.classList.contains('hidden')));if(!accountMenu.classList.contains('hidden'))accountMenu.querySelector('button')?.focus();});
+  document.addEventListener('keydown',event=>{if(accountMenu.classList.contains('hidden'))return;if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();accountMenu.classList.add('hidden');badge.setAttribute('aria-expanded','false');badge.focus();}else if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const buttons=[...accountMenu.querySelectorAll('button:not(.hidden)')],i=buttons.indexOf(document.activeElement),next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(i+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons[next]?.focus();}},true);
   document.addEventListener('click',async event=>{
-    if(!event.target.closest('#cloudBadge'))accountMenu.classList.add('hidden');
+    if(!event.target.closest('#cloudBadge')){accountMenu.classList.add('hidden');badge.setAttribute('aria-expanded','false');}
     const thread=event.target.closest('[data-message-thread]')?.dataset.messageThread;if(thread){state.messageThread=thread;await showMessages();return;}
     const deletion=event.target.closest('[data-message-delete]')?.dataset.messageDelete;if(deletion){try{await api('/messages/'+deletion,{method:'DELETE'});await showMessages();}catch(error){alert(error.message);}return;}
     const action=event.target.closest('[data-cloud-action]')?.dataset.cloudAction;

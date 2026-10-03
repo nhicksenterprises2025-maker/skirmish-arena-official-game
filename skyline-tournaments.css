@@ -1,0 +1,110 @@
+/* Tournament presentation only. Schedules, rosters and results remain server-owned. */
+#modalContent[data-view="tournaments"]{--circuit-surface:var(--sky-surface-light,#edf4fa);--circuit-panel:var(--sky-panel-light,#dfebf5);--circuit-text:var(--sky-text-light,#192e42);--circuit-muted:var(--sky-muted-light,#4c657a);--circuit-line:var(--sky-border,#b4c8d8);--circuit-accent:var(--sky-accent,#79c5f3);color:var(--circuit-text)}
+[data-view="tournaments"] button{color:var(--circuit-text);border-color:var(--circuit-line);background:var(--circuit-surface);font-size:12px;letter-spacing:.025em}
+[data-view="tournaments"] button:hover:not(:disabled){background:var(--sky-accent-hover,#a7deff);border-color:#579cc5}
+[data-view="tournaments"] button:focus-visible{outline:3px solid #277cae;outline-offset:3px}
+[data-view="tournaments"] button:disabled{cursor:not-allowed;opacity:.55}
+[data-view="tournaments"] button.primary{background:var(--circuit-accent);border-color:#5999c0;color:#102b3c}
+[data-view="tournaments"] h3{color:var(--circuit-text);font-size:15px;letter-spacing:.025em}
+.circuit-heading{display:flex;justify-content:space-between;align-items:center;gap:18px}
+.circuit-heading h2{margin:6px 0 15px}
+.circuit-heading>button{flex-shrink:0;padding:13px 18px}
+.circuit-summary{display:flex;gap:20px;align-items:center;flex-wrap:wrap;padding:12px 0 16px;border-bottom:1px solid var(--circuit-line);color:var(--circuit-muted);font-size:13px}
+.circuit-summary strong{margin-left:8px;color:var(--circuit-text);font-size:18px;font-variant-numeric:tabular-nums}
+.circuit-summary>button{margin-left:auto;padding:8px 13px}
+.circuit-notice{padding:12px 15px;background:var(--circuit-panel);border-left:3px solid #4681a6;color:var(--circuit-text);font-size:13px;overflow-wrap:anywhere}
+[data-view="tournaments"] .circuit-feature{display:grid;width:100%;gap:10px;margin:20px 0;padding:22px;text-align:left;border:1px solid var(--circuit-line);border-left:4px solid #3279a6;border-radius:5px;background:var(--circuit-panel)}
+.circuit-feature>strong{font-size:25px;line-height:1.2;overflow-wrap:anywhere}
+.circuit-event-meta{display:flex;justify-content:space-between;gap:12px;font:650 12px ui-monospace,Consolas,monospace;color:var(--circuit-muted)}
+.circuit-feature .circuit-event-meta b{font-family:system-ui,sans-serif;font-weight:650;letter-spacing:0}
+.circuit-event-facts{display:flex;flex-wrap:wrap;gap:8px 24px;color:var(--circuit-muted);font-size:13px}
+.circuit-feature>small{font-size:13px;color:var(--circuit-text)}
+.circuit-filters{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin:20px 0}
+.circuit-filter-group{display:flex;flex-wrap:wrap;gap:4px}
+.circuit-filter-group>button{padding:8px 10px;text-transform:none;letter-spacing:0}
+.circuit-filter-group>button[aria-pressed="true"]{background:var(--circuit-accent);border-color:#5999c0;color:#102b3c}
+[data-view="tournaments"] .circuit-board{grid-template-columns:minmax(0,1.4fr) minmax(260px,1fr);gap:25px}
+.circuit-calendar-panel,.circuit-events-panel{min-width:0}
+[data-view="tournaments"] .calendar-heading{border:0;margin:0;padding:0 0 14px;gap:8px;min-height:42px}
+[data-view="tournaments"] .calendar-heading h3{font-size:18px;letter-spacing:0}
+[data-view="tournaments"] .calendar-heading button{padding:8px 10px}
+[data-view="tournaments"] .circuit-calendar{gap:4px;border:0}
+[data-view="tournaments"] .circuit-calendar>strong{padding:8px 0;border:0;color:var(--circuit-muted);font-size:11px}
+[data-view="tournaments"] .calendar-day{min-height:74px;padding:3px;border:1px solid var(--circuit-line);border-radius:3px;background:var(--circuit-surface);box-shadow:none}
+[data-view="tournaments"] .calendar-day.today{background:var(--circuit-panel);border-color:#6d9dbd;box-shadow:inset 0 3px #5796be}
+[data-view="tournaments"] .calendar-day.selected{border-color:#236c9c;box-shadow:inset 0 0 0 1px #236c9c;background:#cae6f7}
+[data-view="tournaments"] .calendar-day .calendar-date{display:block;width:100%;padding:5px;margin:0;background:transparent;border:0;color:var(--circuit-text);text-align:left;font:650 12px system-ui,sans-serif}
+[data-view="tournaments"] .calendar-day .calendar-event{display:block;width:100%;margin:3px 0;padding:5px 4px;border:0;border-radius:2px;background:#c9dfed;color:#214861;font:650 11px system-ui,sans-serif;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+[data-view="tournaments"] .calendar-day .calendar-event[data-status="ACTIVE"]{background:#28658e;color:#fff}
+[data-view="tournaments"] .calendar-day .calendar-event[data-status="COMPLETED"],[data-view="tournaments"] .calendar-day .calendar-event[data-status="CANCELLED"]{background:#e0e8ee;color:#4c657a}
+.circuit-list-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;padding-bottom:14px}
+.circuit-list-heading h3{margin:0;font-size:18px;letter-spacing:0}
+.circuit-list-heading>span{font-size:12px;color:var(--circuit-muted)}
+.circuit-list-heading>button{padding:8px 10px}
+[data-view="tournaments"] .circuit-event-list{gap:10px;max-height:470px;padding:2px 5px 5px 2px;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-color:#8caec7 transparent}
+[data-view="tournaments"] .circuit-event{display:grid;gap:9px;width:100%;margin:0;padding:16px;border:1px solid var(--circuit-line);border-left:3px solid #79a7c6;background:var(--circuit-surface);border-radius:4px}
+[data-view="tournaments"] .circuit-event>strong{font-size:17px;line-height:1.3;color:var(--circuit-text);overflow-wrap:anywhere}
+[data-view="tournaments"] .circuit-event>.circuit-event-meta{font-size:11px;letter-spacing:0;color:var(--circuit-muted);gap:8px;flex-wrap:wrap}
+[data-view="tournaments"] .circuit-event>.circuit-event-facts{font-size:12px;line-height:1.5;color:var(--circuit-muted);letter-spacing:0;justify-content:flex-start;gap:4px 16px}
+[data-view="tournaments"] .circuit-event>small{font-size:12px;color:var(--circuit-text)}
+[data-view="tournaments"] .circuit-event[data-status="ACTIVE"]{border-left-color:#246891;background:#d9ebf7}
+[data-view="tournaments"] .circuit-event[data-status="COMPLETED"],[data-view="tournaments"] .circuit-event[data-status="CANCELLED"]{border-left-color:#98aebb;background:#e6edf3}
+[data-view="tournaments"] .circuit-empty{padding:22px 18px;background:var(--circuit-panel);color:var(--circuit-muted);border:1px dashed var(--circuit-line);border-radius:4px;font-size:13px;line-height:1.6}
+.circuit-footnote{font-size:12px;line-height:1.6;color:var(--circuit-muted);margin:12px 0}
+.circuit-footnote>span{display:block;margin-top:7px}
+.circuit-detail-nav{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:22px}
+.circuit-detail-nav>button{padding:9px 12px}
+.circuit-detail-nav>span{font:650 12px ui-monospace,Consolas,monospace;color:var(--circuit-muted);text-align:right}
+[data-view="tournaments"] h2.circuit-event-title{font-size:30px;line-height:1.2;margin:0 0 12px;overflow-wrap:anywhere}
+.circuit-event-schedule{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;color:var(--circuit-muted);font-size:13px}
+.circuit-event-schedule>strong{color:var(--circuit-text)}
+[data-view="tournaments"] .circuit-format{gap:12px 20px;padding:13px 15px;background:var(--circuit-panel);color:var(--circuit-text);border-radius:4px;font-size:11px}
+.circuit-detail-top{display:grid;grid-template-columns:minmax(230px,.9fr) minmax(0,1.1fr);gap:30px;margin:24px 0}
+.circuit-detail-top h3{margin:0 0 15px}
+.circuit-prizes h3>small{display:block;margin-top:6px;font-size:11px;color:var(--circuit-muted);font-weight:650}
+.circuit-prizes ol{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;margin:0;padding:0}
+.circuit-prizes li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--circuit-line);font-size:13px;font-variant-numeric:tabular-nums}
+.circuit-prizes li>span{color:var(--circuit-muted)}
+.circuit-prizes li>strong{color:var(--circuit-text);font-weight:650}
+.circuit-custom-earnings{font-size:24px;font-weight:650;margin:12px 0}
+.circuit-custom-earnings span{font-size:11px;color:var(--circuit-muted)}
+[data-view="tournaments"] .circuit-toolbar{margin:0;gap:12px;align-items:flex-end}
+[data-view="tournaments"] .circuit-toolbar label{display:grid;gap:8px;font:650 12px system-ui,sans-serif;max-width:100%;min-width:160px}
+[data-view="tournaments"] .circuit-toolbar select,[data-view="tournaments"] .circuit-create input,[data-view="tournaments"] .circuit-create select{background:var(--circuit-surface);border:1px solid var(--circuit-line);color:var(--circuit-text);font-size:14px;max-width:100%}
+[data-view="tournaments"] .circuit-toolbar button{font-size:11px;padding:12px 14px}
+.circuit-roster,.circuit-bracket-section,.circuit-results-section{padding-top:20px;border-top:1px solid var(--circuit-line);margin-top:26px}
+[data-view="tournaments"] .circuit-teams{gap:12px;margin-top:16px}
+[data-view="tournaments"] .circuit-teams article{padding:15px;border:1px solid var(--circuit-line);background:var(--circuit-surface);border-radius:4px;min-width:0}
+[data-view="tournaments"] .circuit-teams article[data-your-team="true"]{border-color:#5998be;box-shadow:inset 3px 0 #5998be}
+[data-view="tournaments"] .circuit-teams article>strong{font-size:15px;line-height:1.4;color:var(--circuit-text);align-items:baseline;flex-wrap:wrap;overflow-wrap:anywhere}
+[data-view="tournaments"] .circuit-teams article>strong small{font-size:10px;color:var(--circuit-muted);white-space:nowrap}
+.circuit-teams ul{list-style:none;padding:0;margin:11px 0;display:flex;flex-wrap:wrap;gap:5px 14px;font-size:13px;line-height:1.6;color:var(--circuit-text)}
+.circuit-teams li{overflow-wrap:anywhere}
+.circuit-teams li>b{font-size:10px;color:#28678c;margin-left:4px}
+[data-view="tournaments"] .circuit-teams article>span,[data-view="tournaments"] .circuit-invite{font-size:11px;letter-spacing:0;color:var(--circuit-muted);line-height:1.6}
+.circuit-section-heading{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap}
+.circuit-section-heading button{padding:10px 12px}
+[data-view="tournaments"] .circuit-bracket{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+[data-view="tournaments"] .circuit-series{background:var(--circuit-panel);border:1px solid var(--circuit-line);border-radius:4px;padding:15px;gap:12px;min-width:0}
+[data-view="tournaments"] .circuit-series>small,[data-view="tournaments"] .circuit-series>span{font-size:11px;color:var(--circuit-muted)}
+[data-view="tournaments"] .circuit-series>strong{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px}
+[data-view="tournaments"] .circuit-series>strong>b{font-size:22px;color:var(--circuit-text)}
+[data-view="tournaments"] .circuit-series-team{font:650 13px/1.5 system-ui,sans-serif;color:var(--circuit-text);overflow-wrap:anywhere}
+.circuit-series-team small{display:block;font-size:10px!important;letter-spacing:.04em}
+[data-view="tournaments"] .circuit-series-team[data-side="blue"]>small{color:#216391}
+[data-view="tournaments"] .circuit-series-team[data-side="red"]>small{color:#a33b48}
+[data-view="tournaments"] .circuit-series-team[data-winner="true"]{color:var(--circuit-text);text-decoration:underline;text-underline-offset:4px}
+[data-view="tournaments"] .circuit-series>span.circuit-winner{color:var(--circuit-text)}
+.circuit-results-section h3>small{font-size:11px;color:var(--circuit-muted);font-weight:500;margin-left:10px}
+[data-view="tournaments"] .circuit-results>div{padding:14px 15px;background:var(--circuit-surface);border-bottom:1px solid var(--circuit-line);align-items:center;line-height:1.5}
+[data-view="tournaments"] .circuit-results>div:first-child{background:var(--circuit-panel);border-left:3px solid #4385ad}
+.circuit-results>div>span{white-space:nowrap;font-variant-numeric:tabular-nums}
+.circuit-results>div>span>small{font-size:10px;color:var(--circuit-muted);display:block;text-align:right}
+.circuit-delete{margin-top:32px;padding-top:18px;border-top:1px solid var(--circuit-line)}
+.circuit-delete>button{padding:10px 12px;font-size:11px!important}
+[data-view="tournaments"] .circuit-create{background:var(--circuit-panel);border-color:var(--circuit-line);padding:24px;max-width:620px;border-radius:5px}
+[data-view="tournaments"] .circuit-create label{font-size:12px}
+[data-view="tournaments"] .circuit-create p{font-size:13px;color:var(--circuit-muted)}
+@media(max-width:900px){[data-view="tournaments"] .circuit-board{grid-template-columns:1fr}.circuit-event-list{max-height:420px}.circuit-heading>button{max-width:190px}.circuit-feature>strong{font-size:23px}}
+@media(max-width:650px){.circuit-heading{align-items:flex-start;flex-direction:column;gap:0}.circuit-heading>button{max-width:none;width:100%;margin-bottom:12px}.circuit-summary{gap:12px}.circuit-summary>span:first-child{width:100%}.circuit-filters{gap:9px}.circuit-filter-group>button{font-size:11px;padding:8px}.circuit-detail-nav{align-items:flex-start;flex-direction:column;gap:10px}.circuit-detail-nav>span{text-align:left}.circuit-detail-top{grid-template-columns:1fr;gap:22px}.circuit-feature .circuit-event-meta{flex-wrap:wrap}.circuit-feature{padding:17px!important}.circuit-feature>strong{font-size:22px}[data-view="tournaments"] .circuit-bracket,[data-view="tournaments"] .circuit-teams{grid-template-columns:1fr}.circuit-results-section h3>small{display:block;margin:8px 0 0}.circuit-results>div{gap:10px}.circuit-results>div>strong{min-width:0;overflow-wrap:anywhere}[data-view="tournaments"] .calendar-day{min-height:64px;padding:2px}[data-view="tournaments"] .calendar-day .calendar-event{font-size:11px;padding:5px 3px}}
+@media(prefers-reduced-motion:reduce){[data-view="tournaments"] button,[data-view="tournaments"] .calendar-day{transition:none}}

@@ -240,7 +240,72 @@ function validateWorld(world,previous=null){
     }
   }
   validateModeScopes(world,previous);
+  validateParticipantAnalytics(world,previous?.save);
   return serialized;
+}
+function validateParticipantAnalytics(world,old){
+ const analytics=world.patchState.participantAnalytics;
+ const previous=old?.patchState?.participantAnalytics;
+ if(!analytics){if(previous)throw fail(409,'Participant analytics were removed');return;}
+ if(analytics.schema!==1||analytics.coverage!=='prospective-skyline'||!Number.isFinite(analytics.startedAt)||!isRecord(analytics.legacy?.tdm)||!isRecord(analytics.legacy?.deathmatch)||!isRecord(analytics.samples))throw fail(400,'Invalid participant analytics schema');
+ const samePatch=old?.patchState.id===world.patchState.id;
+ if(samePatch&&previous&&(analytics.startedAt!==previous.startedAt||!isDeepStrictEqual(analytics.legacy,previous.legacy)))throw fail(409,'Participant analytics coverage changed');
+ const names=Object.keys(world.patchState.weaponStats),botIds=new Set(Object.entries(world.bots).map(([name,b])=>botId(name,b)));
+ const scopes={tdm:[],deathmatch:[]};
+ for(const [revision,sample] of Object.entries(analytics.samples)){
+  if(!isRecord(sample)||typeof sample.rulesetRevision!=='string')throw fail(400,'Missing participant analytics ruleset');
+  const prior=samePatch?previous?.samples?.[revision]:null;
+  if(prior&&sample.rulesetRevision!==prior.rulesetRevision)throw fail(409,'Participant analytics ruleset changed');
+  for(const mode of ['tdm','deathmatch'])for(const type of ['human','bot']){
+   const scope=sample[mode]?.[type],before=prior?.[mode]?.[type];
+   if(!isRecord(scope?.meta)||!isRecord(scope.skillStrata)||!isRecord(scope.participants))throw fail(400,'Invalid participant cohort');
+   counters(scope,['completedMatches'],['completedMatches']);
+   if(before)monotonic(scope,before,['completedMatches'],'Participant cohort games');
+   if(Object.keys(scope.meta).length!==names.length)throw fail(400,'Incomplete participant weapon sample');
+   for(const [name,row] of Object.entries(scope.meta)){if(!names.includes(name)||row.name!==name)throw fail(400,'Unexpected participant weapon');validateMeta(row);if(before)monotonic(row,before.meta?.[name],META_TOTALS,'Participant weapon measurements');}
+   for(const [id,actor] of Object.entries(scope.participants)){
+    if(!id||id.length>180||actor.participantId!==id||actor.type!==type||!isRecord(actor.meta)||(type==='bot'?!botIds.has(id):botIds.has(id)))throw fail(400,'Invalid stable participant identity');
+    const former=before?.participants?.[id];
+    if(former&&(former.type!==actor.type||former.participantId!==actor.participantId))throw fail(409,'Participant identity changed');
+    for(const [name,row] of Object.entries(actor.meta)){if(!names.includes(name)||row.name!==name)throw fail(400,'Invalid participant weapon record');validateMeta(row);if(former)monotonic(row,former.meta?.[name],META_TOTALS,'Participant actor measurements');}
+    for(const name of Object.keys(former?.meta||{}))if(!actor.meta[name])throw fail(409,'Participant weapon record was removed');
+   }
+   for(const id of Object.keys(before?.participants||{}))if(!scope.participants[id])throw fail(409,'Participant identity was removed');
+   for(const [band,guns] of Object.entries(scope.skillStrata)){
+    if((type==='human'?band!=='human':!/^[0-9]{1,3}$/.test(band))||!isRecord(guns))throw fail(400,'Invalid participant Power band');
+    for(const [name,row] of Object.entries(guns)){if(!names.includes(name))throw fail(400,'Invalid participant band weapon');validateMeta(row);if(before)monotonic(row,before.skillStrata?.[band]?.[name],META_TOTALS,'Participant band measurements');}
+   }
+   for(const [name,row] of Object.entries(scope.meta))for(const key of META_TOTALS){
+    reconcile(row[key],count(Object.values(scope.participants).map(a=>a.meta[name]),key),'Cohort and participant measurements');
+    reconcile(row[key],count(Object.values(scope.skillStrata).map(g=>g[name]),key),'Cohort and Power-band measurements');
+   }
+   scopes[mode].push(scope);
+  }
+  if(prior&&revision!==world.aiRevision&&!isDeepStrictEqual(sample,prior))throw fail(409,'Historical participant sample changed');
+ }
+ for(const revision of Object.keys(samePatch&&previous?.samples||{}))if(!analytics.samples[revision])throw fail(409,'Participant revision history was removed');
+ for(const mode of ['tdm','deathmatch']){
+  const combined=mode==='tdm'?world.patchState.meta:world.modeStats?.deathmatch?.meta||{};
+  for(const [name,row] of Object.entries(analytics.legacy[mode])){if(!names.includes(name))throw fail(400,'Invalid legacy participant weapon');validateMeta(row);}
+  for(const name of names)for(const key of META_TOTALS)reconcile(Number(combined[name]?.[key]||0),Number(analytics.legacy[mode][name]?.[key]||0)+count(scopes[mode].map(s=>s.meta[name]),key),'Combined and participant '+mode+' measurements');
+ }
+ if(samePatch&&previous){
+  // Reconcile prospective TDM actor deltas against the independently retained
+  // exact combat records. Identity comes from profile IDs, never display names.
+  const identityNames=new Map(Object.entries(world.bots).map(([name,b])=>[botId(name,b),name]));
+  for(const type of ['human','bot'])for(const name of names)for(const key of META_TOTALS){
+   const alias=key==='kills'?'k':key==='deaths'?'d':key;
+   const scoped=(source)=>Object.values(source?.samples||{}).reduce((sum,s)=>sum+Number(s.tdm?.[type]?.meta?.[name]?.[key]||0),0);
+   const recorded=(patch)=>count(Object.entries(patch.perBot).filter(([actor])=>type==='human'?actor==='@human:YOU':identityNames.has(botId(actor,world.bots[actor]))).map(([,guns])=>guns[name]),alias);
+   reconcile(scoped(analytics)-scoped(previous),recorded(world.patchState)-recorded(old.patchState),'Participant cohort and actor deltas');
+  }
+  for(const type of ['human','bot'])for(const name of names)for(const alias of WEAPON_TOTALS){
+   const key=alias==='k'?'kills':alias==='d'?'deaths':alias;
+   const scoped=source=>Object.values(source?.samples||{}).reduce((sum,s)=>sum+Number(s.deathmatch?.[type]?.meta?.[name]?.[key]||0),0);
+   const recorded=save=>{const dm=save.modeStats?.deathmatch;return type==='human'?Number(dm?.player?.weapons?.[name]?.[alias]||0):count(Object.values(dm?.bots||{}).map(c=>c.weaponUsage?.[name]),alias);};
+   reconcile(scoped(analytics)-scoped(previous),recorded(world)-recorded(old),'Deathmatch participant cohort and career deltas');
+  }
+ }
 }
 function validateModeScopes(world,previous){
  const old=previous?.save,patch=world.patchState;

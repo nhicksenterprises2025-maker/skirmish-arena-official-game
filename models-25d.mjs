@@ -1,4 +1,5 @@
 import * as THREE from './vendor/three.module.js';
+import './team-presentation.js';
 import {mergeGeometries} from './vendor/addons/utils/BufferGeometryUtils.js';
 import {loadAssetLibrary} from './asset-loader-25d.mjs';
 
@@ -315,7 +316,7 @@ function poseLimb(limb,end,bend){
 }
 export function buildOperator(team=0,skin=0,palette=null){
   const colors={...defaultSkins[Math.abs(skin)%defaultSkins.length],...(palette||{})};
-  const teamColor=team===0?0x20d487:0x25a8ff,group=new THREE.Group(),pose=new THREE.Group(),lower=new THREE.Group(),torso=new THREE.Group();
+  const teamColor=globalThis.SARTeamPresentation.COLORS[team===0?'blue':'red'],group=new THREE.Group(),pose=new THREE.Group(),lower=new THREE.Group(),torso=new THREE.Group();
   group.name='tactical-operator';group.add(pose);pose.add(lower,torso);
   const shadow=mesh(group,sharedGeometry('operator-shadow',()=>new THREE.CircleGeometry(27,24)),sharedShadow(),0,.5,0);shadow.rotation.x=-Math.PI/2;shadow.scale.set(1,.78,1);shadow.castShadow=false;shadow.receiveShadow=false;
   const ring=mesh(group,sharedGeometry('operator-team-ring',()=>new THREE.RingGeometry(27.5,28.8,32)),sharedBasic(teamColor),0,1,0);ring.rotation.x=-Math.PI/2;ring.castShadow=false;
@@ -392,6 +393,14 @@ export function buildOperator(team=0,skin=0,palette=null){
     state:{initialized:false,yaw:0,phase:0,move:0,sprint:0,ads:0,dash:0,hit:0,dead:0,lastDead:false,spawn:1,lastX:0,lastY:0,lastShot:null,shotAge:99,recoil:0,reload:0},colors};
 }
 function sideLens(side){return side*5;}
+export function setOperatorPresentation(entity,presentation){
+  if(!presentation||entity.presentationColor===presentation.color)return;
+  entity.presentationColor=presentation.color;
+  // Ring materials are shared. Swap the cached overlay material rather than
+  // mutating it (which would recolor every operator sharing the old material).
+  entity.ring.material=sharedBasic(presentation.color);
+  entity.spawnRing.material.color.set(presentation.color);
+}
 function sharedBasic(color){
   const key='basic:'+color;
   if(!materialCache.has(key)){const value=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.82,depthWrite:false});value.userData.sarShared=true;materialCache.set(key,value);}

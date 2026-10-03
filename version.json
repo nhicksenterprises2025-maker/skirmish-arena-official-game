@@ -1,21 +1,46 @@
 {
-  "version": "1.9.3",
-  "applicationVersion": "1.9",
+  "version": "1.10.0",
+  "applicationVersion": "1.10",
   "weaponBalance": "8.0",
-  "updateName": "STARTUP REPAIR",
-  "shellRevision": "startup-repair-2",
+  "analyticsSchema": 1,
+  "updateName": "SKYLINE",
+  "shellRevision": "skyline-1",
   "channel": "live",
-  "releasedAt": "2026-10-02T15:28:32.469Z",
-  "notes": "Version 1.9 startup repair safely completes desktop updates and preserves your account, world and progression. Weapon Balance 8.0 is unchanged.",
+  "releasedAt": "2026-10-03T11:46:55.647Z",
+  "notes": "SKYLINE brings a focused lobby, five Phone apps, separate player and bot weapon statistics, a light-blue identity and a clearer tournament hub. Weapon Balance 8.0 is unchanged.",
   "categories": {
-    "Bug Fixes": [
-      "Desktop updates close the required local service before replacing application files, preventing incomplete installations.",
-      "Startup identifies the failed loading stage, checks the installed release and supports a clean Retry.",
-      "The startup screen remains visible for at least three seconds and waits for essential initialization. Optional scenery and audio do not hold up entry.",
-      "Existing worlds retain a recoverable original before progression migration; failed loading never substitutes an empty world."
+    "New Features": [
+      "Phone now contains Messages, Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta, with compact and expanded statistics views.",
+      "Human and bot Weapon Meta use separately attributed participant statistics. Previous mixed records are retained; accurate cohort collection begins with SKYLINE.",
+      "Exit Game saves locally before closing the desktop game, with an honest close-window message in unsupported browsers."
+    ],
+    "Improvements": [
+      "A simplified Play menu and six lobby choices. Player Profile and Settings are available from your username menu.",
+      "A new original wordmark and SA emblem, with a consistent navy and light-blue interface.",
+      "Own-team blue and opponent red indicators use your local perspective; neutral spectating keeps a stable team mapping.",
+      "A clearer tournament hub, event filters, registration details, brackets and per-player earnings.",
+      "Settings now has Game, Audio, Account and About tabs. Data Management is in Account; updates, release history and the player guide are in About. Player-facing debug settings are removed."
     ]
   },
   "history": [
+    {
+      "version": "1.9.3",
+      "applicationVersion": "1.9",
+      "weaponBalance": "8.0",
+      "updateName": "STARTUP REPAIR",
+      "shellRevision": "startup-repair-2",
+      "channel": "live",
+      "releasedAt": "2026-10-02T15:28:32.469Z",
+      "notes": "Version 1.9 startup repair safely completes desktop updates and preserves your account, world and progression. Weapon Balance 8.0 is unchanged.",
+      "categories": {
+        "Bug Fixes": [
+          "Desktop updates close the required local service before replacing application files, preventing incomplete installations.",
+          "Startup identifies the failed loading stage, checks the installed release and supports a clean Retry.",
+          "The startup screen remains visible for at least three seconds and waits for essential initialization. Optional scenery and audio do not hold up entry.",
+          "Existing worlds retain a recoverable original before progression migration; failed loading never substitutes an empty world."
+        ]
+      }
+    },
     {
       "version": "1.9.2",
       "applicationVersion": "1.9",

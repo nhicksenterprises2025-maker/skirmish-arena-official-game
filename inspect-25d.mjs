@@ -19,7 +19,7 @@ export async function paintInspection(canvas,{kind,weapon,skin=0,palette=null,ro
   const interactive=canvas.id==='inspectionCanvas'||rotation!==0;
   const cacheKey=rotation===0?JSON.stringify([kind,weapon,skin,palette,unarmed,width,height,interactive]):null;
   if(cacheKey&&thumbnails.has(cacheKey)){copyCanvas(canvas,thumbnails.get(cacheKey));return;}
-  renderer.setSize(width,height,false);renderer.setClearColor(0xdce3d5,1);
+  renderer.setSize(width,height,false);renderer.setClearColor(typeof getComputedStyle==='function'?getComputedStyle(document.documentElement).getPropertyValue('--sky-panel-light').trim()||'#DFEBF5':'#DFEBF5',1);
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;
   const modelKey=JSON.stringify([kind,weapon,skin,palette,unarmed]);

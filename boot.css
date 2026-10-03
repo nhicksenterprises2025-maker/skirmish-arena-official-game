@@ -1,11 +1,12 @@
-html.sar-boot-active{background:#16291f}
-#sarBoot{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;background:#16291f;color:#eeeede;font:15px "Segoe UI",system-ui,sans-serif;text-align:left}
+@import url("theme.css");
+html.sar-boot-active{background:var(--sky-background)}
+#sarBoot{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;background:var(--sky-background);color:var(--sky-text-dark);font:15px "Segoe UI",system-ui,sans-serif;text-align:left}
 #sarBoot .sar-boot-content{width:min(520px,calc(100vw - 72px))}
-#sarBoot .sar-boot-edition{display:flex;justify-content:space-between;color:#adc1a0;font-size:12px;font-weight:650;letter-spacing:.13em}
-#sarBoot h1{margin:36px 0 26px;font:850 clamp(54px,8vw,88px)/.92 "Segoe UI",system-ui,sans-serif;letter-spacing:-.055em;color:#eeeede;text-shadow:none}
-#sarBoot .sar-boot-balance{margin:0;color:#b8c6b0;font-size:12px;letter-spacing:.08em}
-#sarBoot .sar-boot-rule{height:2px;margin:32px 0 20px;background:#617454}
-#sarBoot [role=status]{min-height:24px;margin:0;color:#c1ccba;font-size:14px;line-height:1.6}
-#sarBoot button{margin-top:18px;padding:11px 24px;border:1px solid #849874;background:#294333;color:#eeeede;border-radius:3px;font:650 13px "Segoe UI",system-ui,sans-serif;cursor:pointer}
-#sarBoot button:focus-visible{outline:2px solid #c3d1aa;outline-offset:4px}
+#sarBoot .sar-boot-edition{display:flex;justify-content:space-between;color:var(--sky-muted-dark);font-size:12px;font-weight:650;letter-spacing:.13em}
+#sarBoot h1{margin:36px 0 26px;font:850 clamp(54px,8vw,88px)/.92 "Segoe UI",system-ui,sans-serif;letter-spacing:-.055em;color:var(--sky-text-dark);text-shadow:none}
+#sarBoot .sar-boot-balance{margin:0;color:var(--sky-muted-dark);font-size:12px;letter-spacing:.08em}
+#sarBoot .sar-boot-rule{height:2px;margin:32px 0 20px;background:var(--sky-border)}
+#sarBoot [role=status]{min-height:24px;margin:0;color:var(--sky-muted-dark);font-size:14px;line-height:1.6}
+#sarBoot button{margin-top:18px;padding:11px 24px;border:1px solid var(--sky-border);background:var(--sky-surface-dark);color:var(--sky-text-dark);border-radius:3px;font:650 13px "Segoe UI",system-ui,sans-serif;cursor:pointer}
+#sarBoot button:focus-visible{outline:2px solid var(--sky-link);outline-offset:4px}
 #sarBoot button[hidden]{display:none}

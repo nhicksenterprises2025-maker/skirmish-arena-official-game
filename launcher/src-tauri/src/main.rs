@@ -349,6 +349,15 @@ fn require_game(app: &tauri::AppHandle, window: &tauri::WebviewWindow) -> Result
     Ok(())
 }
 #[tauri::command]
+fn quit_game(app: tauri::AppHandle, window: tauri::WebviewWindow) -> Result<(), String> {
+    require_game(&app, &window)?;
+    if app.state::<LauncherState>().busy.load(Ordering::SeqCst) { return Err("Wait for the update to finish.".into()); }
+    // The game durably saves its local checkpoint before invoking this command.
+    // Shared backend and independent dialogue processes remain untouched.
+    app.exit(0);
+    Ok(())
+}
+#[tauri::command]
 async fn check_local_backend(app: tauri::AppHandle, window: tauri::WebviewWindow) -> Result<Value, String> {
     require_game(&app, &window)?;
     backend::prepare(&app).await
@@ -550,7 +559,7 @@ fn main() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![launcher_settings, save_server, server_status, check_launcher_update, play, install_launcher_update, finish_game_checkpoint, game_fullscreen_state, set_game_fullscreen, check_local_backend, offline_local_api])
+        .invoke_handler(tauri::generate_handler![launcher_settings, save_server, server_status, check_launcher_update, play, install_launcher_update, finish_game_checkpoint, game_fullscreen_state, set_game_fullscreen, check_local_backend, offline_local_api, quit_game])
         .run(tauri::generate_context!()).expect("Could not start Skirmish launcher");
 }
 

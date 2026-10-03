@@ -1,6 +1,16 @@
-# TACTICAL ADAPTATION maintenance and verification
+# SKYLINE maintenance and verification
 
-This internal document carries operational details moved out of the public README. It routes work within the existing project; it is not a replacement architecture. **1.9.1 — TACTICAL ADAPTATION** is the integration target. See [Tactical Adaptation](TACTICAL-ADAPTATION.md) for the bot-only changes and checks. See [Core Tuning](CORE-TUNING.md) for the changed rules, scheduler, movement and balance checks. See [Tactical Instinct](TACTICAL-INSTINCT.md) for mode, tactical-revision and deletion routes. Completion of the acceptance checks below must be established by current test output, not inferred from this document. This historical document path remains stable for existing project routing.
+This internal document carries operational details moved out of the public README. It routes work within the existing project; it is not a replacement architecture. **1.10.0 — SKYLINE** is the current application release; Balance 8.0 and analytics schema 1 remain separate. See [Tactical Adaptation](TACTICAL-ADAPTATION.md) for the bot-only changes and checks. See [Core Tuning](CORE-TUNING.md) for the changed rules, scheduler, movement and balance checks. See [Tactical Instinct](TACTICAL-INSTINCT.md) for mode, tactical-revision and deletion routes. Completion of the acceptance checks below must be established by current test output, not inferred from this document. This historical document path remains stable for existing project routing.
+
+## SKYLINE routes
+
+- Lobby/account menu/Settings: `index.html`, `game.js`, `cloud.js`. Settings keys are adapted to Game/Audio/Account/About; existing saved keys stay intact.
+- Phone navigation/workspaces: `phone-apps.js`, `phone-apps.css`; retained conversations/device in `ai-ui.js`. Matches run independently of app visibility.
+- Theme/identity: `theme.css` semantic tokens, `skyline.css`, `assets/branding/`, `tools/export-branding.cjs`. Launcher copies the shared theme during staging. Art palettes are independent.
+- Cohort analytics: `game.js` participant analytics schema 1, `server/world.cjs` validation. Stable actor/account identity chooses human/bot; mode/patch scopes stay separate. No unsupportable historical split. Mixed legacy records and AI selection inputs remain intact.
+- Team overlays: `team-presentation.js` / `SAR.getTeamPresentation(matchId)`. Preserve canonical team IDs; resolve viewer relationships only at presentation.
+- Safe exit: `exit-game.js` flushes the local world/pending sync; exact-origin native `quit_game` closes the application without terminating shared services.
+- Tournament presentation: `tournaments-ui.js`, `skyline-tournaments.css`; engine and payouts unchanged.
 
 ## Targeted routes
 
@@ -65,7 +75,7 @@ Facts come from simulation records: actual weapon mechanics, observed meta, care
 
 Maintain all 50 persistent identities and their social traits. Meaningful questions, complaints, opinions, reactions, rivalry and tournament discussion replace routine reminder spam. Cooldowns and event identities prevent repeated topics; low-social bots remain quieter. See [LOCAL_AI.md](LOCAL_AI.md) for historical queue, validation, training export and environment-variable details. Its old public tab/settings labels and tournament limitations are historical; use current code for those names.
 
-Owner debug visibility is restricted to the exact username `noahhicks719`; retain the preference and server authorization where applicable. Never expose passwords, session tokens, recovery codes or account secrets in diagnostics, prompts, exported datasets or screenshots.
+SKYLINE removes all player-facing Developer/Debug settings, including for the owner. Retain internal diagnostics and server authorization; no ordinary settings expose lab/training/privileged tools. Never expose passwords, session tokens, recovery codes or account secrets in diagnostics, prompts, exported datasets or screenshots.
 
 ## Tournament invariants
 

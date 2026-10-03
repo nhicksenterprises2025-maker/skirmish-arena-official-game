@@ -19,6 +19,7 @@
   }
   function updateButton(busy = false) {
     const btn = document.getElementById('sarUpdateApp');
+    if(!btn)return;
     btn.disabled = busy;
     btn.setAttribute('aria-busy', String(busy));
     btn.querySelector('strong').textContent = busy ? 'UPDATING…' : waitingWorker ? 'INSTALL UPDATE' : 'UPDATE GAME';
@@ -28,7 +29,7 @@
     if (!worker || worker.state === 'redundant') return;
     waitingWorker = worker;
     updateButton(!!pending);
-    status('A new release is ready. Hit Update Game to install.', 'ok');
+    status('A new release is ready. Open Settings → About to install.', 'ok');
   }
   function showInstall() {
     document.getElementById('sarInstallApp')?.classList.toggle('hidden', !deferredInstall || standalone());
@@ -79,7 +80,7 @@
       status('Updates need the game’s HTTPS address or localhost. A downloaded folder cannot receive releases.', 'error');
       return false;
     }
-    if (navigator.onLine === false) throw new Error('You’re offline. Connect to the internet and hit Update Game again.');
+    if (navigator.onLine === false) throw new Error('You’re offline. Connect to the internet and check again in Settings → About.');
     if (manual) status('Checking for a new release…');
     registration = registration || await boot;
     if (!registration) {
@@ -116,7 +117,7 @@
     }
     if (manual) updateButton(true);
     pending = runCheck(manual, apply).catch(error => {
-      if (manual) status(navigator.onLine === false ? 'You’re offline. Connect to the internet and hit Update Game again.' : error.name === 'TypeError' ? 'Couldn’t reach the update server. Check your connection and hit Update Game again.' : error.message || 'Update failed. Check your connection and try again.', 'error');
+      if (manual) status(navigator.onLine === false ? 'You’re offline. Connect to the internet and check again in Settings → About.' : error.name === 'TypeError' ? 'Couldn’t reach the update server. Check your connection and check again in Settings → About.' : error.message || 'Update failed. Check your connection and try again.', 'error');
       return false;
     }).finally(() => { pending = null; updateButton(); });
     return pending;
@@ -130,12 +131,7 @@
     hasUpdate: () => !!waitingWorker || !!registration?.waiting,
     getStatus: () => document.getElementById('sarUpdateStatus').textContent
   };
-  document.getElementById('sarUpdateApp').addEventListener('click', () => checkForUpdates(true, true));
-  const dock = document.createElement('div');
-  dock.className = 'sar-update-dock';
-  dock.innerHTML = '<button id="sarInstallApp" class="sar-app-action hidden" type="button">INSTALL APP ↗</button>';
-  document.body.appendChild(dock);
-  document.getElementById('sarInstallApp').addEventListener('click', installApp);
+  document.getElementById('sarUpdateApp')?.addEventListener('click', () => checkForUpdates(true, true));
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; showInstall(); });
   window.addEventListener('appinstalled', () => { deferredInstall = null; showInstall(); status('Skirmish Arena installed.', 'ok'); });
   if (!supported) return;

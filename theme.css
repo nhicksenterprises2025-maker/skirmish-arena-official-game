@@ -1,0 +1,24 @@
+/* SKYLINE shared interface palette. World materials and cosmetic palettes are independent. */
+:root{
+  --sky-background:#101C2A;--sky-background-rgb:16 28 42;
+  --sky-surface-dark:#192C40;--sky-surface-dark-rgb:25 44 64;
+  --sky-surface-raised:#25425D;--sky-surface-raised-rgb:37 66 93;
+  --sky-surface-light:#EDF4FA;--sky-surface-light-rgb:237 244 250;
+  --sky-panel-light:#DFEBF5;--sky-panel-light-rgb:223 235 245;
+  --sky-panel-mid:#C5D9E8;--sky-panel-mid-rgb:197 217 232;
+  --sky-accent:#79C5F3;--sky-accent-rgb:121 197 243;
+  --sky-accent-hover:#A7DEFF;--sky-accent-hover-rgb:167 222 255;
+  --sky-text-light:#192E42;--sky-text-light-rgb:25 46 66;
+  --sky-text-dark:#F0F7FC;--sky-text-dark-rgb:240 247 252;
+  --sky-muted-light:#4C657A;--sky-muted-light-rgb:76 101 122;
+  --sky-muted-dark:#A4BED3;--sky-muted-dark-rgb:164 190 211;
+  --sky-border:#9CB2C5;--sky-border-rgb:156 178 197;
+  --sky-border-dark:#37556F;--sky-border-dark-rgb:55 85 111;
+  --sky-link:#245D83;--sky-link-rgb:36 93 131;
+  --sky-red:#F08A87;--sky-error:#9E3945;
+  --ink:var(--sky-text-light);--muted:var(--sky-muted-light);--panel:var(--sky-surface-light);
+  --line:var(--sky-border);--accent:var(--sky-accent);--accent2:var(--sky-accent-hover);
+  --field-dark:var(--sky-background);--field-mid:var(--sky-surface-dark);
+  --field-light:var(--sky-panel-light);--field-olive:var(--sky-accent);
+  --shadow:0 20px 65px rgb(var(--sky-background-rgb) / .3);
+}

@@ -29,6 +29,7 @@ async function request(base,route,{method='GET',body,cookie,headers={}}={}){
 function sessionFor(db,userId){const token=crypto.randomBytes(32).toString('base64url'),now=Date.now();db.prepare('INSERT INTO sessions(token_hash,user_id,created_at,expires_at,last_seen_at) VALUES(?,?,?,?,?)').run(crypto.createHash('sha256').update(token).digest('hex'),userId,now,now+86400000,now);return 'sar_session='+token;}
 function oldLocalSave(){
   const save=copy(engine().dev.inspect().SAVE);save.schema=16;delete save.patchState.aiSamples;delete save.aiRevision;delete save.modeStats;
+  delete save.patchState.participantAnalytics; // Actual pre-SKYLINE saves have combined history only.
   delete save.playerCareer;delete save.playerSeasons;delete save.config.viewMode;
   for(const bot of Object.values(save.bots)){
     delete bot.profile.id;delete bot.career.timePlayed;

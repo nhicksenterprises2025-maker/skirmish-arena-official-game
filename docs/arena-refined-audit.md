@@ -1,8 +1,10 @@
 # ARENA REFINED audit handoff
 
-**Current status — 2026-10-08:** Audits 1–10 implementation and essential release gates are complete. Final revised native build, signed updates, physical installation, original-data preservation, actual installed gameplay and the existing owner account’s migration/lobby/reopen all pass. Publishing the single 1.13.0 release and verifying public/local downloads is in progress. No user rule decision remains unresolved.
+**Current status — 2026-10-08: Audits 1–10 are complete and released together.** Final build, signed updates, physical installation, original-data preservation, actual installed gameplay, existing-account migration/lobby/reopen, public downloads and native update-feed checks all pass. No user rule decision or release blocker remains.
 
 Release: **1.13.0 — ARENA REFINED**, **Weapon Balance 9.0**, schema **10**, analytics schema **1**, cache revision **arena-refined-2**, existing **live** channel. Application identity, signing key, save keys and installation paths stay unchanged. Do not restart completed feature work.
+
+Public release: [v1.13.0 — ARENA REFINED](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/tag/v1.13.0). Code/source commit: `54f4f7b0cffd925590bb29ce3007e7595086a360`. The documentation completion commit does not change the tested executable or game bundle.
 
 ## Completed implementation and routes
 
@@ -17,7 +19,7 @@ Release: **1.13.0 — ARENA REFINED**, **Weapon Balance 9.0**, schema **10**, an
 | 7 | Persist anchored Eastern recurring schedule, check-in/lock/countdown/game times, real bot reservations, permanent no-show replacements and reconnect checkpoints. Missed offline events cancel without fabricated results. | `server/tournament-schedule.cjs`, `server/tournament-lifecycle.cjs`, runtime, `cloud.js`, tournament branches in `game.js` |
 | 8 | Skirmish Challenge Tournament branding, connected bracket, sortable tournament-only leaderboards, actual upcoming events and persisted official history. Keep custom names and historical snapshots. | `tournaments-ui.js`, `skyline-tournaments.css`, `server/tournament-presentation.cjs`, API routes |
 | 9 | Clickable 3D rank inspection and current ladder; Ranked/Combined profile tabs use unique eligible participation and raw totals, refresh once, respect season/lifetime scope and missing history. | `profile-stats.js`, `progression.js`, profile/rank presentation in `game.js`, profile tests |
-| 10 | Current guide, categorized application notes, separate numeric Balance 9.0 notes, coherent version/cache/package metadata and final integration checks. Implementation and installed verification complete; single release delivery in progress. | `README.md`, `docs/PLAYER-GUIDE.md`, maintenance docs, `version.json`, `build-meta.js`, launcher packaging/update scripts |
+| 10 | Current guide, categorized application notes, separate numeric Balance 9.0 notes, coherent version/cache/package metadata, final integration/installed verification and one published release with verified downloads/update feeds. | `README.md`, `docs/PLAYER-GUIDE.md`, maintenance docs, `version.json`, `build-meta.js`, launcher packaging/update scripts |
 
 The full background allocation is 40 distinct active bots and ten waiting from the same persistent pool of 50. Official reservations take priority; configured background slots wait when participants are unavailable. TDM remains 5v5/60 kills/five minutes; Deathmatch remains ten FFA participants/30 kills/four minutes. No bot is cloned or officially double-booked.
 
@@ -71,6 +73,9 @@ Main evidence: `C:/Users/Noah/OneDrive/Documents/ChatGPT/freeshui/arena-refined-
 | Actual final installed native gameplay | **16/16 groups PASS**, `native/installed-native-release-results.json`; exact physical executable and served hashes, real FAL/TDM/DM/offline play, Phone/rank/HUD and 2 TDM + 2 DM. Startup 3022/3020/3013 ms; mode entry 3067/3032/3070 ms. |
 | Revised arena-refined-2 build/staging and signed native download | **PASS; 7/7 signed checks PASS** |
 | Physical binary installation | **1.12.1→1.13.0 PASS**; five shortcuts and launcher settings preserved. Installed hash `32cfbd6e8a39f1095d50c1c72e74cb46b34e414a79b7d68d884df89e120f596f`; verified three-byte NSIS difference from portable. Full original 13.8 GB DB/profile/config comparison passes before migration. Actual owner schema 8→10 migration completes in about 296 seconds, followed by five lobby/reopen preservation checks. |
+| Original persistent-account gameplay | **5/5 PASS**, `native/installed-owner-lobby-results.json`; original profile and actual account enter the lobby, preserve progress and reopen successfully. |
+| Final installed launcher and live feed | **3/3 PASS**, `native/installed-launcher-feed-check.json`; physical launcher/game are 1.13.0, native signed check reports current, actual Check for Updates finishes without errors, and port-8803 manifest/signature/download match the final candidate. |
+| Public release/source and download verification | **PASS**; v1.13.0 published and source pushed. All three public assets match their exact candidate SHA-256. Both existing project/installed update feeds have the same four verified release files. |
 | Source security review | **737 files, zero findings**; private owner reports are not release assets |
 
 Physical map geometry hash remains `d309d94568cfd7fde10635939bd903095e046ca20a2d8887b77869c785c56032`; fixed-world damage/travel and all 60 spread states match the actual post-balance baseline. Populated migration fixtures preserve 40 positive payouts and all 23 historical games.
@@ -80,9 +85,10 @@ The earlier intermittent API 400 has a deterministic regression: custom auto-all
 ## Final installed verification and delivery
 
 - Final **arena-refined-2** candidate build/staging, 7 signed-update checks, physical 1.12.1→1.13.0 update, full original DB/profile/config preservation, **16 installed-native groups** and **5 actual-owner lobby/reopen groups** pass. Installer SHA-256 **43b6ee82b0405aa0c37df6d2afb9840d41396fe7e0553755ea1a1b18ba759e0a**.
-- The large schema-8 database reaches genuine schema-10 health after a progressing, verified migration lasting about **296 seconds**. Owner XP, level, ranked record, human careers, preferences, all 50 identities and season history survive; no owner human match or XP award was created. Balance archives once and reopening restores the same account.
+- The large schema-8 database reaches genuine schema-10 health after a progressing, verified migration lasting **295.7 seconds**, with **138 observed activity samples** and a verified approximately **13.795 GB** snapshot. Private evidence: `native/installed-owner-migration-completed-account-gate.json`; its preliminary temporary-profile account gate was subsequently resolved and verified by the final owner test. XP, level, ranked record, human careers, preferences, all 50 identities and season history survive; no owner human match or XP award was created. Balance archives once and reopening restores the same account.
 - Two outside test-harness defects were corrected: equivalent Windows long-path prefixes were normalized, and EdgeDriver was explicitly bound to the preserved account profile instead of its default temporary profile. Actual process data-directory verification confirms the original profile. No authentication was fabricated or user storage cleared. Failed preliminary evidence remains private.
-- The exact signed installer, source and both existing update feeds are being published as **one application release**. Record public/local readback below before closing delivery.
+- The exact signed installer and tested source are published as **one application release**, [v1.13.0](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/tag/v1.13.0), on 2026-10-08. Public setup, detached signature and `SHA256SUMS.txt` were downloaded and hash-verified against the candidate. Installer SHA-256 is `43b6ee82b0405aa0c37df6d2afb9840d41396fe7e0553755ea1a1b18ba759e0a` (30,018,057 bytes).
+- Project and real installed backend update feeds contain the same verified installer, installer signature, manifest and manifest signature for **1.13.0**. The actual installed launcher checks the port-8803 signed feed and reports **Launcher is current**; launcher and backend close cleanly. No remaining delivery gate.
 - **Unverified:** physical Windows reboot and physical Alt+Tab. Native close/reopen, cold local-service preparation and authenticated offline entry are verified. Historical measurements without known provenance remain unavailable.
 
 ## Historical evidence

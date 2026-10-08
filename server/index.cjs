@@ -6,14 +6,27 @@ const crypto=require('node:crypto');
 const bcrypt=require('bcryptjs');
 const {createDatabase}=require('./db.cjs');
 const {readWorld,refreshWorldSeason,migrateLocalWorld,writeWorld,MAX_WORLD_BYTES,fail}=require('./world.cjs');
-const {messageRows,processEvents,replyToBot,tournamentEvent,llmConfigured}=require('./messages.cjs');
-const localAI=require('./local-ai.cjs');
 const Circuit=require('./tournaments.cjs'),tournamentRuntime=require('./tournament-runtime.cjs');
+const tournamentPresentation=require('./tournament-presentation.cjs');
+const Commerce=require('./commerce-catalog.cjs'),Wallet=require('./wallet.cjs');
+const Payments=require('./payments.cjs');
 
 const ROOT=path.resolve(__dirname,'..');
 const SESSION_MS=30*24*60*60*1000;
-const STATIC=new Set(['/','/index.html','/game.js','/cloud.js','/ai-ui.js','/ai-ui.css','/fullscreen.js','/audio.js','/assets/audio/LICENSES.json','/styles.css','/updater.js','/sw.js','/version.json','/manifest.webmanifest','/app-icon.svg','/renderer-25d.mjs','/environment-25d.mjs','/models-25d.mjs','/inspect-25d.mjs','/asset-loader-25d.mjs','/vendor/three.module.js','/vendor/three.core.js','/vendor/addons/loaders/GLTFLoader.js','/vendor/addons/utils/BufferGeometryUtils.js','/vendor/addons/utils/SkeletonUtils.js','/assets/25d/manifest.json','/assets/25d/brightfield-props.glb']);
+const STATIC=new Set(['/','/index.html','/phone-ui.js','/phone-ui.css','/game.js','/cloud.js','/fullscreen.js','/audio.js','/assets/audio/LICENSES.json','/styles.css','/updater.js','/sw.js','/version.json','/manifest.webmanifest','/app-icon.svg','/renderer-25d.mjs','/environment-25d.mjs','/models-25d.mjs','/inspect-25d.mjs','/asset-loader-25d.mjs','/vendor/three.module.js','/vendor/three.core.js','/vendor/addons/loaders/GLTFLoader.js','/vendor/addons/utils/BufferGeometryUtils.js','/vendor/addons/utils/SkeletonUtils.js','/assets/25d/manifest.json','/assets/25d/brightfield-props.glb']);
 const audioManifest=JSON.parse(fs.readFileSync(path.join(ROOT,'assets/audio/LICENSES.json'),'utf8'));
+STATIC.add('/mode-entry.js');
+STATIC.add('/profile-stats.js');
+STATIC.add('/distance-units.js');
+for(const asset of ['commerce.js','commerce.css','cosmetics-25d.mjs','assets/25d/cosmetics/manifest.json'])STATIC.add('/'+asset);
+// Runtime cosmetic exports only; editable sources remain outside the server.
+const cosmeticManifestFile=path.join(ROOT,'assets/25d/cosmetics/manifest.json');
+if(fs.existsSync(cosmeticManifestFile)){
+  try{
+    const manifest=JSON.parse(fs.readFileSync(cosmeticManifestFile,'utf8'));
+    for(const entry of Object.values(manifest.cosmetics||{}))for(const style of Object.values(entry.styles||{}))if(/^assets\/25d\/cosmetics\/[a-z0-9._-]+\.glb$/.test(style.file||''))STATIC.add('/'+style.file);
+  }catch(error){console.error('Cosmetic asset catalog unavailable:',error.message);}
+}
 for(const asset of ['fonts.css','blue-circuit.css','assets/fonts/Inter-Variable.ttf','assets/fonts/Oxanium-Variable.ttf','assets/fonts/Inter-OFL.txt','assets/fonts/Oxanium-OFL.txt','assets/fonts/README.md','assets/fonts/manifest.json','assets/25d/ranks/manifest.json','assets/25d/ranks/blue-circuit-ranks.glb'])STATIC.add('/'+asset);
 // Optional badge art must not become a prerequisite for starting the backend.
 for(const rank of require('../progression.js').ranks)STATIC.add('/assets/25d/ranks/'+rank.name.toLowerCase().replaceAll(' ','-')+'.png');
@@ -41,6 +54,14 @@ function readBody(req,limit=MAX_WORLD_BYTES+32768){
     req.on('data',chunk=>{size+=chunk.length;if(size>limit){tooLarge=true;return;}chunks.push(chunk);});
     req.on('end',()=>{if(tooLarge){reject(fail(413,'Request body is too large'));return;}try{resolve(size?JSON.parse(Buffer.concat(chunks).toString('utf8')):{});}catch{reject(fail(400,'Invalid JSON request'));}});
     req.on('error',reject);
+  });
+}
+function readPaymentBody(req){
+  return new Promise((resolve,reject)=>{
+    const chunks=[];let size=0,tooLarge=false;
+    req.on('data',chunk=>{size+=chunk.length;if(size>262144){tooLarge=true;return;}chunks.push(chunk);});
+    req.on('end',()=>tooLarge?reject(fail(413,'Payment event is too large')):resolve(Buffer.concat(chunks)));
+    req.on('error',reject);req.on('aborted',()=>reject(fail(400,'Payment event was interrupted')));
   });
 }
 function clientIp(req){return process.env.SAR_TRUST_PROXY==='1'?String(req.headers['x-forwarded-for']||req.socket.remoteAddress).split(',')[0].trim():req.socket.remoteAddress||'unknown';}
@@ -96,14 +117,25 @@ function adminAuthorized(req){
   const a=Buffer.from(secret),b=Buffer.from(String(token));
   return a.length===b.length&&crypto.timingSafeEqual(a,b);
 }
-function createServer({db=createDatabase()}={}){
+function createServer({db=createDatabase(),paymentOptions={}}={}){
   const runtimeVersion=versionInfo().version;
-  if(!process.env.SAR_GPT_OSS_URL)localAI.runtime(db);
+  const commerceEnvironment=Wallet.environment();
+  const payments=Payments.createPayments({db,...paymentOptions});
   const limits=new Map();
   const server=http.createServer(async(req,res)=>{
     try{
       const requestUrl=new URL(req.url,'http://localhost'),pathname=requestUrl.pathname;
+      // Stripe signatures authenticate this one public endpoint. Preserve the
+      // original raw bytes; browser/session write routes still enforce Origin.
+      if(pathname==='/api/payments/stripe/webhook'&&req.method==='POST'){
+        throttle(limits,req,'payment-webhook',240,60000);
+        json(res,200,await payments.webhook(await readPaymentBody(req),req.headers['stripe-signature']));return;
+      }
       checkOrigin(req);
+      if(pathname==='/shop/return'&&req.method==='GET'){
+        const html='<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Skirmish Arena — Test checkout</title><body><h1>Return to Skirmish Arena</h1><p>This was a Sandbox test checkout. Return to the Shop and check payment status. This page does not confirm a payment or deliver credits.</p></body></html>';
+        res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; frame-ancestors 'none'; base-uri 'none'",'x-content-type-options':'nosniff'});res.end(html);return;
+      }
       if(!pathname.startsWith('/api/')){staticFile(req,res,pathname);return;}
       if(pathname==='/api/status'&&req.method==='GET'){json(res,200,{ok:true,version:runtimeVersion,serverNow:Date.now(),databaseSchema:db.prepare('PRAGMA user_version').get().user_version});return;}
       if(pathname==='/api/version'&&req.method==='GET'){json(res,200,{...versionInfo(),serverNow:Date.now()});return;}
@@ -126,7 +158,8 @@ function createServer({db=createDatabase()}={}){
       }
       if(pathname==='/api/bootstrap'&&req.method==='GET'){
         const user=session(db,req);
-        json(res,200,{authenticated:!!user,account:user?accountJson(db,user):null,serverNow:Date.now(),version:versionInfo().version,gptAvailable:llmConfigured()});return;
+        if(user)Wallet.ensureWallet(db,user.id,commerceEnvironment);
+        json(res,200,{authenticated:!!user,account:user?accountJson(db,user):null,serverNow:Date.now(),version:versionInfo().version});return;
       }
       if(pathname==='/api/auth/signup'&&req.method==='POST'){
         throttle(limits,req,'signup',6,3600000);
@@ -178,14 +211,29 @@ function createServer({db=createDatabase()}={}){
         res.setHeader('set-cookie',expiredCookie(req));json(res,200,{ok:true});return;
       }
       const user=requireSession(db,req);
+      Wallet.ensureWallet(db,user.id,commerceEnvironment);
+      if(pathname==='/api/commerce/catalog'&&req.method==='GET'){
+        Wallet.ensureWallet(db,user.id,commerceEnvironment);
+        try{await payments.verifyConfiguration();}catch{/* Optional checkout stays unavailable; gameplay and wallet remain usable. */}
+        json(res,200,{...Commerce.catalog(commerceEnvironment),...payments.availability()});return;
+      }
+      if(pathname==='/api/wallet'&&req.method==='GET'){json(res,200,Wallet.snapshot(db,user.id,commerceEnvironment));return;}
+      if(pathname==='/api/store/purchase'&&req.method==='POST'){throttle(limits,req,'store-purchase',60,60000);json(res,200,Wallet.purchase(db,user.id,await readBody(req,2048),commerceEnvironment));return;}
+      if(pathname==='/api/store/equip'&&req.method==='POST'){json(res,200,Wallet.equip(db,user.id,await readBody(req,2048),commerceEnvironment));return;}
+      if(pathname==='/api/wallet/match-report'&&req.method==='POST'){throttle(limits,req,'wallet-report',120,60000);json(res,202,Wallet.reportMatch(db,user.id,await readBody(req,2048),commerceEnvironment));return;}
+      if(pathname==='/api/shop/checkout'&&req.method==='POST'){throttle(limits,req,'checkout:'+user.id,20,60000);json(res,200,await payments.checkout(user.id,await readBody(req,2048)));return;}
+      if(pathname==='/api/shop/orders'&&req.method==='GET'){throttle(limits,req,'payment-status:'+user.id,120,60000);json(res,200,payments.list(user.id));return;}
+      const paymentOrder=pathname.match(/^\/api\/shop\/orders\/([a-f0-9-]{36})(\/reconcile)?$/);
+      if(paymentOrder&&req.method==='GET'&&!paymentOrder[2]){throttle(limits,req,'payment-status:'+user.id,120,60000);json(res,200,payments.status(user.id,paymentOrder[1]));return;}
+      if(paymentOrder&&req.method==='POST'&&paymentOrder[2]){throttle(limits,req,'payment-reconcile:'+user.id,20,60000);Wallet.onlyFields(await readBody(req,2048),[]);json(res,200,await payments.reconcile(user.id,paymentOrder[1]));return;}
       if(pathname==='/api/account'&&req.method==='GET'){json(res,200,{account:accountJson(db,user),serverNow:Date.now()});return;}
-      if(pathname==='/api/world'&&req.method==='GET'){json(res,200,{world:refreshWorldSeason(db,user.id),serverNow:Date.now()});processEvents(db,user.id,2).catch(error=>console.error('Message generation:',error));return;}
+      if(pathname==='/api/world'&&req.method==='GET'){json(res,200,{world:refreshWorldSeason(db,user.id),tournamentReservations:db.prepare("SELECT id FROM tournaments WHERE user_id=? AND kind='official' AND status='ACTIVE' AND deleted_at IS NULL").all(user.id).map(row=>tournamentPresentation.publicTournament(Circuit.getTournament(db,user.id,row.id))),serverNow:Date.now()});return;}
       if(pathname==='/api/world'&&req.method==='PUT'){
         throttle(limits,req,'world',240,60000);
         const body=await readBody(req),baseRevision=Number(body.baseRevision);
         if(!Number.isInteger(baseRevision)||baseRevision<0)throw fail(400,'A cloud revision is required');
         const result=writeWorld(db,user.id,body.save,baseRevision);
-        json(res,200,result);processEvents(db,user.id,2).catch(error=>console.error('Message generation:',error));return;
+        json(res,200,result);return;
       }
       if(pathname==='/api/world/import'&&req.method==='POST'){
         throttle(limits,req,'import',10,3600000);
@@ -208,60 +256,32 @@ function createServer({db=createDatabase()}={}){
         const seasons=db.prepare('SELECT number,start_at AS startAt,end_at AS endAt,stats_json AS stats FROM seasons WHERE user_id=? ORDER BY number DESC').all(user.id).map(s=>({...s,stats:JSON.parse(s.stats)[row.name]||null}));
         json(res,200,{bot:{...row,personality:JSON.parse(row.personality),familiarity:JSON.parse(row.familiarity),career:career?JSON.parse(career.stats_json):null,weapons:Object.fromEntries(weapons.map(w=>[w.weapon,JSON.parse(w.stats_json)])),seasons}});return;
       }
-      if(pathname==='/api/ai/status'&&req.method==='GET'){json(res,200,await localAI.status(db,user.id));return;}
-      if(pathname==='/api/ai/preferences'&&req.method==='PATCH'){json(res,200,{preferences:localAI.setPreferences(db,user.id,await readBody(req,2048))});return;}
-      if((pathname==='/api/ai/test'||pathname==='/api/ai/lab')&&req.method==='POST'){throttle(limits,req,'ai-lab',30,3600000);json(res,202,localAI.lab(db,user.id,await readBody(req,16384),pathname.endsWith('/test')));return;}
-      if(pathname.startsWith('/api/ai/jobs/')&&req.method==='GET'){json(res,200,localAI.jobResult(db,user.id,pathname.slice('/api/ai/jobs/'.length)));return;}
-      if(pathname==='/api/ai/feedback'&&req.method==='POST'){json(res,200,localAI.feedback(db,user.id,await readBody(req,8192)));return;}
-      if(pathname==='/api/ai/export'&&req.method==='GET'){const data=localAI.exportTraining(db,user.id);res.writeHead(200,{'content-type':'application/x-ndjson; charset=utf-8','cache-control':'no-store','content-disposition':'attachment; filename="skirmish-personality-training.jsonl"'});res.end(data);return;}
-      if(pathname==='/api/messages'&&req.method==='GET'){json(res,200,process.env.SAR_GPT_OSS_URL?{messages:messageRows(db,user.id),gptAvailable:llmConfigured()}:localAI.messageData(db,user.id));processEvents(db,user.id,2).catch(error=>console.error('Message generation:',error));return;}
-      if(pathname.startsWith('/api/messages/thread/')&&req.method==='GET'){const botId=pathname.slice('/api/messages/thread/'.length);if(!db.prepare('SELECT 1 FROM bots WHERE user_id=? AND bot_id=?').get(user.id,botId))throw fail(404,'Bot not found');const rows=localAI.messageRows(db,user.id,100,{botId,before:requestUrl.searchParams.get('before')});json(res,200,{messages:rows,nextCursor:rows.length===100?rows.at(-1).id:null});return;}
-      if(pathname==='/api/messages/reply'&&req.method==='POST'){
-        throttle(limits,req,'reply',20,3600000);
-        const body=await readBody(req,4096),result=await replyToBot(db,user.id,String(body.botId||''),body.text);
-        json(res,201,result);return;
-      }
-      if(pathname.startsWith('/api/messages/')&&pathname.endsWith('/read')&&req.method==='POST'){
-        const id=pathname.slice('/api/messages/'.length,-'/read'.length);if(!/^[0-9a-f-]{36}$/i.test(id))throw fail(400,'Invalid message ID');
-        db.prepare('UPDATE messages SET read_at=? WHERE id=? AND user_id=?').run(Date.now(),id,user.id);json(res,200,{ok:true});return;
-      }
-      if(pathname.startsWith('/api/messages/')&&req.method==='DELETE'){
-        const id=pathname.slice('/api/messages/'.length);if(!/^[0-9a-f-]{36}$/i.test(id))throw fail(400,'Invalid message ID');
-        const row=db.prepare('SELECT bot_id,direction,event_id FROM messages WHERE id=? AND user_id=?').get(id,user.id);
-        if(!row)throw fail(404,'Message not found');
-        db.exec('BEGIN IMMEDIATE');
-        try{
-          db.prepare('DELETE FROM messages WHERE id=? AND user_id=?').run(id,user.id);
-          localAI.forgetDeleted(db,user.id,row.bot_id,id,row.event_id);
-          if(row.direction==='player'&&row.event_id)db.prepare('UPDATE structured_events SET payload_json=?,messaged_at=? WHERE id=? AND user_id=?').run('{"deleted":true}',Date.now(),row.event_id,user.id);
-          if(row.direction==='player')localAI.cancelDeleted(db,user.id,row.event_id);
-          // Do not retain deleted message text in the bounded conversation summary.
-          const recent=db.prepare('SELECT direction,body FROM messages WHERE user_id=? AND bot_id=? ORDER BY created_at DESC LIMIT 6').all(user.id,row.bot_id).reverse();
-          db.prepare('UPDATE conversation_summaries SET summary=?,last_message_at=? WHERE user_id=? AND bot_id=?').run(recent.map(m=>m.direction+': '+m.body.slice(0,115)).join(' | ').slice(0,700),Date.now(),user.id,row.bot_id);
-          db.exec('COMMIT');
-        }catch(error){db.exec('ROLLBACK');throw error;}
-        json(res,200,{ok:true});return;
-      }
       if(pathname==='/api/tournaments'&&req.method==='GET'){
-        const world=readWorld(db,user.id);if(world)Circuit.scheduleOfficial(db,user.id,world.save.seasons.current);
+        // Resolve an expired season before reading the calendar. The background
+        // runtime may not have refreshed its cache yet after a long closure.
+        const now=Date.now(),world=refreshWorldSeason(db,user.id,now);if(world)Circuit.scheduleOfficial(db,user.id,world.save.seasons.current,now);
         const rows=db.prepare('SELECT id FROM tournaments WHERE user_id=? AND deleted_at IS NULL ORDER BY starts_at DESC').all(user.id);
-        json(res,200,{tournaments:rows.map(row=>Circuit.getTournament(db,user.id,row.id)),earnings:db.prepare('SELECT participant_id AS participantId,SUM(amount) AS amount FROM tournament_earnings e JOIN tournaments t ON t.id=e.tournament_id WHERE t.user_id=? GROUP BY participant_id').all(user.id),serverNow:Date.now()});return;
+        const events=rows.map(row=>Circuit.getTournament(db,user.id,row.id));
+        json(res,200,{tournaments:events.map(t=>tournamentPresentation.publicTournament(t)),officialHistory:tournamentPresentation.officialHistory(db,events),earnings:db.prepare('SELECT participant_id AS participantId,SUM(amount) AS amount FROM tournament_earnings e JOIN tournaments t ON t.id=e.tournament_id WHERE t.user_id=? GROUP BY participant_id').all(user.id),serverNow:now});return;
       }
       if(pathname==='/api/tournaments'&&req.method==='POST'){
         const body=await readBody(req,8192),now=Date.now(),t=Circuit.createCustom(db,user.id,body,now);
-        Circuit.registerTeam(db,user.id,t.id,{name:user.username+' Circuit',participantIds:[user.id]},now);json(res,201,{tournament:Circuit.getTournament(db,user.id,t.id)});return;
+        Circuit.registerTeam(db,user.id,t.id,{name:user.username+' Circuit',participantIds:[user.id]},now);json(res,201,{tournament:tournamentPresentation.publicTournament(Circuit.getTournament(db,user.id,t.id))});return;
       }
-      const circuitRoute=pathname.match(/^\/api\/tournaments\/([a-zA-Z0-9-]+)(?:\/(team|invite|start|play|result))?$/);
+      const circuitRoute=pathname.match(/^\/api\/tournaments\/([a-zA-Z0-9-]+)(?:\/(team|invite|start|play|check-in|ready|heartbeat|result))?$/);
       if(circuitRoute){const [,id,action]=circuitRoute,now=Date.now();
         if(req.method==='DELETE'&&!action){const body=await readBody(req,8192),value=Circuit.deleteCustom(db,user.id,id,body.confirmedName,now,adminAuthorized(req));tournamentRuntime.cancel(db,id);json(res,200,value);return;}
-        if(req.method==='GET'&&!action){json(res,200,{tournament:Circuit.getTournament(db,user.id,id),stats:db.prepare('SELECT participant_id AS participantId,stats_json AS stats FROM tournament_stats WHERE tournament_id=?').all(id).map(row=>({...row,stats:JSON.parse(row.stats)})),serverNow:now});return;}
+        if(req.method==='GET'&&!action){const t=Circuit.getTournament(db,user.id,id);json(res,200,{...tournamentPresentation.detail(db,t,tournamentRuntime.presentationGames(db,t.id),now),serverNow:now});return;}
         if(req.method==='POST'){const body=await readBody(req,262144);let value;
           if(action==='team')value=Circuit.registerTeam(db,user.id,id,{name:body.name,participantIds:[user.id]},now);
           else if(action==='invite'){const team=Circuit.getTournament(db,user.id,id).teams.find(team=>team.id===body.teamId);if(!team?.participants.some(p=>p.id===user.id))throw fail(403,'You may invite bots to your own team');value=Circuit.inviteBot(db,user.id,id,body,now);}
           else if(action==='start'){let t=Circuit.getTournament(db,user.id,id);t=tournamentRuntime.fillBots(db,user.id,t,now);value=Circuit.startTournament(db,user.id,id,now);}
-          else if(action==='play'){json(res,200,{context:tournamentRuntime.playContext(db,user.id,id,now)});return;}
-          else if(action==='result'){Circuit.getTournament(db,user.id,id);const recorded=db.prepare('SELECT series_id FROM tournament_matches WHERE tournament_id=? AND id=?').get(id,body.result?.id||'');if(!recorded){const context=tournamentRuntime.playContext(db,user.id,id,now);if(body.seriesId!==context.seriesId||body.result?.id!==context.gameId)throw fail(409,'This result belongs to a different tournament game');}else if(recorded.series_id!==body.seriesId)throw fail(409,'This result belongs to a different series');value=Circuit.recordGame(db,user.id,id,body.seriesId,body.result,now);}
-          else throw fail(404,'Tournament action not found');json(res,200,{tournament:value});return;
+          else if(action==='check-in'){value=Circuit.checkIn(db,user.id,id,{gameId:body.gameId},now);}
+          else if(action==='play'){json(res,200,{context:tournamentRuntime.playContext(db,user.id,id,now,body),serverNow:now});return;}
+          else if(action==='ready'){json(res,200,{context:tournamentRuntime.ready(db,user.id,id,body,now),serverNow:now});return;}
+          else if(action==='heartbeat'){json(res,200,{...tournamentRuntime.heartbeat(db,user.id,id,body,now),serverNow:now});return;}
+          else if(action==='result'){Circuit.getTournament(db,user.id,id);const recorded=db.prepare('SELECT series_id FROM tournament_matches WHERE tournament_id=? AND id=?').get(id,body.result?.id||'');if(!recorded){tournamentRuntime.validateClientResult(db,user.id,id,body.seriesId,body.result,body,now);}else if(recorded.series_id!==body.seriesId)throw fail(409,'This result belongs to a different series');value=Circuit.recordGame(db,user.id,id,body.seriesId,body.result,now);}
+          else throw fail(404,'Tournament action not found');json(res,200,{tournament:tournamentPresentation.publicTournament(value),serverNow:now});return;
         }
       }
       if(pathname==='/api/admin/tournaments'&&req.method==='POST'){
@@ -274,27 +294,26 @@ function createServer({db=createDatabase()}={}){
         try{
           db.prepare('INSERT INTO tournaments(id,user_id,name,starts_at,status,bracket_json,metadata_json,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)').run(id,user.id,name,startsAt,status,JSON.stringify(body.bracket||{}),JSON.stringify(body.metadata||{}),now,now);
           const results=body.metadata?.results;
-          if(status==='COMPLETED'&&results){const winner=results.winnerBotId,eliminated=results.eliminatedBotIds||[];if(typeof winner!=='string'||!participants.includes(winner)||!Array.isArray(eliminated)||eliminated.some(bot=>!participants.includes(bot)||bot===winner)||new Set(eliminated).size!==eliminated.length)throw fail(400,'Tournament results must identify actual registered bots');for(const bot of [winner,...eliminated]){const type=bot===winner?'TOURNAMENT_WIN':'TOURNAMENT_ELIMINATION';db.prepare('INSERT INTO structured_events(id,user_id,bot_id,type,payload_json,created_at) VALUES(?,?,?,?,?,?)').run(`${user.id}:tournament:${id}:${type}:${bot}`,user.id,bot,type,JSON.stringify({tournamentId:id,name,status,results,source:'explicit tournament results recorded by authorized administrator'}),now);}}
+          if(status==='COMPLETED'&&results){const winner=results.winnerBotId,eliminated=results.eliminatedBotIds||[];if(typeof winner!=='string'||!participants.includes(winner)||!Array.isArray(eliminated)||eliminated.some(bot=>!participants.includes(bot)||bot===winner)||new Set(eliminated).size!==eliminated.length)throw fail(400,'Tournament results must identify actual registered bots')}
           for(const [index,botId] of participants.entries()){
             const exists=db.prepare('SELECT 1 AS yes FROM bots WHERE user_id=? AND bot_id=?').get(user.id,String(botId));if(!exists)throw fail(400,'Tournament includes an unknown bot');
             db.prepare('INSERT INTO tournament_participants(tournament_id,bot_id,seed,state) VALUES(?,?,?,?)').run(id,botId,index+1,'INVITED');
-            tournamentEvent(db,user.id,{id,name,starts_at:startsAt,status},botId,now);
           }
           db.exec('COMMIT');
         }catch(error){db.exec('ROLLBACK');throw error;}
-        json(res,201,{id,name,startsAt,status,participants});processEvents(db,user.id,2).catch(error=>console.error('Message generation:',error));return;
+        json(res,201,{id,name,startsAt,status,participants});return;
       }
       throw fail(404,'API route not found');
     }catch(error){
       if(res.headersSent){res.destroy();return;}
       const status=Number(error.status)||500;
-      if(status>=500)console.error('Server error:',error);
-      json(res,status,{error:status>=500?'Server error':error.message,...(error.code?{code:error.code}:{}),serverNow:Date.now()});
+      if(status>=500)console.error(error.paymentSafe?'Payment service: '+error.code:'Server error:',error.paymentSafe?'':error);
+      json(res,status,{error:status>=500&&!error.paymentSafe?'Server error':error.message,...(error.code?{code:error.code}:{}),serverNow:Date.now()});
     }
   });
-  let stopTournaments=()=>{};server.on('listening',()=>{stopTournaments=tournamentRuntime.start(db);});
-  server.on('close',()=>{stopTournaments();localAI.dispose(db);});
-  return {server,db};
+  let stopTournaments=()=>{};server.on('listening',()=>{stopTournaments=tournamentRuntime.start(db);payments.verifyConfiguration().catch(error=>{if(error.code!=='CHECKOUT_UNAVAILABLE')console.error('Sandbox checkout unavailable: '+error.code);});});
+  server.on('close',()=>{stopTournaments();});
+  return {server,db,payments};
 }
 if(require.main===module){
   const host=process.env.SAR_HOST||'127.0.0.1',port=Number(process.env.SAR_PORT||8803);

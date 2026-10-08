@@ -43,7 +43,7 @@ for(const[name,x,low,high]of[
   ['AR-15',9,3,12],['SMG-9',16,3,12],['LR-762',8,3,12],
   ['LW Tundra',4,3,11],['LW Tundra',27,3,11],['Auto 12',10,6,14],['War Head LMG',8,6,14],
   ['SR-Aug',26,2,13],['P90',38,3,14],['SPAS-12',-2,2,10],
-  ['AK47',12,4,6],['9mm',3,6,8],['X16',3,6,7.5],['X-16 Auto',3,6,8],
+  ['AK47',12,4,6],['FAL',-.5,4,9],['FAL',58,2,10],['9mm',3,6,8],['X16',3,6,7.5],['X-16 Auto',3,6,8],
   ['Pump Shotgun',45,2,4.5]
 ]){
   const weapon=buildWeapon(name),spans=solidSection(weapon,x,.2,35+low);
@@ -68,4 +68,4 @@ for(let skin=0;skin<8;skin++)for(const name of Object.keys(WEAPON_VISUALS)){
   disposeModel(entity.group);
 }
 doubleSided.dispose();
-console.log(`PASS real mesh contact sections for all 14 weapons; identity attachment transforms; ${poses} poses across 8 operators, 14 guns, 360 degrees, idle/walk/ADS/fire/reload.`);
+console.log(`PASS real mesh contact sections for all 15 weapons; identity attachment transforms; ${poses} poses across 8 operators, 15 guns, 360 degrees, idle/walk/ADS/fire/reload.`);

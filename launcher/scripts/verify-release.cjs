@@ -9,9 +9,11 @@ const {spawn} = require('node:child_process');
 const {DatabaseSync} = require('node:sqlite');
 const root = path.resolve(__dirname, '..');
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'sar-native-release-'));
-const published = path.resolve(root, '../server/releases');
+// Optional staged release/executable inputs let verification finish before
+// publishing to an installed player's update service.
+const published = path.resolve(process.argv[3] || path.join(root, '../server/releases'));
 const output = path.resolve(process.argv[2] || path.join(root, 'verification-1.5.2.json'));
-const exe = path.join(root, 'dist/skirmish-launcher.exe');
+const exe = path.resolve(process.argv[4] || path.join(root, 'dist/skirmish-launcher.exe'));
 let fixture;
 async function child(command, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -47,7 +49,7 @@ async function child(command, args, options = {}) {
     const updateResult = path.join(scratch, 'signed-download.json');
     await child(process.execPath, [path.join(root, 'scripts/update-check.cjs'), exe, origin, databasePath, updateResult, releases], {env:signerEnv});
     const signedDownload = JSON.parse(fs.readFileSync(updateResult, 'utf8'));
-    const artifacts = [exe, path.join(root, 'dist', artifact), path.join(published, 'update.json')].map(file => ({path:path.relative(path.resolve(root, '..'), file).replaceAll('\\','/'),bytes:fs.statSync(file).size,sha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')}));
+    const artifacts = [exe, path.join(published, artifact), path.join(published, 'update.json')].map(file => ({path:path.relative(path.resolve(root, '..'), file).replaceAll('\\','/'),bytes:fs.statSync(file).size,sha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')}));
     assert.equal(signedDownload.ok, true);
     fs.writeFileSync(output, JSON.stringify({result:'PASS',verifiedAt:new Date().toISOString(),build:{framework:'Tauri 2',version:manifest.version,portable:true,nsis:true,signedInstaller:true,authenticodePublisherCertificate:false},configurationChecks:'PASS',signedDownload,artifacts,nativeFullscreen:{builtWithFullscreenGameWindow:true,exactOriginChecks:true,interactiveCheck:'pending'}}, null, 2) + '\n');
     console.log('Saved native release verification: ' + output);

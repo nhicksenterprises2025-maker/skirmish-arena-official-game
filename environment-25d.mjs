@@ -38,6 +38,12 @@ function mergeFixedGroup(group){
   for(const m of meshes){const geo=m.geometry.clone();geo.applyMatrix4(m.matrixWorld);batch.add(geo,m.material,0,0,0);group.remove(m);m.geometry.dispose();}
   batch.finish();
 }
+function freezeEnvironmentTransforms(group){
+  // Environment motion is exclusively material cutaways/shadow visibility.
+  // Resolve parent placement first; cameras/lights and actor rigs stay dynamic.
+  group.updateWorldMatrix(true,true,true);
+  group.traverse(node=>{node.matrixAutoUpdate=false;node.matrixWorldAutoUpdate=false;});
+}
 
 export function buildEnvironment(scene,snapshot){
   const {world,geometry}=snapshot,root=new THREE.Group();root.name='Brightfield Blocks';scene.add(root);
@@ -213,6 +219,7 @@ export function buildEnvironment(scene,snapshot){
   }
   for(const d of geometry.decor||[]){batch.add(new THREE.IcosahedronGeometry(d.s||2,0),material([0xd4c98a,0xd9bea0,0xbfcda4,0x809b5b][d.t%4]),d.x,1.8,d.y);}
   batch.finish();
+  freezeEnvironmentTransforms(root);
   function update(s,dt){
     const alive=s.actors.filter(a=>!a.dead),blend=1-Math.exp(-dt*11);
     for(const h of houses){
@@ -232,7 +239,10 @@ export function buildEnvironment(scene,snapshot){
       grouped.get(key).placements.push({x:slot.x,y:0,z:slot.z,rotationY:slot.rotation||0,scale:{x:slot.width?slot.width/d.x:scale,y:slot.width?Math.min(slot.width/d.x,slot.depth/d.z):scale,z:slot.depth?slot.depth/d.z:scale}});
       if(slot.fallback){root.remove(slot.fallback);slot.fallback.traverse(o=>{if(o.geometry)o.geometry.dispose();});}installed++;
     }
-    for(const {name,placements} of grouped.values())library.addInstances(name,placements,root);
+    for(const {name,placements} of grouped.values()){
+      const instances=library.addInstances(name,placements,root);
+      if(instances)freezeEnvironmentTransforms(instances);
+    }
     return installed;
   }
   return {root,update,installAssets,houses,trees,assetSlots,stats:{houses:houses.length,staticMeshes:staticRoot.children.length,assetSlots:assetSlots.length}};

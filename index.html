@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Skirmish Arena — 1.11 BLUE CIRCUIT</title>
+  <title>Skirmish Arena — 1.13.0 ARENA REFINED</title>
   <meta name="theme-color" content="#101C2A" />
   <meta name="application-name" content="Skirmish Arena" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -12,12 +12,13 @@
   <link rel="icon" href="app-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="boot.css" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="ai-ui.css" />
+  <link rel="stylesheet" href="phone-ui.css" />
   <link rel="stylesheet" href="skyline.css" />
   <link rel="stylesheet" href="phone-apps.css" />
   <link rel="stylesheet" href="skyline-tournaments.css" />
   <link rel="stylesheet" href="fonts.css" />
   <link rel="stylesheet" href="blue-circuit.css" />
+  <link rel="stylesheet" href="commerce.css" />
 </head>
 <body>
   <script src="boot.js"></script>
@@ -27,20 +28,22 @@
   <div id="menu" class="screen visible">
     <div class="hero-card glass">
       <div class="lobby-command">
-      <div class="eyebrow home-edition"><i class="dot live"></i> VERSION 1.11 <span>03 OCT / 2026</span></div>
+      <div class="eyebrow home-edition"><i class="dot live"></i> VERSION 1.13.0 <span>08 OCT / 2026</span></div>
       <div class="lobby-brand-row"><h1><img class="brand-wordmark" src="assets/branding/wordmark.svg" alt="SKIRMISH ARENA"></h1></div>
       
       <div class="menu-grid">
         <button id="queueButton" class="primary" data-action="play">PLAY</button>
         <button data-action="loadout">LOADOUT</button><button data-action="meta">WEAPON META</button>
-        <button data-action="operator">OPERATOR</button><button data-action="messages">PHONE</button>
-        <button data-action="tournaments">TOURNAMENTS</button><button data-action="quit-game">EXIT GAME</button>
+        <button data-action="operator">OPERATOR</button><button data-action="phone">PHONE</button>
+        <button data-action="tournaments">TOURNAMENTS</button><button data-action="store">STORE</button>
+        <button data-action="shop">SHOP</button><button data-action="quit-game">EXIT GAME</button>
       </div>
       <div class="lobby-progress-panels" aria-label="Your progression">
         <section id="lobbyProgression" class="lobby-progression" aria-label="Account level"></section>
         <section id="lobbyRanked" class="lobby-ranked" aria-label="Ranked progression"></section>
       </div>
-      <div class="lobby-build"><span id="sarBuildLabel">BUILD 1.11.0</span><span id="sarUpdateStatus" role="status" aria-live="polite"></span></div>
+      <button id="lobbyCredits" class="lobby-credits" data-action="store" aria-label="Arena Credits balance. Open Store"><span>ARENA CREDITS</span><strong>— AC</strong></button>
+      <div class="lobby-build"><span id="sarBuildLabel">BUILD 1.13.0</span><span id="sarUpdateStatus" role="status" aria-live="polite"></span></div>
       <div id="queueStatus" class="queue-status hidden">
         <strong>STARTING MATCH</strong>
         <span id="queueDetail">An instant player slot is always available. Your 5v5 starts immediately.</span>
@@ -143,17 +146,21 @@
   <div id="crosshair" class="crosshair hidden"><i></i><i></i><i></i><i></i></div>
   <div id="matchCountdown" class="match-countdown hidden" aria-live="polite"><span>MATCH STARTS IN</span><strong>3</strong></div>
   <script src="fullscreen.js"></script>
+  <script src="mode-entry.js"></script>
   <script src="audio.js"></script>
-  <script src="ai-ui.js"></script>
+  <script src="phone-ui.js"></script>
   <script src="phone-apps.js"></script>
   <script src="team-presentation.js"></script>
   <script src="exit-game.js"></script>
   <script src="build-meta.js"></script>
   <script src="match-modes.js"></script>
   <script src="progression.js"></script>
+  <script src="profile-stats.js"></script>
+  <script src="distance-units.js"></script>
   <script src="tactical-instinct.js"></script>
   <script src="tournaments-ui.js"></script>
   <script src="cloud.js"></script>
+  <script src="commerce.js"></script>
   <script src="updater.js"></script>
 </body>
 </html>

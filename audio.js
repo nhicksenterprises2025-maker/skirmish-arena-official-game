@@ -81,7 +81,7 @@
   async function unlock(){unlocked=true;const c=getContext();if(!c)return;try{if(c.state!=='running')await c.resume();await ready;void startAmbience();}catch(error){failure('Could not resume audio: '+error.message);}}
   document.addEventListener('pointerdown',unlock,{passive:true});document.addEventListener('keydown',unlock,{passive:true});
   document.addEventListener('pointerover',event=>{const target=event.target.closest?.('button');if(target&&!target.disabled&&!target.contains(event.relatedTarget))emit({type:'ui-hover'});},{passive:true});
-  document.addEventListener('click',event=>{const target=event.target.closest?.('button');if(!target||target.disabled)return;const back=/back|close|return|cancel|resume|menu/.test(target.dataset.action||target.dataset.socialAction||target.textContent.toLowerCase());emit({type:back?'ui-back':'ui-click'});},{capture:true,passive:true});
+  document.addEventListener('click',event=>{const target=event.target.closest?.('button');if(!target||target.disabled)return;const back=/back|close|return|cancel|resume|menu/.test(target.dataset.action||target.dataset.phoneAction||target.textContent.toLowerCase());emit({type:back?'ui-back':'ui-click'});},{capture:true,passive:true});
   document.addEventListener('input',event=>{const key=event.target.dataset?.audioVolume;if(!key)return;setVolume(key,Number(event.target.value)/100);if(event.target.nextElementSibling)event.target.nextElementSibling.textContent=Math.round(volumes[key]*100)+'%';});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){setView({...view,active:false});void context?.suspend();}});
   window.addEventListener('blur',()=>{setView({...view,active:false});void context?.suspend();});

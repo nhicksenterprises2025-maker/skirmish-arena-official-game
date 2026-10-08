@@ -1,6 +1,6 @@
 /* Execute the shipped client against a controlled backend/desktop bridge.
    Every restart creates a fresh JS realm using only the prior persistent store.
-   This checks outage recovery, identity boundaries and local AI transport; the
+   This checks outage recovery, identity boundaries and native backend reconnection; the
    native launcher and actual Windows reboot are verified separately. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {surface,response,settle,deferred,cloudFixture,cloudSource,account,baseSave,queue,puts}=require('./cloud-client-check.cjs');
@@ -10,7 +10,7 @@ function cached(save=baseSave,revision=7){return {'sar-cloud-owner':account.id,'
 async function client({storage=cached(),origin=ORIGIN,native=false,http,invoke}={}){
  const e=surface(storage),invocations=[];Object.assign(e.context.location,{origin,hostname:new URL(origin).hostname,protocol:new URL(origin).protocol});
  e.context.http=http||(()=>{throw new TypeError('Backend unreachable');});
- if(native){e.context.__SAR_NATIVE_GAME__=true;e.context.__TAURI__={core:{invoke:async(command,args)=>{invocations.push({command,args:args&&copy(args)});return invoke?invoke(command,args,e):{status:200,body:{ready:true,model:'gpt-oss:20b'}};}}};}
+ if(native){e.context.__SAR_NATIVE_GAME__=true;e.context.__TAURI__={core:{invoke:async(command,args)=>{invocations.push({command,args:args&&copy(args)});return invoke?invoke(command,args,e):{online:false,mode:'local'};}}};}
  e.run(cloudSource);await settle();return Object.assign(e,{invocations});
 }
 function assertLocal(e,save){const cloud=e.context.SARCloud;assert.equal(cloud.state.loaded,true);assert.equal(cloud.state.localMode,true);assert.equal(cloud.state.account.id,account.id);assert.deepEqual(e.scripts,['game.js']);assert.equal(e.document.getElementById('accountGate').classList.contains('hidden'),true);assert.equal(e.document.getElementById('cloudBadge').textContent,'CLOUD OFFLINE — LOCAL MODE');if(save)assert.deepEqual(JSON.parse(e.data.get('sar-persistent-save')),save);return cloud;}
@@ -77,15 +77,14 @@ async function main(){
  await test('Automatic reconnect is suppressed while explicit account authentication is in flight',async()=>{
   const held=deferred(),e=await client({http:call=>call.url==='/api/auth/login'?held.promise:response({authenticated:false})}),cloud=assertLocal(e);await e.cloudAction('reauth');const host=e.document.getElementById('accountGate');host.querySelector('#cloudUsername').value=account.username;host.querySelector('#cloudPassword').value='fixture-password';const submitting=e.gateAction('submit');await settle();assert.equal(cloud.state.authenticating,true);const before=e.calls.filter(call=>call.url==='/api/bootstrap').length;assert.equal(await cloud.reconnect(),false);assert.equal(e.calls.filter(call=>call.url==='/api/bootstrap').length,before);held.resolve(response({error:'Incorrect password'},401));await submitting;await settle();assert.equal(cloud.state.authenticating,false);await e.gateAction('local-mode');assertLocal(e,baseSave);
  });
- await test('Cloud offline plus native loopback transport keeps local GPT-OSS and Messages on the existing API',async()=>{
-  const e=await client({native:true}),cloud=assertLocal(e);assert.equal(cloud.state.available,true);const ai=await cloud.api('/ai/status');assert.equal(ai.ready,true);assert.deepEqual(e.invocations.find(call=>call.command==='offline_local_api'),{command:'offline_local_api',args:{accountId:account.id,path:'/api/ai/status',method:'GET',body:null}});assert.equal(e.calls.some(call=>call.url==='/api/ai/status'),false);
-  await cloud.api('/messages');assert.ok(e.invocations.some(call=>call.command==='offline_local_api'&&call.args.path==='/api/messages'&&call.args.accountId===account.id));await assert.rejects(cloud.api('/profile'),/Backend unreachable/);assert.equal(e.invocations.some(call=>call.command==='offline_local_api'&&call.args.path==='/api/profile'),false);await cloud.reconnect();assert.ok(e.invocations.some(call=>call.command==='check_local_backend'));
+ await test('Native cached play remains available without a message worker; reconnect checks only the account backend',async()=>{
+  const e=await client({native:true}),cloud=assertLocal(e);assert.equal(cloud.state.available,false);await assert.rejects(cloud.api('/profile'),/Backend unreachable/);assert.deepEqual(e.invocations,[]);await cloud.reconnect();assert.deepEqual(e.invocations.map(call=>call.command),['check_local_backend']);assert.equal(cloud.showMessages,undefined);assert.equal(Object.hasOwn(cloud.state,'gptAvailable'),false);
  });
- await test('Remote native origins never launch a local backend or invoke offline local AI',async()=>{
-  const origin='https://arena.example.invalid',storage=cached();const record=JSON.parse(storage[ACCOUNT_KEY]);record.origin=origin;storage[ACCOUNT_KEY]=JSON.stringify(record);const e=await client({storage,origin,native:true});assertLocal(e,baseSave);assert.equal(e.context.SARCloud.state.available,false);await assert.rejects(e.context.SARCloud.api('/ai/status'),/Backend unreachable/);await e.context.SARCloud.reconnect();assert.deepEqual(e.invocations,[]);assert.ok(e.calls.some(call=>call.url==='/api/ai/status'));
+ await test('Remote native origins never launch a local backend during cached play',async()=>{
+  const origin='https://arena.example.invalid',storage=cached();const record=JSON.parse(storage[ACCOUNT_KEY]);record.origin=origin;storage[ACCOUNT_KEY]=JSON.stringify(record);const e=await client({storage,origin,native:true});assertLocal(e,baseSave);assert.equal(e.context.SARCloud.state.available,false);await e.context.SARCloud.reconnect();assert.deepEqual(e.invocations,[]);
  });
- await test('Browser loopback origins and first-time native users do not gain offline AI account access',async()=>{
-  const browser=await client();assertLocal(browser);await assert.rejects(browser.context.SARCloud.api('/ai/status'),/Backend unreachable/);assert.deepEqual(browser.invocations,[]);const fresh=await client({storage:{},native:true});assert.equal(fresh.context.SARCloud.state.loaded,false);await assert.rejects(fresh.context.SARCloud.api('/ai/status'),/Backend unreachable/);assert.equal(fresh.invocations.some(call=>call.command==='offline_local_api'),false);
+ await test('Browser cached play remains local and first-time native users still require account authentication',async()=>{
+  const browser=await client();assertLocal(browser);await browser.context.SARCloud.reconnect();assert.deepEqual(browser.invocations,[]);const fresh=await client({storage:{},native:true});assert.equal(fresh.context.SARCloud.state.loaded,false);assert.deepEqual(fresh.scripts,[]);assert.deepEqual(fresh.invocations,[]);
  });
  fs.writeFileSync(path.join(__dirname,'offline-client-results.json'),JSON.stringify({result:checks.every(check=>check.result==='PASS')?'PASS':'FAIL',cloudHash:crypto.createHash('sha256').update(cloudSource).digest('hex'),checks},null,2));
 }

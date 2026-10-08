@@ -1122,7 +1122,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPunch_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.105,
           "gain": 1,
           "offsetSeconds": 0
@@ -1147,7 +1147,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.105,
           "gain": 1,
           "offsetSeconds": 0
@@ -1172,7 +1172,7 @@
         {
           "source": "interface",
           "member": "Audio/tick_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.045,
           "gain": 1,
           "offsetSeconds": 0
@@ -1197,7 +1197,7 @@
         {
           "source": "interface",
           "member": "Audio/click_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 1,
           "offsetSeconds": 0
@@ -1222,7 +1222,7 @@
         {
           "source": "interface",
           "member": "Audio/back_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.061,
           "gain": 1,
           "offsetSeconds": 0
@@ -1237,39 +1237,6 @@
       "peak": 0.40997,
       "bytes": 2972,
       "sha256": "12771fccc795498366e46c7b0e254c31a2e18b73fc7111e85267583763ca7e16",
-      "critical": true
-    },
-    "message_received": {
-      "file": "ui/message_received.wav",
-      "source": "interface",
-      "originalMember": "Audio/confirmation_002.ogg",
-      "components": [
-        {
-          "source": "interface",
-          "member": "Audio/confirmation_002.ogg",
-          "startSeconds": 0.0,
-          "durationSeconds": 0.16,
-          "gain": 0.7,
-          "offsetSeconds": 0
-        },
-        {
-          "source": "interface",
-          "member": "Audio/pluck_001.ogg",
-          "startSeconds": 0.0,
-          "durationSeconds": 0.09954166666666667,
-          "gain": 0.2,
-          "offsetSeconds": 0.035
-        }
-      ],
-      "processing": "Unpitched retained CC0 recordings; highpass=f=550,lowpass=f=6900; peak-limited with edge fades; mono 24 kHz PCM16.",
-      "mastering": {
-        "filters": "highpass=f=550,lowpass=f=6900",
-        "targetPeak": 0.44
-      },
-      "duration": 0.16,
-      "peak": 0.43997,
-      "bytes": 7724,
-      "sha256": "b254619f43eeee20c1d13978ddf122d94a0716a305c9d26b75fae82a69e1a686",
       "critical": true
     },
     "dry_fire_01": {
@@ -1291,7 +1258,7 @@
         {
           "source": "interface",
           "member": "Audio/confirmation_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.78,
           "offsetSeconds": 0
@@ -1299,7 +1266,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.075,
           "gain": 0.23,
           "offsetSeconds": 0.012
@@ -1431,7 +1398,7 @@
       "source": "wind",
       "originalMember": null,
       "processing": "30-second mono ambience, 2-second equal-length seam crossfade, high-pass and conservative normalization; Ogg Vorbis q3.",
-      "duration": 30.0,
+      "duration": 30,
       "peak": 0.70409,
       "bytes": 117663,
       "sha256": "cdaee32327783b01d29cd3d62ca88c0dfaa2d15a0501f1d89d1388a5174f24fa",
@@ -1442,7 +1409,7 @@
       "source": "suburb",
       "originalMember": null,
       "processing": "30-second mono ambience, 2-second equal-length seam crossfade, high-pass and conservative normalization; Ogg Vorbis q3.",
-      "duration": 30.0,
+      "duration": 30,
       "peak": 0.70015,
       "bytes": 121370,
       "sha256": "18f9bc5389bb101fc537e79419459ef335727a392889800a8ea82ba76414818d",
@@ -1453,7 +1420,7 @@
       "source": "traffic",
       "originalMember": null,
       "processing": "30-second mono ambience, 2-second equal-length seam crossfade, high-pass and conservative normalization; Ogg Vorbis q3.",
-      "duration": 30.0,
+      "duration": 30,
       "peak": 0.70588,
       "bytes": 138535,
       "sha256": "6fb9cbcaa2581d36334d442bd4aaf8e92b0d5a6ecfdb118d05901ceccf900740",
@@ -1475,7 +1442,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.28,
           "offsetSeconds": 0.074
@@ -1503,7 +1470,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.28,
           "offsetSeconds": 0.08
@@ -1518,7 +1485,7 @@
         {
           "source": "rifle-reload",
           "member": null,
-          "startSeconds": 1.0,
+          "startSeconds": 1,
           "durationSeconds": 0.12995833333333334,
           "gain": 1,
           "offsetSeconds": 0
@@ -1526,7 +1493,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.35,
           "offsetSeconds": 0.06899999999999999
@@ -1546,7 +1513,7 @@
         {
           "source": "rifle-reload",
           "member": null,
-          "startSeconds": 1.0,
+          "startSeconds": 1,
           "durationSeconds": 0.12995833333333334,
           "gain": 1,
           "offsetSeconds": 0
@@ -1554,7 +1521,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.35,
           "offsetSeconds": 0.075
@@ -1577,7 +1544,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.25,
           "offsetSeconds": 0.094
@@ -1605,7 +1572,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.25,
           "offsetSeconds": 0.1
@@ -1620,7 +1587,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1628,7 +1595,7 @@
         {
           "source": "impact",
           "member": "Audio/impactWood_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.45,
           "offsetSeconds": 0.059000000000000004
@@ -1648,7 +1615,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1656,7 +1623,7 @@
         {
           "source": "impact",
           "member": "Audio/impactWood_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.45,
           "offsetSeconds": 0.065
@@ -1671,7 +1638,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1679,7 +1646,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.4,
           "offsetSeconds": 0.06899999999999999
@@ -1699,7 +1666,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1707,7 +1674,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.4,
           "offsetSeconds": 0.075
@@ -1730,7 +1697,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.28,
           "offsetSeconds": 0.164
@@ -1758,7 +1725,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.28,
           "offsetSeconds": 0.17
@@ -1773,7 +1740,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1781,7 +1748,7 @@
         {
           "source": "interface",
           "member": "Audio/click_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.097125,
           "gain": 0.35,
           "offsetSeconds": 0.049
@@ -1801,7 +1768,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1809,7 +1776,7 @@
         {
           "source": "interface",
           "member": "Audio/click_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.097125,
           "gain": 0.35,
           "offsetSeconds": 0.055
@@ -1824,7 +1791,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1832,7 +1799,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.45,
           "offsetSeconds": 0.059000000000000004
@@ -1852,7 +1819,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1860,7 +1827,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.45,
           "offsetSeconds": 0.065
@@ -1883,7 +1850,7 @@
         {
           "source": "interface",
           "member": "Audio/click_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.28,
           "offsetSeconds": 0.109
@@ -1911,7 +1878,7 @@
         {
           "source": "interface",
           "member": "Audio/click_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.28,
           "offsetSeconds": 0.115
@@ -1926,7 +1893,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1934,7 +1901,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.4,
           "offsetSeconds": 0.054
@@ -1954,7 +1921,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1962,7 +1929,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.4,
           "offsetSeconds": 0.06
@@ -1977,7 +1944,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -1985,7 +1952,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.3,
           "offsetSeconds": 0.08399999999999999
@@ -2005,7 +1972,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -2013,7 +1980,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.3,
           "offsetSeconds": 0.09
@@ -2036,7 +2003,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.32,
           "offsetSeconds": 0.109
@@ -2064,7 +2031,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.32,
           "offsetSeconds": 0.115
@@ -2079,7 +2046,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -2087,7 +2054,7 @@
         {
           "source": "interface",
           "member": "Audio/click_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.021791666666666668,
           "gain": 0.3,
           "offsetSeconds": 0.054
@@ -2107,7 +2074,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -2115,7 +2082,7 @@
         {
           "source": "interface",
           "member": "Audio/click_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.021791666666666668,
           "gain": 0.3,
           "offsetSeconds": 0.06
@@ -2130,7 +2097,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11625,
           "gain": 1,
           "offsetSeconds": 0
@@ -2138,7 +2105,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.35,
           "offsetSeconds": 0.074
@@ -2158,7 +2125,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11625,
           "gain": 1,
           "offsetSeconds": 0
@@ -2166,7 +2133,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.35,
           "offsetSeconds": 0.08
@@ -2189,7 +2156,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.25,
           "offsetSeconds": 0.154
@@ -2217,7 +2184,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.25,
           "offsetSeconds": 0.16
@@ -2232,7 +2199,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -2240,7 +2207,7 @@
         {
           "source": "interface",
           "member": "Audio/click_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.011625,
           "gain": 0.35,
           "offsetSeconds": 0.064
@@ -2260,7 +2227,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -2268,7 +2235,7 @@
         {
           "source": "interface",
           "member": "Audio/click_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.011625,
           "gain": 0.35,
           "offsetSeconds": 0.07
@@ -2283,7 +2250,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -2291,7 +2258,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 0.3,
           "offsetSeconds": 0.059000000000000004
@@ -2311,7 +2278,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -2319,7 +2286,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 0.3,
           "offsetSeconds": 0.065
@@ -2385,7 +2352,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11441666666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -2393,7 +2360,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.45,
           "offsetSeconds": 0.104
@@ -2413,7 +2380,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11441666666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -2421,7 +2388,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.45,
           "offsetSeconds": 0.11
@@ -2436,7 +2403,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.19,
           "gain": 1,
           "offsetSeconds": 0
@@ -2444,7 +2411,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.45,
           "offsetSeconds": 0.094
@@ -2464,7 +2431,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.19,
           "gain": 1,
           "offsetSeconds": 0
@@ -2472,7 +2439,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.45,
           "offsetSeconds": 0.1
@@ -2495,7 +2462,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.13091666666666665,
           "gain": 0.4,
           "offsetSeconds": 0.204
@@ -2523,7 +2490,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.13091666666666665,
           "gain": 0.4,
           "offsetSeconds": 0.21
@@ -2538,7 +2505,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -2546,7 +2513,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11,
           "gain": 0.35,
           "offsetSeconds": 0.044000000000000004
@@ -2566,7 +2533,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -2574,7 +2541,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11,
           "gain": 0.35,
           "offsetSeconds": 0.05
@@ -2589,7 +2556,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 1,
           "offsetSeconds": 0
@@ -2597,7 +2564,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_006.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 0.45,
           "offsetSeconds": 0.039
@@ -2617,7 +2584,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 1,
           "offsetSeconds": 0
@@ -2625,7 +2592,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_006.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 0.45,
           "offsetSeconds": 0.045
@@ -2648,7 +2615,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_007.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 0.4,
           "offsetSeconds": 0.08399999999999999
@@ -2676,7 +2643,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_007.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 0.4,
           "offsetSeconds": 0.09
@@ -2699,7 +2666,7 @@
         {
           "source": "interface",
           "member": "Audio/click_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.25,
           "offsetSeconds": 0.059000000000000004
@@ -2727,7 +2694,7 @@
         {
           "source": "interface",
           "member": "Audio/click_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.25,
           "offsetSeconds": 0.065
@@ -2750,7 +2717,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.4,
           "offsetSeconds": 0.06899999999999999
@@ -2778,7 +2745,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.4,
           "offsetSeconds": 0.075
@@ -2801,7 +2768,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.3,
           "offsetSeconds": 0.11399999999999999
@@ -2829,7 +2796,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.3,
           "offsetSeconds": 0.12
@@ -2844,7 +2811,7 @@
         {
           "source": "interface",
           "member": "Audio/click_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 1,
           "offsetSeconds": 0
@@ -2852,7 +2819,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.08,
           "gain": 0.35,
           "offsetSeconds": 0.029000000000000005
@@ -2872,7 +2839,7 @@
         {
           "source": "interface",
           "member": "Audio/click_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 1,
           "offsetSeconds": 0
@@ -2880,7 +2847,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.08,
           "gain": 0.35,
           "offsetSeconds": 0.035
@@ -2895,7 +2862,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -2903,7 +2870,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.4,
           "offsetSeconds": 0.059000000000000004
@@ -2923,7 +2890,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -2931,7 +2898,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.4,
           "offsetSeconds": 0.065
@@ -2946,7 +2913,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -2954,7 +2921,7 @@
         {
           "source": "interface",
           "member": "Audio/click_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.011625,
           "gain": 0.45,
           "offsetSeconds": 0.08399999999999999
@@ -2974,7 +2941,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -2982,7 +2949,7 @@
         {
           "source": "interface",
           "member": "Audio/click_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.011625,
           "gain": 0.45,
           "offsetSeconds": 0.09
@@ -2997,7 +2964,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -3005,7 +2972,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.35,
           "offsetSeconds": 0.039
@@ -3025,7 +2992,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -3033,7 +3000,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.35,
           "offsetSeconds": 0.045
@@ -3048,7 +3015,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11,
           "gain": 1,
           "offsetSeconds": 0
@@ -3056,7 +3023,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.4,
           "offsetSeconds": 0.059000000000000004
@@ -3076,7 +3043,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11,
           "gain": 1,
           "offsetSeconds": 0
@@ -3084,7 +3051,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.4,
           "offsetSeconds": 0.065
@@ -3107,7 +3074,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.35,
           "offsetSeconds": 0.109
@@ -3135,7 +3102,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.35,
           "offsetSeconds": 0.115
@@ -3150,7 +3117,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -3158,7 +3125,7 @@
         {
           "source": "interface",
           "member": "Audio/click_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.021791666666666668,
           "gain": 0.32,
           "offsetSeconds": 0.059000000000000004
@@ -3178,7 +3145,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -3186,7 +3153,7 @@
         {
           "source": "interface",
           "member": "Audio/click_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.021791666666666668,
           "gain": 0.32,
           "offsetSeconds": 0.065
@@ -3201,7 +3168,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -3209,7 +3176,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.42,
           "offsetSeconds": 0.064
@@ -3229,7 +3196,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -3237,7 +3204,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.42,
           "offsetSeconds": 0.07
@@ -3260,7 +3227,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_006.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.4,
           "offsetSeconds": 0.09899999999999999
@@ -3288,7 +3255,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_006.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.4,
           "offsetSeconds": 0.105
@@ -3303,7 +3270,7 @@
         {
           "source": "impact",
           "member": "Audio/impactWood_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.09,
           "gain": 1,
           "offsetSeconds": 0
@@ -3311,7 +3278,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.32,
           "offsetSeconds": 0.034
@@ -3331,7 +3298,7 @@
         {
           "source": "impact",
           "member": "Audio/impactWood_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.09,
           "gain": 1,
           "offsetSeconds": 0
@@ -3339,7 +3306,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.32,
           "offsetSeconds": 0.04
@@ -3362,7 +3329,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.22,
           "offsetSeconds": 0.194
@@ -3390,7 +3357,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.22,
           "offsetSeconds": 0.2
@@ -3405,7 +3372,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.09,
           "gain": 1,
           "offsetSeconds": 0
@@ -3413,7 +3380,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.48,
           "offsetSeconds": 0.054
@@ -3433,7 +3400,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.09,
           "gain": 1,
           "offsetSeconds": 0
@@ -3441,7 +3408,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.48,
           "offsetSeconds": 0.06
@@ -3464,7 +3431,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.4,
           "offsetSeconds": 0.11399999999999999
@@ -3492,7 +3459,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.4,
           "offsetSeconds": 0.12
@@ -3565,7 +3532,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.2674,
           "offsetSeconds": 0.08
@@ -3598,7 +3565,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.2548,
           "offsetSeconds": 0.08600000000000001
@@ -3631,7 +3598,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.33425,
           "offsetSeconds": 0.075
@@ -3664,7 +3631,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.3185,
           "offsetSeconds": 0.081
@@ -3697,7 +3664,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.23875,
           "offsetSeconds": 0.1
@@ -3730,7 +3697,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.2275,
           "offsetSeconds": 0.10600000000000001
@@ -3780,7 +3747,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -3788,7 +3755,7 @@
         {
           "source": "impact",
           "member": "Audio/impactWood_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.42974999999999997,
           "offsetSeconds": 0.065
@@ -3813,7 +3780,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11625,
           "gain": 1,
           "offsetSeconds": 0
@@ -3821,7 +3788,7 @@
         {
           "source": "impact",
           "member": "Audio/impactWood_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.40950000000000003,
           "offsetSeconds": 0.07100000000000001
@@ -3846,7 +3813,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11625,
           "gain": 1,
           "offsetSeconds": 0
@@ -3854,7 +3821,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.382,
           "offsetSeconds": 0.075
@@ -3879,7 +3846,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -3887,7 +3854,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11441666666666667,
           "gain": 0.36400000000000005,
           "offsetSeconds": 0.081
@@ -3920,7 +3887,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.2674,
           "offsetSeconds": 0.17
@@ -3953,7 +3920,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.2548,
           "offsetSeconds": 0.17600000000000002
@@ -4003,7 +3970,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4011,7 +3978,7 @@
         {
           "source": "interface",
           "member": "Audio/click_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.011625,
           "gain": 0.33425,
           "offsetSeconds": 0.055
@@ -4036,7 +4003,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4044,7 +4011,7 @@
         {
           "source": "interface",
           "member": "Audio/click_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.3185,
           "offsetSeconds": 0.061
@@ -4069,7 +4036,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4077,7 +4044,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.42974999999999997,
           "offsetSeconds": 0.065
@@ -4102,7 +4069,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4110,7 +4077,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.40950000000000003,
           "offsetSeconds": 0.07100000000000001
@@ -4143,7 +4110,7 @@
         {
           "source": "interface",
           "member": "Audio/click_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.2674,
           "offsetSeconds": 0.115
@@ -4176,7 +4143,7 @@
         {
           "source": "interface",
           "member": "Audio/click_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.2548,
           "offsetSeconds": 0.12100000000000001
@@ -4251,7 +4218,7 @@
         {
           "source": "impact",
           "member": "Audio/impactWood_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.09,
           "gain": 1,
           "offsetSeconds": 0
@@ -4259,7 +4226,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.3056,
           "offsetSeconds": 0.04
@@ -4284,7 +4251,7 @@
         {
           "source": "impact",
           "member": "Audio/impactWood_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.09,
           "gain": 1,
           "offsetSeconds": 0
@@ -4292,7 +4259,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.2912,
           "offsetSeconds": 0.046
@@ -4325,7 +4292,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.21009999999999998,
           "offsetSeconds": 0.2
@@ -4358,7 +4325,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.20020000000000002,
           "offsetSeconds": 0.20600000000000002
@@ -4433,7 +4400,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11441666666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -4441,7 +4408,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.382,
           "offsetSeconds": 0.06
@@ -4466,7 +4433,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4474,7 +4441,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11625,
           "gain": 0.36400000000000005,
           "offsetSeconds": 0.066
@@ -4499,7 +4466,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4507,7 +4474,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.2865,
           "offsetSeconds": 0.09
@@ -4532,7 +4499,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4540,7 +4507,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.273,
           "offsetSeconds": 0.096
@@ -4573,7 +4540,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.3056,
           "offsetSeconds": 0.115
@@ -4606,7 +4573,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.2912,
           "offsetSeconds": 0.12100000000000001
@@ -4656,7 +4623,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4664,7 +4631,7 @@
         {
           "source": "interface",
           "member": "Audio/click_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.2865,
           "offsetSeconds": 0.06
@@ -4689,7 +4656,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4697,7 +4664,7 @@
         {
           "source": "interface",
           "member": "Audio/click_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.021791666666666668,
           "gain": 0.273,
           "offsetSeconds": 0.066
@@ -4722,7 +4689,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11625,
           "gain": 1,
           "offsetSeconds": 0
@@ -4730,7 +4697,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.33425,
           "offsetSeconds": 0.08
@@ -4755,7 +4722,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -4763,7 +4730,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_006.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.3185,
           "offsetSeconds": 0.08600000000000001
@@ -4796,7 +4763,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.23875,
           "offsetSeconds": 0.16
@@ -4829,7 +4796,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.2275,
           "offsetSeconds": 0.166
@@ -4904,7 +4871,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -4912,7 +4879,7 @@
         {
           "source": "interface",
           "member": "Audio/click_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.33425,
           "offsetSeconds": 0.07
@@ -4937,7 +4904,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4945,7 +4912,7 @@
         {
           "source": "interface",
           "member": "Audio/click_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.011625,
           "gain": 0.3185,
           "offsetSeconds": 0.07600000000000001
@@ -4970,7 +4937,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -4978,7 +4945,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 0.2865,
           "offsetSeconds": 0.065
@@ -5003,7 +4970,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -5011,7 +4978,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 0.273,
           "offsetSeconds": 0.07100000000000001
@@ -5152,7 +5119,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11441666666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -5160,7 +5127,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.42974999999999997,
           "offsetSeconds": 0.11
@@ -5185,7 +5152,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11441666666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -5193,7 +5160,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.40950000000000003,
           "offsetSeconds": 0.116
@@ -5218,7 +5185,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.13091666666666665,
           "gain": 1,
           "offsetSeconds": 0
@@ -5226,7 +5193,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.42974999999999997,
           "offsetSeconds": 0.1
@@ -5251,7 +5218,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.16475,
           "gain": 1,
           "offsetSeconds": 0
@@ -5259,7 +5226,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_heavy_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.40950000000000003,
           "offsetSeconds": 0.10600000000000001
@@ -5292,7 +5259,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.13091666666666665,
           "gain": 0.382,
           "offsetSeconds": 0.21
@@ -5325,7 +5292,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_heavy_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.13091666666666665,
           "gain": 0.36400000000000005,
           "offsetSeconds": 0.216
@@ -5375,7 +5342,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -5383,7 +5350,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_006.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11,
           "gain": 0.33425,
           "offsetSeconds": 0.05
@@ -5408,7 +5375,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -5416,7 +5383,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_007.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11,
           "gain": 0.3185,
           "offsetSeconds": 0.056
@@ -5441,7 +5408,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 1,
           "offsetSeconds": 0
@@ -5449,7 +5416,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_007.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 0.42974999999999997,
           "offsetSeconds": 0.045
@@ -5474,7 +5441,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 1,
           "offsetSeconds": 0
@@ -5482,7 +5449,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 0.40950000000000003,
           "offsetSeconds": 0.051
@@ -5515,7 +5482,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 0.382,
           "offsetSeconds": 0.09
@@ -5548,7 +5515,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.12,
           "gain": 0.36400000000000005,
           "offsetSeconds": 0.096
@@ -5631,7 +5598,7 @@
         {
           "source": "interface",
           "member": "Audio/click_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.23875,
           "offsetSeconds": 0.065
@@ -5664,7 +5631,7 @@
         {
           "source": "interface",
           "member": "Audio/click_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.2275,
           "offsetSeconds": 0.07100000000000001
@@ -5697,7 +5664,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.382,
           "offsetSeconds": 0.075
@@ -5730,7 +5697,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.36400000000000005,
           "offsetSeconds": 0.081
@@ -5763,7 +5730,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.2865,
           "offsetSeconds": 0.12
@@ -5796,7 +5763,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_006.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.273,
           "offsetSeconds": 0.126
@@ -5846,7 +5813,7 @@
         {
           "source": "interface",
           "member": "Audio/click_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 1,
           "offsetSeconds": 0
@@ -5854,7 +5821,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.08,
           "gain": 0.33425,
           "offsetSeconds": 0.035
@@ -5879,7 +5846,7 @@
         {
           "source": "interface",
           "member": "Audio/click_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 1,
           "offsetSeconds": 0
@@ -5887,7 +5854,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.08,
           "gain": 0.3185,
           "offsetSeconds": 0.041
@@ -5912,7 +5879,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -5920,7 +5887,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.382,
           "offsetSeconds": 0.065
@@ -5945,7 +5912,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -5953,7 +5920,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.36400000000000005,
           "offsetSeconds": 0.07100000000000001
@@ -5978,7 +5945,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -5986,7 +5953,7 @@
         {
           "source": "interface",
           "member": "Audio/click_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.42974999999999997,
           "offsetSeconds": 0.09
@@ -6011,7 +5978,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -6019,7 +5986,7 @@
         {
           "source": "interface",
           "member": "Audio/click_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.011625,
           "gain": 0.40950000000000003,
           "offsetSeconds": 0.096
@@ -6094,7 +6061,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -6102,7 +6069,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.33425,
           "offsetSeconds": 0.045
@@ -6127,7 +6094,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 1,
           "offsetSeconds": 0
@@ -6135,7 +6102,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.3185,
           "offsetSeconds": 0.051
@@ -6160,7 +6127,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11,
           "gain": 1,
           "offsetSeconds": 0
@@ -6168,7 +6135,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_006.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.382,
           "offsetSeconds": 0.065
@@ -6193,7 +6160,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.11,
           "gain": 1,
           "offsetSeconds": 0
@@ -6201,7 +6168,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_007.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.36400000000000005,
           "offsetSeconds": 0.07100000000000001
@@ -6234,7 +6201,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.33425,
           "offsetSeconds": 0.115
@@ -6267,7 +6234,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.3185,
           "offsetSeconds": 0.12100000000000001
@@ -6342,7 +6309,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -6350,7 +6317,7 @@
         {
           "source": "interface",
           "member": "Audio/click_005.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.007125,
           "gain": 0.3056,
           "offsetSeconds": 0.065
@@ -6375,7 +6342,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 1,
           "offsetSeconds": 0
@@ -6383,7 +6350,7 @@
         {
           "source": "interface",
           "member": "Audio/click_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.021791666666666668,
           "gain": 0.2912,
           "offsetSeconds": 0.07100000000000001
@@ -6408,7 +6375,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -6416,7 +6383,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.40109999999999996,
           "offsetSeconds": 0.07
@@ -6441,7 +6408,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.10654166666666667,
           "gain": 1,
           "offsetSeconds": 0
@@ -6449,7 +6416,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.3822,
           "offsetSeconds": 0.07600000000000001
@@ -6482,7 +6449,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_007.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.382,
           "offsetSeconds": 0.105
@@ -6515,7 +6482,7 @@
         {
           "source": "interface",
           "member": "Audio/switch_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.14,
           "gain": 0.36400000000000005,
           "offsetSeconds": 0.111
@@ -6590,7 +6557,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_000.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.09,
           "gain": 1,
           "offsetSeconds": 0
@@ -6598,7 +6565,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.4584,
           "offsetSeconds": 0.06
@@ -6623,7 +6590,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.09,
           "gain": 1,
           "offsetSeconds": 0
@@ -6631,7 +6598,7 @@
         {
           "source": "impact",
           "member": "Audio/impactMetal_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.4368,
           "offsetSeconds": 0.066
@@ -6664,7 +6631,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.382,
           "offsetSeconds": 0.12
@@ -6697,7 +6664,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_medium_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.1,
           "gain": 0.36400000000000005,
           "offsetSeconds": 0.126
@@ -6722,7 +6689,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPunch_medium_001.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.105,
           "gain": 1,
           "offsetSeconds": 0
@@ -6747,7 +6714,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPunch_medium_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.105,
           "gain": 1,
           "offsetSeconds": 0
@@ -6772,7 +6739,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.105,
           "gain": 1,
           "offsetSeconds": 0
@@ -6797,7 +6764,7 @@
         {
           "source": "impact",
           "member": "Audio/impactPlate_light_003.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.105,
           "gain": 1,
           "offsetSeconds": 0
@@ -6822,7 +6789,7 @@
         {
           "source": "interface",
           "member": "Audio/tick_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.02033333333333333,
           "gain": 1,
           "offsetSeconds": 0
@@ -6847,7 +6814,7 @@
         {
           "source": "interface",
           "member": "Audio/click_004.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.021791666666666668,
           "gain": 1,
           "offsetSeconds": 0
@@ -6872,7 +6839,7 @@
         {
           "source": "interface",
           "member": "Audio/back_002.ogg",
-          "startSeconds": 0.0,
+          "startSeconds": 0,
           "durationSeconds": 0.085,
           "gain": 1,
           "offsetSeconds": 0
@@ -6887,6 +6854,457 @@
       "peak": 0.40997,
       "bytes": 4124,
       "sha256": "ffc84392d79c89783c0702fd5a619877712a06312f06ad50c609511aed3e0f90",
+      "critical": true
+    },
+    "fal_mag_out": {
+      "file": "handling/fal_mag_out.wav",
+      "source": "rifle-reload",
+      "originalMember": null,
+      "components": [
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 0.31,
+          "durationSeconds": 0.155,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "impact",
+          "member": "Audio/impactMetal_medium_003.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.105,
+          "gain": 0.32,
+          "offsetSeconds": 0.059000000000000004
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25",
+        "targetPeak": 0.57
+      },
+      "duration": 0.164,
+      "peak": 0.56998,
+      "bytes": 7916,
+      "sha256": "f86bc370fa24bd3a113f321a92a38b285fd1cf767871c53288dfaa76e7d7ade8",
+      "critical": true,
+      "recipeComponents": [
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 0.31,
+          "durationSeconds": 0.155,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "impact",
+          "member": "Audio/impactMetal_medium_003.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.105,
+          "gain": 0.32,
+          "offsetSeconds": 0.065
+        }
+      ]
+    },
+    "fal_mag_in": {
+      "file": "handling/fal_mag_in.wav",
+      "source": "impact",
+      "originalMember": "Audio/impactMetal_heavy_004.ogg",
+      "components": [
+        {
+          "source": "impact",
+          "member": "Audio/impactMetal_heavy_004.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.13091666666666665,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 0.9,
+          "durationSeconds": 0.13,
+          "gain": 0.43,
+          "offsetSeconds": 0.074
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25",
+        "targetPeak": 0.57
+      },
+      "duration": 0.204,
+      "peak": 0.56998,
+      "bytes": 9836,
+      "sha256": "e83e70d7b14f5e9b6581e329ccaf23f29dd845251470e72485bde67564e030d5",
+      "critical": true,
+      "recipeComponents": [
+        {
+          "source": "impact",
+          "member": "Audio/impactMetal_heavy_004.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.13091666666666665,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 0.9,
+          "durationSeconds": 0.13,
+          "gain": 0.43,
+          "offsetSeconds": 0.08
+        }
+      ]
+    },
+    "fal_reload_ready": {
+      "file": "handling/fal_reload_ready.wav",
+      "source": "rifle-reload",
+      "originalMember": null,
+      "components": [
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 1.31,
+          "durationSeconds": 0.21,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "impact",
+          "member": "Audio/impactPlate_medium_003.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.11,
+          "gain": 0.28,
+          "offsetSeconds": 0.129
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25",
+        "targetPeak": 0.57
+      },
+      "duration": 0.239,
+      "peak": 0.56998,
+      "bytes": 11516,
+      "sha256": "83aff6f6d8b6a75136f895fb500af540aef8692373cde098e3e658f247be1762",
+      "critical": true,
+      "recipeComponents": [
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 1.31,
+          "durationSeconds": 0.21,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "impact",
+          "member": "Audio/impactPlate_medium_003.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.11,
+          "gain": 0.28,
+          "offsetSeconds": 0.135
+        }
+      ]
+    },
+    "fal_fire_01": {
+      "file": "weapons/fal_fire_01.wav",
+      "source": "firearms",
+      "originalMember": "Prepared SFX Library/Mosin Nagant/M_21P.wav",
+      "components": [
+        {
+          "source": "firearms",
+          "member": "Prepared SFX Library/Mosin Nagant/M_21P.wav",
+          "startSeconds": 1.0327916666666668,
+          "durationSeconds": 0.28,
+          "gain": 1,
+          "offsetSeconds": 0
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=80,lowpass=f=8800,equalizer=f=210:t=q:w=.75:g=2.5,equalizer=f=3100:t=q:w=.85:g=1.4; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=80,lowpass=f=8800,equalizer=f=210:t=q:w=.75:g=2.5,equalizer=f=3100:t=q:w=.85:g=1.4",
+        "targetPeak": 0.72
+      },
+      "duration": 0.28,
+      "peak": 0.71997,
+      "bytes": 13484,
+      "sha256": "05c70fd6a4a24573382485ab87e750d1ab27780e85e7057a3f5cbbbf35f2f2b9",
+      "critical": true
+    },
+    "fal_fire_02": {
+      "file": "weapons/fal_fire_02.wav",
+      "source": "firearms",
+      "originalMember": "Prepared SFX Library/Mosin Nagant/M_21P.wav",
+      "components": [
+        {
+          "source": "firearms",
+          "member": "Prepared SFX Library/Mosin Nagant/M_21P.wav",
+          "startSeconds": 5.018791666666667,
+          "durationSeconds": 0.28,
+          "gain": 1,
+          "offsetSeconds": 0
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=80,lowpass=f=8800,equalizer=f=210:t=q:w=.75:g=2.5,equalizer=f=3100:t=q:w=.85:g=1.4; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=80,lowpass=f=8800,equalizer=f=210:t=q:w=.75:g=2.5,equalizer=f=3100:t=q:w=.85:g=1.4",
+        "targetPeak": 0.735
+      },
+      "duration": 0.28,
+      "peak": 0.73499,
+      "bytes": 13484,
+      "sha256": "6b6c1391ea4d5f3a99023eb3a8f37aaa95e4a7bf64eba5998eafb0bf9cd6f859",
+      "critical": true
+    },
+    "fal_fire_03": {
+      "file": "weapons/fal_fire_03.wav",
+      "source": "firearms",
+      "originalMember": "Prepared SFX Library/Mosin Nagant/M_21P.wav",
+      "components": [
+        {
+          "source": "firearms",
+          "member": "Prepared SFX Library/Mosin Nagant/M_21P.wav",
+          "startSeconds": 9.154625,
+          "durationSeconds": 0.28,
+          "gain": 1,
+          "offsetSeconds": 0
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=80,lowpass=f=8800,equalizer=f=210:t=q:w=.75:g=2.5,equalizer=f=3100:t=q:w=.85:g=1.4; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=80,lowpass=f=8800,equalizer=f=210:t=q:w=.75:g=2.5,equalizer=f=3100:t=q:w=.85:g=1.4",
+        "targetPeak": 0.72
+      },
+      "duration": 0.28,
+      "peak": 0.71997,
+      "bytes": 13484,
+      "sha256": "605cd2fb1a651ab8683f6cb25ed5224d279cbb0e7d515bb334f1737051f22524",
+      "critical": true
+    },
+    "fal_fire_04": {
+      "file": "weapons/fal_fire_04.wav",
+      "source": "firearms",
+      "originalMember": "Prepared SFX Library/Mosin Nagant/M_21P.wav",
+      "components": [
+        {
+          "source": "firearms",
+          "member": "Prepared SFX Library/Mosin Nagant/M_21P.wav",
+          "startSeconds": 14.136208333333334,
+          "durationSeconds": 0.28,
+          "gain": 1,
+          "offsetSeconds": 0
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=80,lowpass=f=8800,equalizer=f=210:t=q:w=.75:g=2.5,equalizer=f=3100:t=q:w=.85:g=1.4; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=80,lowpass=f=8800,equalizer=f=210:t=q:w=.75:g=2.5,equalizer=f=3100:t=q:w=.85:g=1.4",
+        "targetPeak": 0.735
+      },
+      "duration": 0.28,
+      "peak": 0.73499,
+      "bytes": 13484,
+      "sha256": "d6beb60fca261ba9b0fabf0caad5def807553e98533cf7e3a72afe4f8e8df8dc",
+      "critical": true
+    },
+    "fal_mag_out_02": {
+      "file": "handling/fal_mag_out_02.wav",
+      "source": "rifle-reload",
+      "originalMember": null,
+      "components": [
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 0.315,
+          "durationSeconds": 0.155,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "impact",
+          "member": "Audio/impactMetal_medium_004.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.105,
+          "gain": 0.3056,
+          "offsetSeconds": 0.065
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25",
+        "targetPeak": 0.585
+      },
+      "duration": 0.17,
+      "peak": 0.58499,
+      "bytes": 8204,
+      "sha256": "235fb632980e7c22f1b86e18c70c77ef24e26eab8ac95a9ca07bfc9a31d49b7d",
+      "critical": true
+    },
+    "fal_mag_out_03": {
+      "file": "handling/fal_mag_out_03.wav",
+      "source": "rifle-reload",
+      "originalMember": null,
+      "components": [
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 0.32,
+          "durationSeconds": 0.155,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "impact",
+          "member": "Audio/impactMetal_medium_000.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.105,
+          "gain": 0.2912,
+          "offsetSeconds": 0.07100000000000001
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25",
+        "targetPeak": 0.6
+      },
+      "duration": 0.176,
+      "peak": 0.59998,
+      "bytes": 8492,
+      "sha256": "58d5ac82afb227f77a08578a449c644f7c25339a900f8bd7322c645c83f4f3d9",
+      "critical": true
+    },
+    "fal_mag_in_02": {
+      "file": "handling/fal_mag_in_02.wav",
+      "source": "impact",
+      "originalMember": "Audio/impactMetal_heavy_000.ogg",
+      "components": [
+        {
+          "source": "impact",
+          "member": "Audio/impactMetal_heavy_000.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.13091666666666665,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 0.905,
+          "durationSeconds": 0.13,
+          "gain": 0.41064999999999996,
+          "offsetSeconds": 0.08
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25",
+        "targetPeak": 0.585
+      },
+      "duration": 0.21,
+      "peak": 0.58499,
+      "bytes": 10124,
+      "sha256": "6848ca8e5dc048dbdc46a118492e80b0305eed8af0c7c68941d9b3df4b02db35",
+      "critical": true
+    },
+    "fal_mag_in_03": {
+      "file": "handling/fal_mag_in_03.wav",
+      "source": "impact",
+      "originalMember": "Audio/impactMetal_heavy_001.ogg",
+      "components": [
+        {
+          "source": "impact",
+          "member": "Audio/impactMetal_heavy_001.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.13091666666666665,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 0.91,
+          "durationSeconds": 0.13,
+          "gain": 0.3913,
+          "offsetSeconds": 0.08600000000000001
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25",
+        "targetPeak": 0.6
+      },
+      "duration": 0.216,
+      "peak": 0.59998,
+      "bytes": 10412,
+      "sha256": "3918d2b2ad217b3c0861e8d582e30e107a9bbf2d508f3b70c577e945a0bfea33",
+      "critical": true
+    },
+    "fal_reload_ready_02": {
+      "file": "handling/fal_reload_ready_02.wav",
+      "source": "rifle-reload",
+      "originalMember": null,
+      "components": [
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 1.315,
+          "durationSeconds": 0.21,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "impact",
+          "member": "Audio/impactPlate_medium_004.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.11,
+          "gain": 0.2674,
+          "offsetSeconds": 0.135
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25",
+        "targetPeak": 0.585
+      },
+      "duration": 0.245,
+      "peak": 0.58499,
+      "bytes": 11804,
+      "sha256": "51f354b6784919e32bc9bfba39616e172c840c63bd16f15fa96850de46e2b654",
+      "critical": true
+    },
+    "fal_reload_ready_03": {
+      "file": "handling/fal_reload_ready_03.wav",
+      "source": "rifle-reload",
+      "originalMember": null,
+      "components": [
+        {
+          "source": "rifle-reload",
+          "member": null,
+          "startSeconds": 1.32,
+          "durationSeconds": 0.21,
+          "gain": 1,
+          "offsetSeconds": 0
+        },
+        {
+          "source": "impact",
+          "member": "Audio/impactPlate_medium_000.ogg",
+          "startSeconds": 0.0,
+          "durationSeconds": 0.11,
+          "gain": 0.2548,
+          "offsetSeconds": 0.14100000000000001
+        }
+      ],
+      "processing": "Unpitched retained CC0 recordings; highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25; peak-limited with edge fades; mono 24 kHz PCM16.",
+      "mastering": {
+        "filters": "highpass=f=120,lowpass=f=6500,equalizer=f=420:t=q:w=.9:g=1.25",
+        "targetPeak": 0.6
+      },
+      "duration": 0.251,
+      "peak": 0.59998,
+      "bytes": 12092,
+      "sha256": "79635406ab62d19fc063241bae5ad3e455a45ce90cbc97625083e5847893adb9",
       "critical": true
     }
   },
@@ -7440,6 +7858,46 @@
         "presenceDb": 2
       },
       "handlingGain": 1
+    },
+    "FAL": {
+      "fire": [
+        "fal_fire_01",
+        "fal_fire_02",
+        "fal_fire_03",
+        "fal_fire_04"
+      ],
+      "handling": "magazine",
+      "pump": false,
+      "handlingEvents": {
+        "mag-out": [
+          "fal_mag_out",
+          "fal_mag_out_02",
+          "fal_mag_out_03"
+        ],
+        "mag-in": [
+          "fal_mag_in",
+          "fal_mag_in_02",
+          "fal_mag_in_03"
+        ],
+        "reload-ready": [
+          "fal_reload_ready",
+          "fal_reload_ready_02",
+          "fal_reload_ready_03"
+        ]
+      },
+      "fireGain": 0.7,
+      "rateVariation": 0.008,
+      "identity": "firm full-power semi-auto rifle crack, short steel receiver tail",
+      "masteringProfile": {
+        "tailSeconds": 0.28,
+        "highpassHz": 80,
+        "lowpassHz": 8800,
+        "bodyHz": 210,
+        "bodyDb": 2.5,
+        "presenceHz": 3100,
+        "presenceDb": 1.4
+      },
+      "handlingGain": 1
     }
   },
   "events": {
@@ -7553,15 +8011,6 @@
       ],
       "category": "UI",
       "gain": 0.22,
-      "spatial": false,
-      "priority": 2
-    },
-    "message": {
-      "assets": [
-        "message_received"
-      ],
-      "category": "UI",
-      "gain": 0.28,
       "spatial": false,
       "priority": 2
     },

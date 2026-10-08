@@ -1,0 +1,74 @@
+'use strict';
+// Real browser and real combat. Faults affect only one isolated WebGL canvas or
+// its local module response; neither owner accounts nor stored worlds are used.
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto');
+const {chromium}=require(process.env.SAR_PLAYWRIGHT||path.join(os.homedir(),'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
+const out=path.resolve(process.env.SAR_TEST_OUTPUT||path.join(os.tmpdir(),'sar-arena-refined-mode-entry'));fs.mkdirSync(out,{recursive:true});
+const testedSource=fs.readFileSync(path.join(__dirname,'../game.js'),'utf8'),sourceHash=crypto.createHash('sha256').update(testedSource).digest('hex');new Function(testedSource);fs.writeFileSync(path.join(out,'tested-game-source.js'),testedSource);
+const app=require('../server/index.cjs').createServer({db:require('../server/db.cjs').createDatabase(':memory:')});
+const checks=[],errors=[],metrics=[],contexts=[],pass=name=>{checks.push(name);console.log('PASS '+name);};let browser,base,lastPage;
+const humans=page=>page.evaluate(()=>SAR.getActorSnapshots().filter(a=>a.isPlayer&&a.matchId!==null));
+const rendererCount=async page=>assert.deepEqual(await page.evaluate(()=>['game3d','game3dLabels','game3dMap'].map(id=>document.querySelectorAll('#'+id).length)),[1,1,1]);
+async function newPage({failWebGL=false}={}){
+ const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});contexts.push(context);
+ if(failWebGL)await context.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;window.__auditFailWebGL=false;HTMLCanvasElement.prototype.getContext=function(type,...args){if(window.__auditFailWebGL&&this.id==='game3d'&&/^webgl/.test(type))return null;return original.call(this,type,...args);};});
+ const auth=await context.request.post(base+'/api/auth/signup',{data:{username:'entry_'+Date.now().toString(36)+crypto.randomBytes(3).toString('hex'),password:crypto.randomBytes(18).toString('hex')},headers:{origin:base}});assert.equal(auth.status(),201);
+ const page=await context.newPage();lastPage=page;const pageErrors=[];page.on('pageerror',error=>{pageErrors.push(error.message);errors.push(error.message);});page.on('response',response=>{if(response.status()>=500&&/\/api\/tournaments(?:\/|\?|$)/.test(response.url()))errors.push('Tournament API '+response.status());});await page.goto(base+'/?diagnostics=1',{waitUntil:'domcontentloaded'});if(pageErrors.length)throw Error('Startup script failed: '+pageErrors[0]);
+ await page.waitForFunction(()=>window.SAR?.beginModeEntry&&window.SARModeEntry&&window.SARCloud?.state.loaded&&!document.getElementById('sarBoot'),null,{timeout:45000});await page.bringToFront();await page.evaluate(()=>SARFullscreen.setAutoEnter(false));
+ if(failWebGL)await page.evaluate(()=>{window.SAR25D=null;window.__auditFailWebGL=true;});
+ return {page,context};
+}
+const reservePool=page=>page.evaluate(()=>{const people=Object.values(SAR.getProfiles()).slice(0,40).map(p=>({id:p.id,kind:'bot'}));SAR.syncTournamentReservations([{id:'isolated-entry-audit',kind:'official',status:'ACTIVE',teams:Array.from({length:8},(_,i)=>({participants:people.slice(i*5,i*5+5)}))}]);return SAR.getState().reservedBots;});
+async function modeMenu(page){if(await page.locator('#modal.visible').count())await page.locator('#closeModal').click();await page.locator('.menu-grid [data-action="play"]').click();await page.waitForSelector('.play-modes');}
+async function select(page,mode,{double=false}={}){
+ await modeMenu(page);const action={tdm:'play-tdm',deathmatch:'play-deathmatch','ranked-tdm':'play-ranked',custom:'play-custom'}[mode];
+ if(mode==='custom'){await page.locator(`[data-action="${action}"]`).click();await page.locator('#customMode').selectOption('deathmatch');await page.locator('#customBot0').selectOption('random');await page.locator('[data-action="start-custom"]').click();}
+ else if(double)await page.locator(`[data-action="${action}"]`).evaluate(button=>{button.click();button.click();});else await page.locator(`[data-action="${action}"]`).click();
+ await page.waitForSelector('#sarModeEntry:not([hidden])');
+ const attempt=await page.evaluate(()=>{const attempt=SARModeEntry.state();clearInterval(window.__auditEntryTimer);window.__auditEntryProbe={started:attempt.started,id:attempt.id,firstHumanAt:null,firstStatus:null,firstHP:null};window.__auditEntryTimer=setInterval(()=>{const p=SAR.getActorSnapshots().find(a=>a.isPlayer&&a.matchId!==null);if(p&&window.__auditEntryProbe.firstHumanAt===null){window.__auditEntryProbe.firstHumanAt=performance.now();window.__auditEntryProbe.firstHP=p.hp;window.__auditEntryProbe.firstStatus=SAR.getState().matches.find(m=>m?.id===p.matchId)?.status;}},10);return attempt;});
+ assert.equal((await humans(page)).length,0);return attempt;
+}
+async function entered(page,mode){
+ await page.waitForFunction(()=>SAR.getActorSnapshots().filter(a=>a.isPlayer&&a.matchId!==null).length===1,null,{timeout:15000});
+ await page.waitForFunction(()=>window.__auditEntryProbe?.firstHumanAt!==null,null,{timeout:3000});const probe=await page.evaluate(()=>window.__auditEntryProbe),elapsed=probe.firstHumanAt-probe.started;
+ assert.ok(elapsed>=2999.5,'Player must not spawn before the three-second minimum: '+elapsed);assert.equal(probe.firstStatus,'countdown');assert.equal(probe.firstHP,250);
+ const state=await page.evaluate(()=>SAR.getState()),match=state.matches.find(m=>m?.id===state.playerMatchId);assert.equal(match.mode,mode==='custom'||mode==='deathmatch'?'deathmatch':'tdm');assert.equal(match.sessionType,mode==='custom'?'custom':mode==='ranked-tdm'?'ranked':'standard');
+ assert.equal(await page.locator('#sarModeEntry').isVisible(),false);assert.equal(await page.locator('#matchCountdown').isVisible(),true);await rendererCount(page);
+ await page.waitForFunction(()=>{const s=SAR.getState();return s.matches.find(m=>m?.id===s.playerMatchId)?.status==='active';},null,{timeout:10000});
+ assert.equal((await humans(page)).length,1);assert.equal(await page.evaluate(()=>SAR.getState().running),true);metrics.push({mode,entryMs:Math.round(elapsed),matchMode:match.mode,sessionType:match.sessionType});
+}
+async function leave(page){await page.keyboard.press('Escape');await page.waitForSelector('#pause.visible');await page.locator('#pause [data-action="exit"]').click();await page.waitForFunction(()=>SAR.getState().mode==='menu'&&SAR.getActorSnapshots().filter(a=>a.isPlayer&&a.matchId!==null).length===0);}
+(async()=>{try{
+ await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));base='http://127.0.0.1:'+app.server.address().port;browser=await chromium.launch({headless:true,channel:'msedge'});
+ if(!process.env.SAR_ENTRY_RESPONSIVE_ONLY){
+ if(!process.env.SAR_ENTRY_RETRY_ONLY){
+ const normal=await newPage(),page=normal.page,xp=await page.evaluate(()=>SAR.getProgression().totalXP);
+ for(const mode of ['tdm','deathmatch','ranked-tdm','custom']){await select(page,mode);await page.waitForTimeout(2500);assert.equal((await humans(page)).length,0);await entered(page,mode);if(mode==='tdm')await page.screenshot({path:path.join(out,'tdm-real-countdown-complete.png')});await leave(page);assert.equal(await page.evaluate(()=>SAR.getProgression().totalXP),xp);}
+ pass('Actual TDM, Deathmatch, Ranked and Custom UI selections wait at least three seconds, spawn one safe player into the existing countdown, then start real combat');
+ const first=await select(page,'tdm',{double:true});assert.equal(await page.evaluate(()=>SARModeEntry.state().id),first.id);await page.evaluate(()=>{void SAR.beginModeEntry('tdm');void SAR.beginModeEntry('tdm');});assert.equal(await page.evaluate(()=>SARModeEntry.state().id),first.id);
+ await page.keyboard.press('Escape');await page.waitForFunction(()=>!SARModeEntry.isVisible());await page.waitForTimeout(3400);assert.equal((await humans(page)).length,0);assert.equal(await page.evaluate(()=>SAR.getState().mode),'menu');
+ await select(page,'deathmatch');await page.evaluate(()=>SAR.showSettings());assert.equal(await page.locator('#sarModeEntry').isVisible(),false);await page.waitForTimeout(3200);assert.equal((await humans(page)).length,0);assert.equal(await page.locator('#modalContent').getAttribute('data-view'),'settings');await page.locator('#closeModal').click();await rendererCount(page);
+ const customDuplicate=await select(page,'custom');await page.locator('#sarModeEntry').evaluate(()=>{const raw={mode:'deathmatch',difficulty:document.getElementById('customDifficulty').value,player:true,playerTeam:0,bots:[{sourceBotId:'random',team:0}]};void SAR.beginModeEntry('custom',raw);void SAR.beginModeEntry('custom',raw);});
+ const customId=await page.evaluate(()=>SARModeEntry.state().id);assert.equal(customId,customDuplicate.id);await page.evaluate(()=>{const raw={mode:'deathmatch',difficulty:document.getElementById('customDifficulty').value,player:true,playerTeam:0,bots:[{sourceBotId:'random',team:0}]};void SAR.beginModeEntry('custom',raw);});assert.equal(await page.evaluate(()=>SARModeEntry.state().id),customId);await page.locator('#sarModeCancel').click();await page.waitForTimeout(3200);assert.equal((await humans(page)).length,0);
+ pass('Double selection shares one attempt; Escape and opening Settings invalidate loading without late players or duplicate renderer canvases');
+ // Headless Edge reports its tabs focused simultaneously. Fault the focus API
+ // consumed by the shipped guard; do not freeze the actual match simulation.
+ await select(page,'tdm');await page.evaluate(()=>{window.__auditFocusLost=true;const original=document.hasFocus.bind(document);Object.defineProperty(document,'hasFocus',{configurable:true,value:()=>!window.__auditFocusLost&&original()});dispatchEvent(new Event('blur'));});
+ assert.equal(await page.evaluate(()=>document.hidden||!document.hasFocus()),true);await page.waitForTimeout(3500);assert.equal((await humans(page)).length,0);assert.equal(await page.evaluate(()=>SARModeEntry.state()?.phase),'ready');assert.match(await page.locator('#sarModeStatus').textContent(),/Return to the game/);
+ await page.evaluate(()=>{window.__auditFocusLost=false;delete document.hasFocus;dispatchEvent(new Event('focus'));});await entered(page,'tdm');await leave(page);
+ pass('The shipped focus guard holds a prepared entry when focus is lost; restoring focus enters once through the existing countdown');
+ const slow=await newPage();assert.equal(await reservePool(slow.page),40);await select(slow.page,'deathmatch');await slow.page.waitForTimeout(3600);assert.equal((await humans(slow.page)).length,0);assert.equal(await slow.page.locator('#sarModeRetry').isVisible(),false);assert.match(await slow.page.locator('#sarModeStatus').textContent(),/Waiting for available participants/);await slow.page.screenshot({path:path.join(out,'slow-preparation-after-three-seconds.png')});await slow.page.evaluate(()=>SAR.syncTournamentReservations([]));await entered(slow.page,'deathmatch');await leave(slow.page);
+ pass('Real official pool reservations keep essential roster preparation waiting beyond three seconds; release permits safe entry without cloned participants');
+ }
+ const failure=await newPage({failWebGL:true});await select(failure.page,'tdm');await failure.page.waitForSelector('#sarModeRetry:not([hidden])',{timeout:15000});assert.equal((await humans(failure.page)).length,0);assert.match(await failure.page.locator('#sarModeStatus').textContent(),/arena view.*(?:could not load|failed)/i);const failedId=await failure.page.evaluate(()=>SARModeEntry.state().id);await failure.page.screenshot({path:path.join(out,'honest-webgl-preparation-failure.png')});
+ await failure.page.evaluate(()=>{window.__auditFailWebGL=false;window.__auditEntryProbe=null;});await failure.page.locator('#sarModeRetry').click();
+ await failure.page.evaluate(()=>{const a=SARModeEntry.state();window.__auditEntryProbe={started:a.started,id:a.id,firstHumanAt:null,firstStatus:null,firstHP:null};});assert.ok(await failure.page.evaluate(id=>SARModeEntry.state().id>id,failedId));await entered(failure.page,'tdm');await rendererCount(failure.page);await leave(failure.page);
+ assert.equal(await failure.page.evaluate(()=>SAR.getProgression().totalXP),0);assert.deepEqual(errors,[]);
+ pass('Genuine WebGL initialization failure shows its stage; Retry makes a fresh successful attempt with one player, one renderer and no XP from loading/abandonment');
+ }
+ const responsive=await newPage();assert.equal(await reservePool(responsive.page),40);await select(responsive.page,'deathmatch');await responsive.page.screenshot({path:path.join(out,'mode-loading-1440.png')});await responsive.page.setViewportSize({width:390,height:844});
+ const dimensions=await responsive.page.locator('#sarModeEntry').evaluate(el=>({width:el.clientWidth,scrollWidth:el.scrollWidth,height:el.clientHeight,scrollHeight:el.scrollHeight}));assert.ok(dimensions.scrollWidth<=dimensions.width+1,'Loading screen must fit the mobile viewport');
+ const cancel=responsive.page.locator('#sarModeCancel');assert.equal(await cancel.isVisible(),true);const rect=await cancel.boundingBox();assert.ok(rect.x>=0&&rect.x+rect.width<=390&&rect.y>=0&&rect.y+rect.height<=844,'Cancel must remain reachable at 390px');assert.equal((await humans(responsive.page)).length,0);await responsive.page.screenshot({path:path.join(out,'mode-loading-390.png')});await cancel.click();await responsive.page.evaluate(()=>SAR.syncTournamentReservations([]));await responsive.page.waitForTimeout(3300);assert.equal((await humans(responsive.page)).length,0);assert.deepEqual(errors,[]);
+ pass('Loading presentation fits 1440px and 390px viewports; Return to Modes stays reachable and cancellation prevents late entry');
+ fs.writeFileSync(path.join(out,'mode-entry-browser-results.json'),JSON.stringify({ok:true,checks,metrics,errors,sourceHash,method:'Real Edge/WebGL, shipped simulation and UI, isolated in-memory accounts; genuine shared-pool reservations, game3d-only WebGL allocation failure after boot and focus-API fault with native blur/focus events. No simulation freeze or owner data.',unverified:['Physical Windows Alt+Tab; headless Edge reports all tabs focused, so the exact document.hasFocus guard is fault-tested.']},null,2));
+}catch(error){if(lastPage&&!lastPage.isClosed())await lastPage.screenshot({path:path.join(out,'mode-entry-browser-failure.png')}).catch(()=>{});fs.writeFileSync(path.join(out,'mode-entry-browser-results.json'),JSON.stringify({ok:false,checks,metrics,errors,message:error.message,stack:error.stack},null,2));throw error;}finally{for(const context of contexts)await context.close().catch(()=>{});await browser?.close();await new Promise(resolve=>app.server.close(resolve));app.db.close();}})().catch(error=>{console.error(error.message);process.exitCode=1;});

@@ -24,8 +24,14 @@ function visibleProfile(e,career){
 let storage={};
 for(const scenario of [{name:'win',won:true,combat:true},{name:'loss',won:false,combat:true},{name:'zero-kill',won:false,combat:false}]){
  const e=engine(storage,injected),before=clone(e.dev.inspect().SAVE.playerCareer),queued=[];
- e.context.SARCloud={state:{account:{id:'profile-regression-account',username:'Profile Regression'},loaded:true,localMode:true},queueSave:world=>queued.push(clone(world))};
- e.dev.queueForMatch();queued.length=0;const {state,SAVE}=e.dev.inspect(),p=state.actors.find(a=>a.isPlayer),match=state.matches.find(m=>m.id===p.matchId);assert.ok(match.hasPlayer);assert.equal(match.participants.length,10);assert.strictEqual(p.career,SAVE.playerCareer,'player actor shares authoritative career');assert.strictEqual(p.weaponUsage,SAVE.playerCareer.weapons,'player actor shares authoritative weapon records');
+ const fixtureNow=e.context.SARCloud.now;
+ e.context.SARCloud={now:fixtureNow,state:{account:{id:'profile-regression-account',username:'Profile Regression'},loaded:true,localMode:true},queueSave:world=>queued.push(clone(world))};
+ e.dev.queueForMatch();
+ // Previous scenarios persist both TDM slots' legitimate 15-second cooldowns.
+ // Wait through the real slot scheduler rather than assuming every queue call
+ // admits synchronously; keep the prior career and all combat assertions.
+ for(let i=0;i<1800&&!e.dev.inspect().state.actors.some(a=>a.isPlayer);i++)e.step(1/30);
+ queued.length=0;const {state,SAVE}=e.dev.inspect(),p=state.actors.find(a=>a.isPlayer);assert.ok(p,'real scheduler admits the queued player after cooldown');const match=state.matches.find(m=>m.id===p.matchId);assert.ok(match.hasPlayer);assert.equal(match.participants.length,10);assert.strictEqual(p.career,SAVE.playerCareer,'player actor shares authoritative career');assert.strictEqual(p.weaponUsage,SAVE.playerCareer.weapons,'player actor shares authoritative weapon records');
  // Freeze only fixture bots; actual human countdown/movement/equipped-time paths run.
  for(const a of state.actors)if(!a.isPlayer)Object.assign(a,{dead:true,respawnAt:Infinity});
  e.step(3.001);assert.equal(match.status,'active');e.step(2.5);p.currentSlot=1;e.step(1.5);p.currentSlot=0;
@@ -53,6 +59,9 @@ for(const scenario of [{name:'win',won:true,combat:true},{name:'loss',won:false,
  const stats=clone(p.stats),expectedWeapon=clone(p.matchWeaponStats),beforeFinal=clone(SAVE.playerCareer),score=[...match.score];
  assert.equal(stats.kills,scenario.combat?2:0);assert.equal(stats.deaths,1);assert.equal(stats.assists,scenario.combat?1:0);assert.equal(stats.headshots,scenario.combat?1:0);assert.equal(stats.shots,shots);assert.equal(stats.hits,hits);
  const winner=scenario.won?p.team:1-p.team;
+ // Another background slot may finish its persisted cooldown while this fixture
+ // is playing. Count completion checkpoints from the finalization boundary.
+ queued.length=0;
  assert.ok(score[winner]>score[1-winner],'resolved winning team matches actual score');e.dev.endMatch(match,winner,'time');const committed=clone(SAVE.playerCareer);
  assert.equal(committed.games,before.games+1);assert.equal(committed.wins,before.wins+(scenario.won?1:0));assert.equal(committed.losses,before.losses+(scenario.won?0:1));
  for(const key of ['kills','deaths','assists','damage','taken','shots','hits','headshots','timeAlive'])near(committed[key],before[key]+stats[key]);near(committed.timePlayed,before.timePlayed+stats.timeAlive);
@@ -77,6 +86,7 @@ if(source.includes('function startTournamentGame(')){
  const match=e.context.SAR.startTournamentGame(context),p=match.participants.find(a=>a.isPlayer),ally=match.participants.find(a=>!a.isPlayer&&a.team===p.team),enemy=match.participants.find(a=>a.team!==p.team);
  assert.equal(state.matches.length,5);assert.equal(match.participants.length,10);assert.notStrictEqual(p.career,SAVE.playerCareer);assert.notStrictEqual(ally.career,SAVE.bots[ally.name].career);assert.notStrictEqual(ally.tournamentBot.familiarity,SAVE.bots[ally.name].familiarity);
  for(const a of match.participants)if(!a.isPlayer)Object.assign(a,{dead:true,respawnAt:Infinity});
+ e.step(3.001);assert.equal(match.status,'active','real tournament countdown completes before combat');
  e.step(1.25);p.currentSlot=1;e.step(.75);p.currentSlot=0;
  let lane;for(let y=100;y<2200&&!lane;y+=80)for(let x=100;x<3500&&!lane;x+=80)if(!e.dev.collides(x,y)&&[-35,0,35].every(o=>e.dev.pathClear(x,y+o,x+210,y+o)))lane={x,y};assert.ok(lane);
  let clock=e.dev.now()+1000;

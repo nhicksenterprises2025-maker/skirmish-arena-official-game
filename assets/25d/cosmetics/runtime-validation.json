@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "checks": 4,
+  "products": 35,
+  "appearances": 38,
+  "rigPoses": 3724,
+  "maxMeshes": 76,
+  "maxTriangles": 5494,
+  "maxBaseMeshes": 75,
+  "maxBaseTriangles": 5248,
+  "cache": {
+    "residentItems": 6,
+    "activeItems": 0,
+    "idleItems": 6,
+    "pendingItems": 0,
+    "maxIdleItems": 6
+  }
+}

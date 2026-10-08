@@ -3,6 +3,7 @@ const {engine}=require('../dev/simulate.cjs');
 const {validateProgression,validateRankedProgression,validateRewardOwnership,validateTournamentProgression}=require('./progression.cjs');
 const {upsertWorldTables,botId}=require('./db.cjs');
 const {isDeepStrictEqual}=require('node:util');
+const DistanceUnits=require('../distance-units.js');
 const {statSync}=require('node:fs');
 const weaponSource=require.resolve('../game.js');
 const MAX_WORLD_BYTES=8*1024*1024;
@@ -111,10 +112,23 @@ function careerTotals(world,key){
   const botCount=count(Object.values(world.bots||{}).map(b=>b.career||{}),key);
   return botCount+(Number(world.playerCareer?.[key])||0);
 }
+function validateDistanceMetadata(world,old){
+  const validate=(row,prior)=>{
+    if(prior?.distanceProvenance&&!isDeepStrictEqual(row?.distanceProvenance,prior.distanceProvenance))throw fail(409,'Recorded distance calibration cannot change');
+    if(row?.distanceProvenance===undefined)return; // Historical unknown scale remains unknown.
+    const p=row.distanceProvenance;let expected;
+    try{expected=DistanceUnits.worldProvenance(DistanceUnits.mapCalibration(p?.mapId));}catch{throw fail(400,'Unknown distance calibration');}
+    if(!isDeepStrictEqual(p,expected))throw fail(400,'Invalid distance calibration or source units');
+  };
+  const patch=world.patchState,prior=old?.patchState?.id===patch?.id?old.patchState:null;
+  validate(patch,prior);
+  for(const [id,sample] of Object.entries(patch?.aiSamples||{}))validate(sample,prior?.aiSamples?.[id]);
+  for(const [id,sample] of Object.entries(patch?.participantAnalytics?.samples||{}))for(const mode of ['tdm','deathmatch'])for(const cohort of ['human','bot'])validate(sample?.[mode]?.[cohort],prior?.participantAnalytics?.samples?.[id]?.[mode]?.[cohort]);
+}
 function validateWorld(world,previous=null){
   if(!isRecord(world)||!Number.isInteger(world.schema)||world.schema<17||world.schema>17)throw fail(400,'Unsupported game save schema');
   const serialized=JSON.stringify(world);if(Buffer.byteLength(serialized)>MAX_WORLD_BYTES)throw fail(413,'Game save exceeds size limit');
-  validateValue(world);validateProgression(world,previous?.save);
+  validateValue(world);validateDistanceMetadata(world,previous?.save);validateProgression(world,previous?.save);
   if(!Array.isArray(world.activeBotNames)||world.activeBotNames.length!==50||new Set(world.activeBotNames).size!==50)throw fail(400,'Expected 50 stable active bots');
   if(!isRecord(world.bots)||!isRecord(world.patchState)||!isRecord(world.patchState.meta)||!isRecord(world.seasons?.current)||!Array.isArray(world.seasons.history)||!Array.isArray(world.patchArchives)||!Array.isArray(world.balancePatchHistory))throw fail(400,'Game save is incomplete');
   const submittedBalance=JSON.stringify(world.patchState.weaponStats),publishedBalance=balance();
@@ -336,37 +350,6 @@ function validateModeScopes(world,previous){
  if(prior){monotonic(dm,prior,['completedMatches'],'Deathmatch completions');for(const [name,career] of [['@player',dm.player],...Object.entries(dm.bots)]){const before=name==='@player'?prior.player:prior.bots[name];if(before){monotonic(career,before,CAREER_TOTALS.concat('timePlayed'),'Deathmatch career');const key=name==='@player'?'weapons':'weaponUsage';for(const [w,row] of Object.entries(before[key]))monotonic(career[key][w],row,WEAPON_TOTALS.concat('games'),'Deathmatch weapon history');}}for(const name of Object.keys(prior.bots))if(!dm.bots[name])throw fail(409,'Deathmatch bot history was removed');for(const [w,row] of Object.entries(prior.meta))monotonic(dm.meta[w],row,META_TOTALS,'Deathmatch meta');}
 }
 
-function addStructuredEvent(db,userId,event){
-  db.prepare('INSERT OR IGNORE INTO structured_events(id,user_id,bot_id,type,payload_json,created_at) VALUES(?,?,?,?,?,?)').run(event.id,userId,event.botId||null,event.type,JSON.stringify(event.payload),event.at);
-}
-function recordEvents(db,userId,oldWorld,newWorld,now){
-  require('./social-events.cjs').recordSocialEvents(db,userId,oldWorld,newWorld,now);
-  if(!oldWorld)return;
-  for(const name of newWorld.activeBotNames){
-    const old=oldWorld.bots[name],next=newWorld.bots[name];if(!old||!next)continue;
-    const previous=Math.floor((old.career.kills||0)/500),current=Math.floor((next.career.kills||0)/500);
-    if(current>previous)for(let step=previous+1;step<=Math.min(current,previous+3);step++){
-      const threshold=step*500,id=botId(name,next);
-      addStructuredEvent(db,userId,{id:userId+':'+id+':kills:'+threshold,botId:id,type:'CAREER_MILESTONE',at:now,payload:{botId:id,name,kills:threshold,actualCareerKills:next.career.kills,power:next.profile.power,playstyle:next.profile.archetype,form:next.recentForm}});
-    }
-  }
-  const seen=new Set((oldWorld.seasons?.history||[]).map(s=>s.number));
-  for(const season of newWorld.seasons?.history||[])if(!seen.has(season.number)&&season.winner?.name){
-    const bot=newWorld.bots[season.winner.name],id=bot?botId(season.winner.name,bot):null;
-    addStructuredEvent(db,userId,{id:userId+':season:'+season.number,botId:id,type:'SEASON_CHAMPION',at:now,payload:{season:season.number,winner:season.winner,endedAt:season.endAt}});
-  }
-  const oldPatches=new Set((oldWorld.balancePatchHistory||[]).map(p=>p.at+':'+p.to));
-  for(const patch of newWorld.balancePatchHistory||[])if(!oldPatches.has(patch.at+':'+patch.to)){
-    const currentPatch=newWorld.patchState.id;
-    for(const name of require('./social-events.cjs').selectPatchContacts(newWorld,(patch.changes||[]).map(change=>change.weapon),currentPatch)){
-      const bot=newWorld.bots[name],favorite=bot.profile.personality?.favoriteWeapon,changes=(patch.changes||[]).filter(c=>c.weapon===favorite);
-      if(!changes.length)continue;
-      const id=botId(name,bot);
-      if(db.prepare("SELECT 1 FROM structured_events WHERE user_id=? AND bot_id=? AND type IN ('BALANCE_FEEDBACK','NEW_WEAPON') AND json_extract(payload_json,'$.currentPatch')=? LIMIT 1").get(userId,id,currentPatch))continue;
-      addStructuredEvent(db,userId,{id:userId+':patch:'+patch.to+':'+id,botId:id,type:'BALANCE_CHANGE',at:now,payload:{botId:id,name,power:bot.profile.power,playstyle:bot.profile.archetype,form:bot.recentForm,weapon:favorite,changes,previousPatch:patch.from,currentPatch:patch.to}});
-    }
-  }
-}
 function writeWorld(db,userId,world,baseRevision,{importing=false,originalSave=null}={}){
   const now=Date.now(),previous=readWorld(db,userId);
   if(previous&&importing)throw fail(409,'This account already has cloud progress');
@@ -382,7 +365,7 @@ function writeWorld(db,userId,world,baseRevision,{importing=false,originalSave=n
       db.prepare('INSERT INTO world_backups(user_id,revision,save_json,reason,created_at) VALUES(?,?,?,?,?)').run(userId,previous.revision,JSON.stringify(previous.save),rankedMigration?'before ranked progression migration':'before cloud revision '+revision,now);
     }
     db.prepare('INSERT INTO worlds(user_id,revision,schema_version,save_json,updated_at,season_start_at,season_end_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET revision=excluded.revision,schema_version=excluded.schema_version,save_json=excluded.save_json,updated_at=excluded.updated_at,season_start_at=excluded.season_start_at,season_end_at=excluded.season_end_at').run(userId,revision,world.schema,saveJson,now,world.seasons.current.startAt,world.seasons.current.endAt);
-    upsertWorldTables(db,userId,world,now);recordEvents(db,userId,previous?.save||null,world,now);
+    upsertWorldTables(db,userId,world,now);require('./bot-relationships.cjs').recordRelationships(db,userId,previous?.save||null,world,now);
     db.exec('COMMIT');
   }catch(error){db.exec('ROLLBACK');throw error;}
   return {revision,updatedAt:now,serverNow:now};

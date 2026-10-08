@@ -10,15 +10,15 @@ const report = JSON.parse(await fs.readFile(new URL('live-circuit-build-report.j
 const bytes = await fs.readFile(new URL('live-circuit-details.glb',base));
 const buffer=bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);
 const gltf = await new GLTFLoader().parseAsync(buffer,base.href);
-const wanted=['AR-15','AK47','SMG-9','Pump Shotgun','Auto 12','LR-762','LW Tundra','War Head LMG','P90','9mm','X16','X-16 Auto','SR-Aug','SPAS-12'];
+const wanted=['AR-15','AK47','SMG-9','Pump Shotgun','Auto 12','LR-762','LW Tundra','War Head LMG','P90','9mm','X16','X-16 Auto','SR-Aug','SPAS-12','FAL'];
 const checks=[];
 function pass(name){checks.push({name,status:'PASS'});console.log('PASS',name);}
-assert.equal(entries.length,16);
+assert.equal(entries.length,17);
 assert.deepEqual(entries.filter(e=>e.weapon).map(e=>e.weapon).sort(),wanted.sort());
 assert.equal(manifest.models.filter(e=>e.file==='brightfield-props.glb').length,14);
 assert.equal(report.blender,'5.2.2 LTS');
 assert((await fs.stat(new URL('live-circuit-details.blend',base))).size>50000);
-pass('Sixteen Blender-authored assets cover all fourteen weapons, the universal operator kit and complete phone; all fourteen neighborhood props remain');
+pass('Seventeen Blender-authored assets cover all fifteen weapons, the universal operator kit and complete phone; all fourteen neighborhood props remain');
 
 let triangles=0,meshes=0;
 for(const entry of entries){

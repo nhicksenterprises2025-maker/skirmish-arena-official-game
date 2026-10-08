@@ -1,0 +1,154 @@
+{
+  "status": "SANDBOX_CATALOG_PROVISIONED_RUNTIME_SETUP_PENDING",
+  "accountObserved": {
+    "name": "New business sandbox",
+    "id": "acct_1TGJWg1F1wnVf2XK",
+    "livemode": false
+  },
+  "inventoryObservedAt": "2026-10-07",
+  "existingProducts": 0,
+  "existingPrices": 0,
+  "executed": true,
+  "instructions": "Catalog provisioned and read back on 7 October 2026. Reuse verified IDs; reconcile existing metadata before any later writes. Runtime credentials, approved payment methods and webhook delivery remain required. No payment has been completed.",
+  "operations": [
+    {
+      "operation": "PostPrices",
+      "parameters": {
+        "currency": "usd",
+        "unit_amount": 699,
+        "lookup_key": "skirmish-arena:sandbox:ac_500:v1",
+        "metadata": {
+          "game": "skirmish-arena",
+          "environment": "sandbox",
+          "catalog_key": "ac_500"
+        },
+        "product_data": {
+          "name": "Skirmish Arena — 500 Arena Credits (Sandbox)",
+          "metadata": {
+            "game": "skirmish-arena",
+            "environment": "sandbox",
+            "catalog_key": "ac_500"
+          }
+        }
+      },
+      "creditUnits": 50000,
+      "gamePackId": "ac-500"
+    },
+    {
+      "operation": "PostPrices",
+      "parameters": {
+        "currency": "usd",
+        "unit_amount": 1099,
+        "lookup_key": "skirmish-arena:sandbox:ac_1000:v1",
+        "metadata": {
+          "game": "skirmish-arena",
+          "environment": "sandbox",
+          "catalog_key": "ac_1000"
+        },
+        "product_data": {
+          "name": "Skirmish Arena — 1,000 Arena Credits (Sandbox)",
+          "metadata": {
+            "game": "skirmish-arena",
+            "environment": "sandbox",
+            "catalog_key": "ac_1000"
+          }
+        }
+      },
+      "creditUnits": 100000,
+      "gamePackId": "ac-1000"
+    },
+    {
+      "operation": "PostPrices",
+      "parameters": {
+        "currency": "usd",
+        "unit_amount": 1499,
+        "lookup_key": "skirmish-arena:sandbox:ac_1500:v1",
+        "metadata": {
+          "game": "skirmish-arena",
+          "environment": "sandbox",
+          "catalog_key": "ac_1500"
+        },
+        "product_data": {
+          "name": "Skirmish Arena — 1,500 Arena Credits (Sandbox)",
+          "metadata": {
+            "game": "skirmish-arena",
+            "environment": "sandbox",
+            "catalog_key": "ac_1500"
+          }
+        }
+      },
+      "creditUnits": 150000,
+      "gamePackId": "ac-1500"
+    },
+    {
+      "operation": "PostPrices",
+      "parameters": {
+        "currency": "usd",
+        "unit_amount": 2499,
+        "lookup_key": "skirmish-arena:sandbox:ac_3000:v1",
+        "metadata": {
+          "game": "skirmish-arena",
+          "environment": "sandbox",
+          "catalog_key": "ac_3000"
+        },
+        "product_data": {
+          "name": "Skirmish Arena — 3,000 Arena Credits (Sandbox)",
+          "metadata": {
+            "game": "skirmish-arena",
+            "environment": "sandbox",
+            "catalog_key": "ac_3000"
+          }
+        }
+      },
+      "creditUnits": 300000,
+      "gamePackId": "ac-3000"
+    },
+    {
+      "operation": "PostPrices",
+      "parameters": {
+        "currency": "usd",
+        "unit_amount": 4999,
+        "lookup_key": "skirmish-arena:sandbox:ac_7500:v1",
+        "metadata": {
+          "game": "skirmish-arena",
+          "environment": "sandbox",
+          "catalog_key": "ac_7500"
+        },
+        "product_data": {
+          "name": "Skirmish Arena — 7,500 Arena Credits (Sandbox)",
+          "metadata": {
+            "game": "skirmish-arena",
+            "environment": "sandbox",
+            "catalog_key": "ac_7500"
+          }
+        }
+      },
+      "creditUnits": 750000,
+      "gamePackId": "ac-7500"
+    },
+    {
+      "operation": "PostPrices",
+      "parameters": {
+        "currency": "usd",
+        "unit_amount": 9999,
+        "lookup_key": "skirmish-arena:sandbox:ac_17500:v1",
+        "metadata": {
+          "game": "skirmish-arena",
+          "environment": "sandbox",
+          "catalog_key": "ac_17500"
+        },
+        "product_data": {
+          "name": "Skirmish Arena — 17,500 Arena Credits (Sandbox)",
+          "metadata": {
+            "game": "skirmish-arena",
+            "environment": "sandbox",
+            "catalog_key": "ac_17500"
+          }
+        }
+      },
+      "creditUnits": 1750000,
+      "gamePackId": "ac-17500"
+    }
+  ],
+  "verifiedCatalog": "overclock-sandbox-catalog-verified.json"
+}

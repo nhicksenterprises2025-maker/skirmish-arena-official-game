@@ -44,11 +44,20 @@ root = None
 def xyz(x, y, z):
     return (x, -z, y)
 
-def prism(name, points, back, front, finish, bevel=.22):
+def prism(name, points, back, front, finish, bevel=.22, crown=0):
     """A closed, gently chamfered plate in runtime XY, extruded along Z."""
     n = len(points)
     vertices = [xyz(x, y, z) for z in (back, front) for x, y in points]
-    faces = [tuple(range(n-1, -1, -1)), tuple(range(n, n*2))]
+    faces = [tuple(range(n-1, -1, -1))]
+    if crown:
+        # The enamel has a shallow formed face, rather than one flat polygon.
+        # Broad facets make the crest's relief readable at badge size without
+        # changing its heraldry or adding decorative pieces.
+        center = (sum(x for x, _ in points)/n, sum(y for _, y in points)/n)
+        vertices.append(xyz(*center, front+crown))
+        faces += [(n+i, n+(i+1)%n, n*2) for i in range(n)]
+    else:
+        faces.append(tuple(range(n, n*2)))
     faces += [(i, (i+1) % n, (i+1) % n+n, i+n) for i in range(n)]
     data = bpy.data.meshes.new(root.name + "_" + name)
     data.from_pydata(vertices, [], faces)
@@ -102,8 +111,8 @@ for index, rank in enumerate(RANKS):
     # Every family shares the same tactical shield; added prestige comes from
     # broad, attached shoulders and larger heraldry, never miniature ornament.
     crest = [(-20,27),(20,27),(26,19),(22,-13),(0,-31),(-22,-13),(-26,19)]
-    prism("crest_rim", crest, -2.3, 1.2, "silver")
-    prism("navy_enamel", [(x*.90,y*.90) for x,y in crest], 1, 2.8, "navy")
+    prism("crest_rim", crest, -3.4, 1.8, "silver", bevel=.65)
+    prism("navy_enamel", [(x*.90,y*.90) for x,y in crest], 1.4, 2.8, "navy", bevel=.35, crown=.65)
     rect("header", 0, 20, 30, 3, 2.7, 3.7, "blue" if prestige < 6 else "light")
 
     if prestige >= 3:
@@ -168,7 +177,8 @@ for index, rank in enumerate(RANKS):
                     "rankName":name,"rankIndex":index,"threshold":rank["threshold"],
                     "family":family,"division":division,"thumbnail":slug+".png",
                     "dimensions":{"x":round(hi[0]-lo[0],3),"y":round(hi[2]-lo[2],3),"z":round(hi[1]-lo[1],3)},
-                    "castShadow":False,"presentationOnly":True})
+                    "castShadow":False,"presentationOnly":True,
+                    "construction":"extruded chamfered metal shield; formed enamel face; attached raised heraldry"})
 
 # Preserve unbatched editable sources, arranged as a board for convenient editing.
 for index, badge in enumerate(ROOTS):
@@ -210,7 +220,7 @@ def aim(obj):
 camera_data = bpy.data.cameras.new("Crest thumbnails")
 camera = bpy.data.objects.new("Crest thumbnails",camera_data)
 bpy.context.collection.objects.link(camera)
-camera.location = (18,-180,18)
+camera.location = (48,-180,18)
 camera_data.type = "ORTHO"
 camera_data.ortho_scale = 92
 aim(camera)

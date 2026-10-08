@@ -4,7 +4,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const {chromium}=require(process.env.SAR_PLAYWRIGHT||path.join(os.homedir(),'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
 const out=path.resolve(process.env.SAR_TEST_OUTPUT||os.tmpdir()),checks=[],errors=[];
 const pass=name=>{checks.push(name);console.log('PASS '+name);};
-process.env.SAR_OLLAMA_URL='http://127.0.0.1:1';
+
 const app=require('../server/index.cjs').createServer({db:require('../server/db.cjs').createDatabase(':memory:')});
 let browser,page,context;
 const readSentinels=()=>page.evaluate(async()=>({local:localStorage.getItem('blue-cache-safety'),managed:SARStorage.get('sar-blue-circuit-backup-fixture'),otherCache:await caches.has('blue-user-cache-fixture')}));

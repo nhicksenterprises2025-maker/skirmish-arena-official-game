@@ -5,7 +5,7 @@ const fail=message=>Object.assign(new Error(message),{status:409,code:'SAVE_REJE
 const fresh=(p,old)=>Object.entries(p?.awards||{}).filter(([id])=>!Object.hasOwn(old?.awards||{},id));
 const ordinary=r=>r.kind==='standard'||r.kind==='ranked';
 const record=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
-const statsKeys=['kills','deaths','assists','damage','headshots','timeAlive'];
+const statsKeys=['kills','deaths','assists','damage','headshots','timeAlive','shots','hits'];
 function validateProgression(world,previous){
  const p=world.progression,old=previous?.progression;
  try{XP.validate(p,old);}catch(e){throw fail(e.message);}
@@ -21,7 +21,7 @@ function validateProgression(world,previous){
    if(!id.startsWith('match:'))throw fail('Standard XP requires a standard match');
    const career=r.mode==='deathmatch'?world.modeStats?.deathmatch?.player:world.playerCareer;
    const record=career?.recentMatches?.find(m=>m.matchId===id);
-   if(record){if(record.sessionType!==r.kind||record.mode!==r.mode||['kills','deaths','assists','damage','headshots'].some(k=>record[k]!==r.stats[k])||record.won!==(r.won===true))throw fail('XP differs from the completed match');}
+   if(record){if(record.sessionType!==r.kind||record.mode!==r.mode||['kills','deaths','assists','damage','headshots'].some(k=>record[k]!==r.stats[k])||record.won!==(r.won===true))throw fail('XP differs from the completed match');for(const key of ['shots','hits'])if(r.stats[key]!==undefined&&record[key]!==undefined&&r.stats[key]!==record[key])throw fail('XP accuracy differs from the completed match');}
    if(r.kind==='ranked'&&r.mode!=='tdm')throw fail('Ranked XP requires Team Deathmatch');
   }else if(!r.tournamentId||!r.seriesId||r.mode!=='tdm'||r.winStreak!==0)throw fail('Invalid tournament XP context');
  }
@@ -31,6 +31,7 @@ function validateProgression(world,previous){
   const rows=added.filter(([,r])=>ordinary(r)&&r.mode===mode),games=(career(world)?.games||0)-(career(previous)?.games||0);
   if(rows.length>games)throw fail('XP requires newly completed standard games');
   if(rows.length&&old){let streak=career(previous)?.currentWinStreak||0;for(const [,r]of rows){streak=r.won?streak+1:0;if(r.winStreak!==streak)throw fail('XP win streak does not match standard results');}}
+  for(const key of ['shots','hits']){const measured=Object.values(p.awards).filter(r=>ordinary(r)&&r.mode===mode).reduce((sum,r)=>sum+(r.stats[key]||0),0);if(measured>(career(world)?.[key]||0))throw fail('XP accuracy exceeds lifetime mode measurements');}
  }
 }
 function validateRankedProgression(world,previous){
@@ -84,7 +85,7 @@ function validateRankedProgression(world,previous){
  for(const [participantId,rows]of completed){
   const career=rows[0].type==='human'?world.playerCareer:bots.get(participantId).bot.career;
   if(rows.length>career.games)throw fail('Ranked history exceeds completed career games');
-  for(const key of statsKeys){const measured=rows.reduce((sum,row)=>sum+row.stats[key],0),total=career[key]||0;if(measured>total+Math.max(.0001,Math.abs(total)*1e-9))throw fail('Ranked measurements exceed lifetime career totals');}
+  for(const key of statsKeys){const measured=rows.reduce((sum,row)=>sum+(row.stats[key]||0),0),total=career[key]||0;if(measured>total+Math.max(.0001,Math.abs(total)*1e-9))throw fail('Ranked measurements exceed lifetime career totals');}
  }
 }
 function validateRewardOwnership(userId,world,previous){
@@ -94,13 +95,15 @@ function validateRewardOwnership(userId,world,previous){
 function validateTournamentProgression(db,userId,world,previous){
  for(const [id,r]of fresh(world.progression,previous?.progression)){
   if(r.kind!=='official')continue;
-  const t=Circuit.getTournament(db,userId,r.tournamentId),series=t.series.find(s=>s.id===r.seriesId),team=t.teams.find(t=>t.participants.some(p=>p.id===userId));
+  const t=Circuit.getTournament(db,userId,r.tournamentId),series=t.series.find(s=>s.id===r.seriesId),roster=series?(Circuit.gameRoster?.(t,series,id)||t.teams):[],team=roster.find(t=>t.participants.some(p=>p.id===userId));
   if(t.kind!=='official'||!series||!team||!series.teamIds.includes(team.id))throw fail('XP is only available in your official tournament games');
   const completed=db.prepare('SELECT result_json FROM tournament_matches WHERE id=? AND tournament_id=? AND series_id=?').get(id,t.id,series.id);
   if(!completed){
    // World sync can arrive just before the resolved game upload. Authorize only
    // the one registered, active game ID; retries retain the same transaction.
-   if(t.status!=='ACTIVE'||series.winnerTeamId||id!==series.id+':game'+(series.games.length+1))throw fail('Tournament XP requires a registered game');
+   const playable=Circuit.canPlaySeries(series,t);
+   if(t.status!=='ACTIVE'||!playable||id!==series.id+':game'+(series.games.length+1))throw fail('Tournament XP requires a registered game');
+   if(t.schedulePolicy){const scheduled=t.scheduling?.games?.[id];if(!scheduled||scheduled.startedAt==null||scheduled.finalizedAt||scheduled.error||!scheduled.teams?.some(team=>team.participants.some(p=>p.id===userId&&p.kind==='user')))throw fail('Tournament XP requires your actual scheduled game participation');}
   }else{
    const result=JSON.parse(completed.result_json),player=result.stats.find(s=>s.participantId===userId);
    if(!player||['kills','deaths','assists','damage','headshots','timeAlive'].some(k=>player[k]!==r.stats[k])||r.won!==(result.winnerTeamId===team.id))throw fail('Tournament XP differs from the resolved game');

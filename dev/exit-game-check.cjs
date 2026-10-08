@@ -17,6 +17,11 @@ async function check(name,fn){await fn();checks.push(name);console.log('PASS',na
 // Keep controlled native completion separate from the long-running browser
 // process: the promise is an acknowledgment, never a real app.exit call.
 async function run(){
+ await check('Scheduled tournament recovery commits before local flush and native close; checkpoint failures remain retryable',async()=>{
+  const pending=deferred(),h=fixture();let fail=false;h.context.SARTournaments={checkpoint(){h.calls.push('tournament-checkpoint');return fail?Promise.reject(new Error('Tournament recovery storage unavailable')):pending.promise;}};
+  const attempt=h.quit();await settle();assert.deepEqual(h.calls,['checkpoint','tournament-checkpoint']);pending.resolve();await attempt;assert.deepEqual(h.calls.slice(0,4),['checkpoint','tournament-checkpoint','local-flush','quit_game']);
+  fail=true;const closes=h.calls.filter(c=>c==='quit_game').length;await h.quit();assert.equal(h.calls.filter(c=>c==='quit_game').length,closes);assert.match(h.panels.at(-1).html,/could not finish/);fail=false;await h.quit();assert.equal(h.calls.filter(c=>c==='quit_game').length,closes+1);
+ });
  await check('Native quit waits for durable local commit; duplicate clicks cannot create a second checkpoint or close',async()=>{
   const saved=deferred(),native=deferred(),h=fixture({flush:()=>saved.promise,invoke:()=>native.promise});const first=h.quit(),second=h.quit();await settle();assert.equal(h.prepares,1);assert.deepEqual(h.calls,['checkpoint','local-flush']);assert.equal(h.cloudFlushes,0,'offline cloud requests never gate exit');saved.resolve();await settle();assert.deepEqual(h.calls,['checkpoint','local-flush','quit_game']);const third=h.quit();await settle();assert.equal(h.calls.filter(c=>c==='quit_game').length,1);native.resolve();await Promise.all([first,second,third]);assert.equal(h.resumes,1);assert.equal(h.timers.size,0);
  });

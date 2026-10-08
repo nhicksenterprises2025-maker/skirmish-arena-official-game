@@ -1,12 +1,13 @@
 (() => {
   'use strict';
   const SAVE_KEY='sar-persistent-save',OWNER_KEY='sar-cloud-owner',PENDING_KEY='sar-cloud-pending',ACCOUNT_KEY='sar-cloud-authenticated-account';
-  const state={available:false,online:false,localMode:false,account:null,revision:0,updatedAt:0,serverNow:0,clockPerformance:0,loaded:false,dirty:null,sending:false,retry:null,mode:'signup',gptAvailable:false};
+  const state={available:false,online:false,localMode:false,account:null,revision:0,updatedAt:0,serverNow:0,clockPerformance:0,loaded:false,dirty:null,sending:false,retry:null,mode:'signup'};
   // Worlds and retained branches exceed localStorage's small synchronous quota.
   // Hydrate once, keep game reads synchronous, and commit queued writes before
   // replacing an authenticated world or closing for an update.
   const storage=window.SARStorage=(()=>{
     const values=new Map(),dirty=new Map();let db=null,inFlight=null,scheduled=false,error=null,backupSerial=0;
+    const retiredArchiveKey='sar-dialogue-retirement-backup-v1',isRetiredDraft=key=>/^sar\.social\.replyDrafts\..+$/.test(key);
     const managed=key=>[SAVE_KEY,OWNER_KEY,PENDING_KEY,ACCOUNT_KEY].includes(key)||/^sar-.*(?:backup|migration-original|previous-local|skipped-local)/.test(key)||values.has(key);
     const local=key=>{try{return localStorage.getItem(key);}catch{return null;}};
     const removeLocal=key=>{try{localStorage.removeItem(key);}catch{}};
@@ -27,20 +28,66 @@
       if(dirty.size)return flush();
     }
     function schedule(){if(scheduled)return;scheduled=true;Promise.resolve().then(()=>{scheduled=false;void flush().catch(()=>{});});}
+    async function archiveRetiredDrafts(){
+      // Only the removed inbox owned these keys. Keep their exact contents in
+      // the existing complete-save export before deleting any active entry.
+      const key=retiredArchiveKey,drafts=[];
+      const keep=(name,value)=>{if(value!==null&&!drafts.some(entry=>entry.key===name&&entry.value===value))drafts.push({key:name,value});};
+      for(let index=0;index<localStorage.length;index++){const name=localStorage.key(index);if(isRetiredDraft(name))keep(name,local(name));}
+      for(const[name,value]of values)if(isRetiredDraft(name))keep(name,value);
+      const localArchive=local(key);
+      if(!drafts.length&&localArchive===null)return;
+      const parsed=value=>{const archive=JSON.parse(value);if(archive.version!==1||!Array.isArray(archive.entries)||archive.entries.some(entry=>!isRetiredDraft(entry?.key)||typeof entry.value!=='string'))throw new Error('The retained draft archive needs recovery.');return archive;};
+      const merge=current=>{
+        const archive=current?parsed(current):{version:1,retiredAt:Date.now(),entries:[]};
+        for(const entry of [...(localArchive?parsed(localArchive).entries:[]),...drafts])if(!archive.entries.some(saved=>saved.key===entry.key&&saved.value===entry.value))archive.entries.push(entry);
+        return JSON.stringify(archive);
+      };
+      const names=[...new Set(drafts.map(entry=>entry.key))],archived=(name,value)=>drafts.some(entry=>entry.key===name&&entry.value===value);
+      if(db){
+        // Read + merge + write share one serialized transaction. A second game
+        // window must append to the committed archive, never replace a stale copy.
+        await new Promise((resolve,reject)=>{let failure;const tx=db.transaction('entries','readwrite'),store=tx.objectStore('entries'),request=store.get(key);request.onsuccess=()=>{try{store.put({key,value:merge(request.result?.value)});}catch(error){failure=error;tx.abort();}};tx.oncomplete=resolve;tx.onerror=tx.onabort=()=>reject(failure||tx.error||new Error('Draft archive commit failed.'));});
+        const committed=(await readAll()).find(row=>row.key===key)?.value;
+        if(!committed||drafts.some(entry=>!parsed(committed).entries.some(saved=>saved.key===entry.key&&saved.value===entry.value)))throw new Error('Draft archive verification failed.');
+        values.set(key,committed);
+        if(localArchive!==null&&local(key)===localArchive)removeLocal(key);
+        // Another still-open old shell may save a newer reply. Read and compare
+        // within the cleanup transaction so that unarchived change survives.
+        const remaining=new Map();
+        await new Promise((resolve,reject)=>{const tx=db.transaction('entries','readwrite'),store=tx.objectStore('entries');for(const name of names){const request=store.get(name);request.onsuccess=()=>{const current=request.result?.value;if(current===undefined||archived(name,current))store.delete(name);else remaining.set(name,current);};}tx.oncomplete=resolve;tx.onerror=tx.onabort=()=>reject(tx.error||new Error('Draft cleanup deferred.'));});
+        for(const name of names){if(remaining.has(name))values.set(name,remaining.get(name));else values.delete(name);}
+      }else{
+        const serialized=merge(localArchive);
+        localStorage.setItem(key,serialized);
+        if(local(key)!==serialized)throw new Error('Draft archive verification failed.');
+        // localStorage has no cross-window transaction. Keep originals until a
+        // later IndexedDB startup can archive and retire them safely.
+        return;
+      }
+      for(const name of names)if(archived(name,local(name)))removeLocal(name);
+    }
+    async function retireDraftsSafely(){try{await archiveRetiredDrafts();}catch(failure){console.warn('Saved reply draft retirement deferred; original data retained.',failure.message);}}
     const ready=(async()=>{
-      if(!window.indexedDB)return;
+      if(!window.indexedDB){await retireDraftsSafely();return;}
       try{
         db=await new Promise((resolve,reject)=>{const request=indexedDB.open('sar-world-cache-v1',1);request.onupgradeneeded=()=>request.result.createObjectStore('entries',{keyPath:'key'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);request.onblocked=()=>reject(new Error('Local world storage is busy in another game window.'));});
         for(const row of await readAll())values.set(row.key,row.value);
         // A legacy build may have written a newer local branch. Migrate it only
         // after the full transaction commits; never discard quota-filling backups.
         const keys=Array.from({length:localStorage.length},(_,index)=>localStorage.key(index));
-        for(const key of keys){const value=local(key);if(managed(key)||(key?.startsWith('sar-')&&value?.length>65536)){values.set(key,value);dirty.set(key,value);}}
+        for(const key of keys){if(isRetiredDraft(key)||key===retiredArchiveKey)continue;const value=local(key);if(managed(key)||(key?.startsWith('sar-')&&value?.length>65536)){values.set(key,value);dirty.set(key,value);}}
         await flush();
+        await retireDraftsSafely();
       }catch(failure){error=failure;throw failure;}
     })();
     return {ready,flush,get error(){return error?.message||null;},
       get(key){return values.has(key)?values.get(key):local(key);},
+      // Tournament checkpoints retain cyclic actor/projectile references and
+      // Maps through IndexedDB's structured clone, independently of world JSON.
+      getTournament(key){return key.startsWith('sar.tournament.runtime.')&&values.has(key)?structuredClone(values.get(key)):null;},
+      canTournamentCheckpoint(){return !!db;},
+      async putTournament(key,value){if(!key.startsWith('sar.tournament.runtime.'))throw new Error('Invalid tournament checkpoint key');await ready;if(!db)throw new Error('Durable tournament recovery requires local storage.');const copy=structuredClone(value);values.set(key,copy);dirty.set(key,copy);await flush();},
       set(key,value){value=String(value);if(db&&(managed(key)||(key.startsWith('sar-')&&value.length>65536))){const previous=values.get(key);if(previous&&previous!==value&&/^sar-.*(?:backup|migration-original|previous-local|skipped-local)/.test(key)&&!key.includes(':retained:')){const retained=key+':retained:'+Date.now()+':'+(++backupSerial);values.set(retained,previous);dirty.set(retained,previous);}values.set(key,value);dirty.set(key,value);schedule();return true;}try{localStorage.setItem(key,value);return true;}catch(failure){error=failure;return false;}},
       remove(key){if(db&&managed(key)){values.set(key,null);dirty.set(key,null);schedule();}else removeLocal(key);},
       entries(){const all=new Map();for(let index=0;index<localStorage.length;index++){const key=localStorage.key(index);all.set(key,local(key));}for(const[key,value]of values){if(value===null)all.delete(key);else all.set(key,value);}return [...all];}
@@ -57,7 +104,7 @@
   function localSet(key,value){return storage.set(key,value);}
   function localRemove(key){storage.remove(key);}
   function readJSON(key){try{return JSON.parse(localGet(key));}catch{return null;}}
-  function localBridge(){return !!window.__SAR_NATIVE_GAME__&&typeof window.__TAURI__?.core?.invoke==='function'&&['127.0.0.1','localhost','[::1]'].includes(location.hostname);}
+  function nativeLocalBackend(){return !!window.__SAR_NATIVE_GAME__&&typeof window.__TAURI__?.core?.invoke==='function'&&['127.0.0.1','localhost','[::1]'].includes(location.hostname);}
   function rememberAccount(){
     if(!state.account)return;
     const owner=localGet(OWNER_KEY);if(owner&&owner!==state.account.id)return;
@@ -85,7 +132,7 @@
     const cached=cachedAccount();if(!cached)return false;
     state.account=cached.account;state.revision=cached.revision??state.revision;state.unknownRevision=cached.revision==null;state.updatedAt=cached.updatedAt;
     if(cached.record?.serverNow)observeClock(cached.record.serverNow+Math.max(0,Date.now()-cached.record.authenticatedAt));
-    state.localMode=true;state.online=false;state.available=localBridge();state.suspending=false;state.replacing=false;
+    state.localMode=true;state.online=false;state.available=false;state.suspending=false;state.replacing=false;
     state.authExpired=false;
     state.dirty=localGet(SAVE_KEY);pendingCheckpoint(state.dirty);host.classList.add('hidden');loadGame();connectionLabel();scheduleReconnect();return true;
   }
@@ -95,18 +142,10 @@
     const update=document.querySelector('#sarUpdateStatus');if(update&&state.account)update.textContent=message;
   }
   async function api(path,options={}){
-    const ai=/^\/(?:ai|messages)(?:\/|$)/.test(path),bridge=async()=>{
-      const result=await window.__TAURI__.core.invoke('offline_local_api',{accountId:state.account.id,path:'/api'+path,method:options.method||'GET',body:options.body||null});
-      if(result.status>=400)throw Object.assign(new Error(result.body?.error||'Local service unavailable'),{status:result.status,code:result.body?.code});
-      return result.body;
-    };
-    if(ai&&state.localMode&&state.account&&localBridge())return bridge();
-    let response;
-    try{response=await fetch('/api'+path,{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(20000),...options,headers:{'content-type':'application/json',...options.headers}});}
-    catch(error){if(ai&&state.account&&localBridge())return bridge();throw error;}
+    const response=await fetch('/api'+path,{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(20000),...options,headers:{'content-type':'application/json',...options.headers}});
     let body={};try{body=await response.json();}catch{}
     observeClock(body.serverNow);
-    if(!response.ok){if(ai&&state.account&&localBridge()&&[401,502,503,504].includes(response.status))return bridge();const error=new Error(body.error||'Server request failed');error.status=response.status;error.code=body.code;throw error;}
+    if(!response.ok){const error=new Error(body.error||'Server request failed');error.status=response.status;error.code=body.code;throw error;}
     return body;
   }
   function showGate(mode='signup',message=''){
@@ -126,14 +165,19 @@
     host.classList.remove('hidden');
     host.innerHTML=`<div class="account-gate-card account-gate-recovery"><div class="account-gate-brand"><span>SAVE MIGRATION</span><h1>FOUND LOCAL PROGRESS</h1><p>This browser has an existing Skirmish world. Copy its bot careers, seasons and current patch telemetry into ${safe(name)}'s cloud account?</p></div><div class="account-gate-form"><button class="primary" data-cloud-action="import">IMPORT LOCAL PROGRESS</button><button data-cloud-action="fresh">START A NEW WORLD</button><p id="cloudStatus" role="status">The local original is kept as a migration backup.</p></div></div>`;
   }
+  function notifyCommerce(method='init'){
+    // Optional account commerce never holds the saved-world/game startup gate.
+    void Promise.resolve(window.SARCommerce?.[method]?.()).catch(error=>console.warn('Arena Credits:',error.message));
+  }
   function loadGame(){
+    notifyCommerce();
     if(state.loaded){if(state.reauthNeeded&&!state.localMode)location.reload();return;}
     if(!state.localMode)rememberAccount();
     state.loaded=true;host.classList.add('hidden');
     badge.classList.toggle('hidden',!state.account);
     connectionLabel();
     window.SARBoot?.stage('game-module','Loading your saved arena…');
-    const script=document.createElement('script');script.src='game.js';script.onload=()=>window.SARBoot?.gameReady();script.onerror=()=>window.SARBoot?.fail('The game module could not be loaded. Retry to continue.',new Error('game.js failed to load'));document.body.appendChild(script);
+    const script=document.createElement('script');script.src='game.js';script.onload=()=>{window.SARBoot?.gameReady();window.SARTournaments?.init?.();};script.onerror=()=>window.SARBoot?.fail('The game module could not be loaded. Retry to continue.',new Error('game.js failed to load'));document.body.appendChild(script);
     const notice=localGet('sar-cloud-recovery-notice');if(notice){const panel=document.createElement('div');panel.id='cloudRecoveryNotice';panel.className='cloud-recovery-notice';panel.setAttribute('role','alert');panel.innerHTML='<span>'+safe(notice)+'</span><button data-cloud-action="export-recovery">EXPORT BACKUP</button><button data-cloud-action="dismiss-recovery" aria-label="Dismiss recovery notice">×</button>';document.body.appendChild(panel);}
   }
   async function cacheWorld(world){
@@ -149,6 +193,7 @@
   async function cloudWorld(){
     if(state.loaded&&state.reauthNeeded)state.replacing=true;
     const body=await api('/world');let world=body.world;
+    if(Array.isArray(body.tournamentReservations)){state.tournamentReservations=body.tournamentReservations;const key='sar.tournament.calendar.'+state.account.id;let cached={};try{cached=JSON.parse(localGet(key)||'{}')||{};}catch{}const retained=(Array.isArray(cached.tournaments)?cached.tournaments:[]).filter(t=>t.kind!=='official'||t.status!=='ACTIVE');localSet(key,JSON.stringify({...cached,tournaments:[...retained,...body.tournamentReservations]}));}
     const rawPending=localGet(PENDING_KEY);
     if(rawPending){
       try{
@@ -256,7 +301,7 @@
   async function checkpoint(){
     let resume;if(window.SAR?.prepareReload)resume=window.SAR.prepareReload();else{window.dispatchEvent(new Event('sar-before-update'));resume=()=>{};}
     state.suspending=true;
-    try{await flush();await storage.flush();if(state.dirty||state.sending)throw new Error(state.saveRejected?'Cloud rejected this save. A local backup was retained.':'Progress is waiting for cloud sync. Reconnect before updating or signing out.');return ()=>{state.suspending=false;resume();};}
+    try{await window.SARTournaments?.checkpoint?.();await flush();await storage.flush();if(state.dirty||state.sending)throw new Error(state.saveRejected?'Cloud rejected this save. A local backup was retained.':'Progress is waiting for cloud sync. Reconnect before updating or signing out.');return ()=>{state.suspending=false;resume();};}
     catch(error){state.suspending=!!state.authExpired;if(!state.authExpired)resume();throw error;}
   }
   async function importWorld(save){
@@ -271,6 +316,7 @@
     let resume;try{resume=await checkpoint();await api('/auth/logout',{method:'POST',body:'{}'});}catch(error){resume?.();alert(error.message);return;}
     const raw=localGet(SAVE_KEY);if(raw)localSet('sar-cloud-logout-backup-'+state.account.id,raw);
     state.replacing=true;
+    window.SARCommerce?.reset?.();
     localRemove(ACCOUNT_KEY);localRemove(OWNER_KEY);localRemove(PENDING_KEY);localRemove(SAVE_KEY);await storage.flush();
     location.reload();
   }
@@ -283,25 +329,12 @@
       modal(`<div class="eyebrow">PERMANENT CAREER / ${safe(account.username)}</div><h2>PLAYER PROFILE</h2><div class="match-report-grid"><div><span>MATCHES</span><strong>${c.games||0}</strong><small>${c.wins||0} W · ${c.losses||0} L</small></div><div><span>K / D / A</span><strong>${c.kills||0} / ${c.deaths||0} / ${c.assists||0}</strong></div><div><span>DAMAGE</span><strong>${Math.round(c.damage||0).toLocaleString()}</strong></div><div><span>BEST GAME</span><strong>${c.bestKills||0} K</strong><small>${Math.round(c.bestDamage||0)} damage</small></div><div><span>BEST STREAK</span><strong>${c.bestStreak||0}</strong></div><div><span>SEASON</span><strong>${seasons?.current?.number||1}</strong><small>Cloud revision ${account.revision}</small></div></div><h3>WEAPON HISTORY</h3><div class="meta-table-scroll"><table class="meta-table"><thead><tr><th>WEAPON</th><th>KILLS</th><th>SHOTS</th><th>HITS</th><th>DAMAGE</th><th>TIME</th></tr></thead><tbody>${weapons.map(([name,w])=>`<tr><td>${safe(name)}</td><td>${w.k||0}</td><td>${w.shots||0}</td><td>${w.hits||0}</td><td>${Math.round(w.damage||0)}</td><td>${((w.equippedTime||0)/60).toFixed(1)}m</td></tr>`).join('')}</tbody></table></div><p class="meta-note">Current loadout: ${safe(loadout?.primary||'—')} / ${safe(loadout?.sidearm||'—')}</p>`,'player-profile');
     }catch(error){alert(error.message);}
   }
-  async function showMessages(){
-    if(window.SARSocialUI)return window.SARSocialUI.showMessages();
-    if(!state.available||!state.account){modal('<div class="eyebrow">BOT NETWORK</div><h2>MESSAGES</h2><p class="analytics-note">Connect to the account server to use the persistent inbox. Your local game remains available.</p>','messages');return;}
-    try{
-      const data=await api('/messages'),rows=data.messages||[];
-      const bots=window.SAR?.getProfiles?.()||{},byId=Object.fromEntries(Object.values(bots).map(bot=>[bot.id,bot]));
-      const threadIds=[...new Set(rows.map(row=>row.botId).filter(Boolean))];
-      state.messageThread=byId[state.messageThread]?state.messageThread:threadIds[0]||Object.values(bots)[0]?.id;
-      const bot=byId[state.messageThread],thread=rows.filter(row=>row.botId===state.messageThread).slice().reverse();
-      modal(`<div class="eyebrow">BOT NETWORK / INBOX</div><h2>MESSAGES</h2><p class="meta-note">Career milestones, balance reactions and events use verified game records. ${data.gptAvailable?'Messaging service connected.':'Messaging service is reconnecting. Your replies can still be saved.'}</p><div class="message-toolbar"><button data-cloud-action="refresh-messages">REFRESH</button><span>${rows.filter(row=>row.direction==='bot'&&!row.readAt).length} UNREAD</span><label>NEW CONVERSATION <select id="messageRecipient"><option value="">CHOOSE A BOT</option>${Object.values(bots).map(bot=>`<option value="${safe(bot.id)}">${safe(bot.name)} · ${bot.power} PWR</option>`).join('')}</select></label></div><div class="inbox-layout"><aside class="inbox-threads">${(threadIds.length?threadIds:Object.values(bots).slice(0,8).map(bot=>bot.id)).map(id=>{const list=rows.filter(row=>row.botId===id),unread=list.filter(row=>row.direction==='bot'&&!row.readAt).length;return `<button data-message-thread="${safe(id)}" class="${id===state.messageThread?'active':''}"><strong>${safe(byId[id]?.name||id)}</strong><span>${unread?unread+' UNREAD':list.length+' MESSAGES'}</span></button>`;}).join('')}</aside><section class="inbox-conversation"><div class="inbox-bot"><strong>${safe(bot?.name||'BOT')}</strong>${bot?`<button data-bot-profile="${safe(bot.name)}">${bot.power} PWR / PROFILE ↗</button>`:''}</div><div class="message-list">${thread.length?thread.map(row=>`<article class="message-card ${row.direction==='player'?'message-sent':''}"><div><strong>${row.direction==='player'?'YOU':safe(bot?.name||row.botId)}</strong><span>${safe(row.type)} · ${new Date(row.createdAt).toLocaleString()}</span></div><p>${safe(row.body)}</p><button class="message-delete" data-message-delete="${safe(row.id)}" title="Delete this message">DELETE</button></article>`).join(''):'<p class="analytics-note">No conversation yet. Send a reply or wait for a game event.</p>'}</div><div class="message-compose"><input id="messageBotId" type="hidden" value="${safe(state.messageThread||'')}"><label>REPLY TO ${safe(bot?.name||'BOT')}<textarea id="messageBody" rows="2" maxlength="500" placeholder="Write a short reply"></textarea></label><button data-cloud-action="send-message">SEND</button><span id="messageStatus" role="status"></span></div></section></div>`,'messages');
-      await Promise.allSettled(thread.filter(row=>row.direction==='bot'&&!row.readAt).map(row=>api('/messages/'+row.id+'/read',{method:'POST',body:'{}'})));
-    }catch(error){alert(error.message);}
-  }
   async function showTournaments(){
     if(window.SARTournaments)return window.SARTournaments.show();
     if(!state.available||!state.account){modal('<div class="eyebrow">LEAGUE / EVENT BOARD</div><h2>TOURNAMENTS</h2><p class="analytics-note">Connect to the account server to see scheduled events.</p>','tournaments');return;}
     try{
       const data=await api('/tournaments');
-      modal(`<div class="eyebrow">LEAGUE / EVENT BOARD</div><h2>TOURNAMENTS</h2><p class="meta-note">Scheduled events are announced from the server. Match results and brackets appear only after actual play.</p><div class="message-list">${data.tournaments.length?data.tournaments.map(t=>`<article class="message-card"><div><strong>${safe(t.name)}</strong><span>${safe(t.status)}</span></div><p>${new Date(t.startsAt).toLocaleString()}</p></article>`).join(''):'<p class="analytics-note">No tournaments announced.</p>'}</div>`,'tournaments');
+      modal(`<div class="eyebrow">LEAGUE / EVENT BOARD</div><h2>TOURNAMENTS</h2><p class="meta-note">Scheduled events are announced from the server. Match results and brackets appear only after actual play.</p><div class="tournament-list">${data.tournaments.length?data.tournaments.map(t=>`<article class="tournament-card"><div><strong>${safe(t.name)}</strong><span>${safe(t.status)}</span></div><p>${new Date(t.startsAt).toLocaleString()}</p></article>`).join(''):'<p class="analytics-note">No tournaments announced.</p>'}</div>`,'tournaments');
     }catch(error){alert(error.message);}
   }
   host.addEventListener('click',async event=>{
@@ -324,19 +357,11 @@
   document.addEventListener('keydown',event=>{if(accountMenu.classList.contains('hidden'))return;if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();accountMenu.classList.add('hidden');badge.setAttribute('aria-expanded','false');badge.focus();}else if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const buttons=[...accountMenu.querySelectorAll('button:not(.hidden)')],i=buttons.indexOf(document.activeElement),next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(i+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons[next]?.focus();}},true);
   document.addEventListener('click',async event=>{
     if(!event.target.closest('#cloudBadge')){accountMenu.classList.add('hidden');badge.setAttribute('aria-expanded','false');}
-    const thread=event.target.closest('[data-message-thread]')?.dataset.messageThread;if(thread){state.messageThread=thread;await showMessages();return;}
-    const deletion=event.target.closest('[data-message-delete]')?.dataset.messageDelete;if(deletion){try{await api('/messages/'+deletion,{method:'DELETE'});await showMessages();}catch(error){alert(error.message);}return;}
     const action=event.target.closest('[data-cloud-action]')?.dataset.cloudAction;
     if(action==='reauth')showGate('login','Sign in to synchronize your locally saved progress.');
     if(action==='dismiss-recovery'){localRemove('sar-cloud-recovery-notice');document.querySelector('#cloudRecoveryNotice')?.remove();}
     if(action==='export-recovery'){const raw=localGet(localGet('sar-cloud-recovery-source')||'sar-cloud-conflict-backup');if(raw){const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([raw],{type:'application/json'}));link.download='skirmish-unsynced-backup.json';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);}}
-    if(action==='refresh-messages')showMessages();
-    if(action==='send-message'){
-      const botId=document.querySelector('#messageBotId')?.value?.trim(),text=document.querySelector('#messageBody')?.value?.trim(),out=document.querySelector('#messageStatus');
-      try{if(out)out.textContent='SENDING…';const result=await api('/messages/reply',{method:'POST',body:JSON.stringify({botId,text})});await showMessages();const latest=document.querySelector('#messageStatus');if(latest)latest.textContent=result.generated?'REPLY RECEIVED':'MESSAGE SAVED · BOT REPLY PENDING';}catch(error){if(out)out.textContent=error.message;}
-    }
   });
-  document.addEventListener('change',event=>{if(event.target.id==='messageRecipient'&&event.target.value){state.messageThread=event.target.value;showMessages();}});
   async function bootstrap(){
     const response=await fetch('/api/bootstrap',{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(5000)});
     if(!response.ok||!String(response.headers.get('content-type')).includes('application/json'))throw new Error('Cloud server unavailable');
@@ -349,7 +374,7 @@
       try{
         // The native launcher owns local process management. Remote origins never
         // invoke this command or start a localhost service.
-        if(localBridge())await window.__TAURI__.core.invoke('check_local_backend').catch(()=>{});
+        if(nativeLocalBackend())await window.__TAURI__.core.invoke('check_local_backend').catch(()=>{});
         const body=await bootstrap();
         if(!body.authenticated){
           state.reauthNeeded=true;
@@ -357,7 +382,7 @@
           connectionLabel();scheduleReconnect();return false;
         }
         if(state.account&&body.account.id!==state.account.id){state.reauthNeeded=true;connectionLabel();scheduleReconnect();return false;}
-        observeClock(body.serverNow);state.gptAvailable=body.gptAvailable;
+        observeClock(body.serverNow);
         const cachedId=state.account?.id;state.account=body.account;
         if(!state.loaded){state.available=true;state.online=true;state.localMode=false;state.revision=body.account.revision||0;await cloudWorld();return true;}
         // Snapshot before checking the revision so current local play survives
@@ -374,7 +399,7 @@
         }
         state.localMode=false;state.online=true;state.available=true;state.authExpired=false;state.reauthNeeded=false;state.unknownRevision=false;
         state.revision=remoteRevision;connectionLabel();rememberAccount();await flush();
-        if(!state.localMode)connectionLabel();return !state.localMode;
+        if(!state.localMode){connectionLabel();notifyCommerce('refresh');}return !state.localMode;
       }catch(_){enterLocalMode();scheduleReconnect();return false;}
       finally{reconnecting=null;}
     })();
@@ -387,7 +412,7 @@
     try{
       await storage.ready;
       window.SARBoot?.stage('account-access','Loading your account…');
-      const body=await bootstrap();state.available=true;state.online=true;observeClock(body.serverNow);state.gptAvailable=body.gptAvailable;
+      const body=await bootstrap();state.available=true;state.online=true;observeClock(body.serverNow);
       if(!body.authenticated){state.reauthNeeded=true;if(!enterLocalMode())showGate('signup');return;}
       const prior=cachedAccount();if(prior&&prior.account.id!==body.account.id){state.reauthNeeded=true;enterLocalMode();return;}
       state.account=body.account;state.revision=body.account.revision||0;window.SARBoot?.stage('saved-world','Loading your saved world…');await cloudWorld();
@@ -400,6 +425,6 @@
       }
     }
   }
-  window.SARCloud={state,queueSave,commitMatch,flush,checkpoint,importWorld,logout,showProfile,showMessages,showTournaments,api,now,reconnect};
+  window.SARCloud={state,queueSave,commitMatch,flush,checkpoint,importWorld,logout,showProfile,showTournaments,api,now,reconnect};
   boot();
 })();

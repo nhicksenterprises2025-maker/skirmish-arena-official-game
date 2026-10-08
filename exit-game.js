@@ -11,7 +11,7 @@
         // prepareReload writes the world and account-owned pending sync record.
         // Only the durable local commit gates exit; cloud connectivity does not.
         let timeout;
-        try{await Promise.race([window.SARStorage?.flush?.(),new Promise((_,reject)=>{timeout=setTimeout(()=>reject(new Error('The local save is still pending.')),10000);})]);}finally{clearTimeout(timeout);}
+        try{await Promise.race([(async()=>{await window.SARTournaments?.checkpoint?.();await window.SARStorage?.flush?.();})(),new Promise((_,reject)=>{timeout=setTimeout(()=>reject(new Error('The local save is still pending.')),10000);})]);}finally{clearTimeout(timeout);}
         if(window.SARStorage?.error)throw new Error(window.SARStorage.error);
         saved=true;
         if(window.__SAR_NATIVE_GAME__&&window.__TAURI__?.core?.invoke){await window.__TAURI__.core.invoke('quit_game');return;}

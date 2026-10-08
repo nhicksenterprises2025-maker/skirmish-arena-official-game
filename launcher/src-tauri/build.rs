@@ -12,7 +12,7 @@ fn main() {
             "set_game_fullscreen",
             "check_local_backend",
             "quit_game",
-            "offline_local_api",
+            "open_sandbox_checkout",
         ]),
     ))
     .expect("Could not generate launcher capabilities");

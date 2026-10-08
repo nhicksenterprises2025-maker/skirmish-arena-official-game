@@ -1,11 +1,11 @@
 # BLUE CIRCUIT maintenance and verification
 
-This internal document carries operational details moved out of the public README. It routes work within the existing project; it is not a replacement architecture. **1.11.0 — BLUE CIRCUIT** is the current application release; Balance 8.0 and analytics schema 1 remain separate. See [Tactical Adaptation](TACTICAL-ADAPTATION.md) for the bot-only changes and checks. See [Core Tuning](CORE-TUNING.md) for the changed rules, scheduler, movement and balance checks. See [Tactical Instinct](TACTICAL-INSTINCT.md) for mode, tactical-revision and deletion routes. Completion of the acceptance checks below must be established by current test output, not inferred from this document. This historical document path remains stable for existing project routing.
+This internal document carries operational details moved out of the public README. It routes work within the existing project; it is not a replacement architecture. The current application release is **1.13.0 — ARENA REFINED**, combining Audits 1–10. Continue from [arena-refined-audit.md](arena-refined-audit.md). Balance 9.0 and analytics schema 1 remain separate. See [Tactical Adaptation](TACTICAL-ADAPTATION.md) for the bot-only changes and checks. See [Core Tuning](CORE-TUNING.md) for the changed rules, scheduler, movement and balance checks. See [Tactical Instinct](TACTICAL-INSTINCT.md) for mode, tactical-revision and deletion routes. Completion of the acceptance checks below must be established by current test output, not inferred from this document. This historical document path remains stable for existing project routing.
 
 ## SKYLINE routes
 
 - Lobby/account menu/Settings: `index.html`, `game.js`, `cloud.js`. Settings keys are adapted to Game/Audio/Account/About; existing saved keys stay intact.
-- Phone navigation/workspaces: `phone-apps.js`, `phone-apps.css`; retained conversations/device in `ai-ui.js`. Matches run independently of app visibility.
+- Phone navigation/workspaces: `phone-apps.js`, `phone-apps.css`, `phone-ui.js`, `phone-ui.css`; retained device and four non-message apps. Matches run independently of app visibility.
 - Theme/identity: `theme.css` semantic tokens, `skyline.css`, `assets/branding/`, `tools/export-branding.cjs`. Launcher copies the shared theme during staging. Art palettes are independent.
 - Cohort analytics: `game.js` participant analytics schema 1, `server/world.cjs` validation. Stable actor/account identity chooses human/bot; mode/patch scopes stay separate. No unsupportable historical split. Mixed legacy records and AI selection inputs remain intact.
 - Team overlays: `team-presentation.js` / `SAR.getTeamPresentation(matchId)`. Preserve canonical team IDs; resolve viewer relationships only at presentation.
@@ -13,6 +13,8 @@ This internal document carries operational details moved out of the public READM
 - Tournament presentation: `tournaments-ui.js`, `skyline-tournaments.css`; engine and payouts unchanged.
 
 ## Targeted routes
+
+The staged **1.12.0 — OVERCLOCK** release is tracked in [overclock-handoff.md](overclock-handoff.md): frame pacing, HUD sizing, account cosmetics and payment verification. [OVERCLOCK-PAYMENTS.md](OVERCLOCK-PAYMENTS.md) contains Sandbox setup and the closed live-activation gates. OVERCLOCK is retained as release history; ARENA REFINED delivery evidence is in the audit handoff.
 
 BLUE CIRCUIT integration paths and acceptance evidence are in [blue-circuit-handoff.md](blue-circuit-handoff.md): Ranked/XP schemas, per-card preview APIs, badges/fonts, scoped competitor dialogue and release verification. Weapon balance and telemetry versions remain unchanged.
 
@@ -22,7 +24,8 @@ BLUE CIRCUIT integration paths and acceptance evidence are in [blue-circuit-hand
 | 2.5D models and animation | `models-25d.mjs`, `renderer-25d.mjs`, `asset-loader-25d.mjs`; `dev/models-25d-check.mjs` |
 | Map presentation and Blender exports | `environment-25d.mjs`, `assets/25d/manifest.json`, `tools/blender_assets.py`, `tools/blender_live_circuit.py`; `tools/blender_validate.mjs` |
 | Audio events, mappings and licensing | `audio.js`, `assets/audio/LICENSES.json`; `dev/audio-check.cjs` |
-| Account/world sync, cached mode and Phone conversations | Existing cloud/social client and server modules; `dev/cloud-client-check.cjs`, `dev/offline-client-check.cjs`, `dev/social-ui-check.cjs` |
+| Account/world sync and cached mode | `cloud.js`, existing account/world server modules; `dev/cloud-client-check.cjs`, `dev/offline-client-check.cjs` |
+| Phone device and remaining apps | `phone-ui.js`, `phone-apps.js`; `dev/phone-ui-check.cjs` |
 | Tournament registration, schedule, bracket and persisted results | Existing tournament module and server routes/migrations; tournament tests added with the engine |
 | Shell, navigation, public settings and Patch Notes | `index.html`, `game.js`, existing styles and release metadata |
 | Native startup, bundled backend and updates | `launcher/`; `launcher/README.md` and `server/DEPLOYMENT.md` |
@@ -38,7 +41,7 @@ Use the existing degree values for stationary hip, walking hip, sprint hip and A
 
 One eligible standard-match finalization path commits totals exactly once, persists the local authoritative profile and refreshes its UI immediately. Preserve games, outcomes, kills, deaths, assists, resolved damage, accuracy, headshots, playtime, weapon records and other existing fields. Offline saves queue the existing revision-aware sync. Tournament match results have isolated totals and must bypass normal profile, career, season combat and meta accumulation.
 
-Weapon Balance 8.0 (`b-b9bdf00b`, CORE TUNING) intentionally changes four weapons from Balance 7.0. Archive the previous full dataset once when its constants fingerprint differs; a version-only change must never reset telemetry. Only an intentional change to authoritative weapon constants can require a new balance fingerprint. Preferred range tiles always derive from preferred range divided by 70. Balance 6.0 remains historical telemetry.
+Weapon Balance 9.0 (`b-59670f2d`) applies the supplied table and adds FAL with PreferredWorld 1100. Balance 8.0 (`b-b9bdf00b`) remains archived. Archive the previous full dataset once when its constants fingerprint differs; a version-only change must never reset telemetry. Only an intentional change to authoritative weapon constants can require a new balance fingerprint. Legacy weapon units retain 70 world units per legacy tile for physical simulation. New hidden map cells are 32 world units square, 2 m² each, on the unchanged 4320×2880 world. Public distances use `distance-units.js` and explicit provenance; never replace the physics TILE constant. Balance 6.0 remains historical telemetry.
 
 Preserve current meta definitions: average engagement range samples actual trigger pulls aimed at visible enemies; kill range records lethal projectile travel. A solo kill requires the finishing weapon to remove at least 200 of the victim's 250 HP since spawn, while finisher credit uses 100 HP or less. Use resolved damage, never overkill. Missing historic contribution measurements remain unknown rather than receiving invented backfills. P90's existing ranged-SMG movement intent is ideal 7–12 tiles, acceptable 5–16, escape pressure below four and no bot firing beyond eighteen, with close emergency shots while separating.
 
@@ -63,11 +66,13 @@ node .\tools\blender_validate.mjs
 
 ## Audio identity
 
-`dev/prepare-fieldcraft-audio.py` deterministically masters the retained CC0 sources. Runtime audio contains 56 firing clips (four per weapon), 120 weapon handling clips (three per existing phase), and the retained movement, impact, UI and ambience assets. All 219 runtime assets total 2,779,800 bytes. Source archives, component attribution and exact hashes remain in `assets/audio/LICENSES.json`; source archives stay outside installers and shell caches.
+`dev/prepare-fieldcraft-audio.py` deterministically masters the retained CC0 sources. Runtime audio contains 56 firing clips (four per weapon), 120 weapon handling clips (three per existing phase), and the retained movement, impact, UI and ambience assets. All 218 remaining runtime assets total 2,772,076 bytes. Source archives, component attribution and exact hashes remain in `assets/audio/LICENSES.json`; source archives stay outside installers and shell caches.
 
 Firing events remain one sound per real bullet or shotgun shell. SR-Aug still emits separate rounds at 0/65/130 ms. Reload cues use existing authoritative phases and completion times. Shuffle bags exhaust variations before reuse; a separate ambience gain stage briefly lowers scenery beneath nearby combat without rewriting user volume settings. Run `node dev/audio-identity-check.cjs` and `node dev/audio-check.cjs` after audio edits. Rebuild with the project's Python environment containing numpy and imageio-ffmpeg; no new recordings or network downloads are required.
 
-## Dialogue internals
+## Historical dialogue internals
+
+> Retired by ARENA REFINED Audit 1. This section records the prior release architecture; none of its provider, Messages or training tooling runs in the current project. See [arena-refined-audit.md](arena-refined-audit.md) for current paths and storage migration.
 
 The internal service remains Ollama `gpt-oss:20b`, normally at `http://127.0.0.1:11434`. Detection uses `/api/tags`; dialogue uses structured non-streaming `/api/chat`. No account-backend outage should disable an otherwise reachable local dialogue service. Preserve the native fallback transport and canonical job/database handlers.
 
@@ -81,13 +86,13 @@ SKYLINE removes all player-facing Developer/Debug settings, including for the ow
 
 ## Tournament invariants
 
-Official schedules derive from server-authoritative season start in 72-hour increments, only while the scheduled start falls inside the active season. Schedule and registration survive restart, reconnect and updates. The client does not need to remain open for deadlines to advance.
+Official schedules preserve the existing anchor and recur every three calendar days at 19:30 America/New_York, including daylight saving. Schedule and registration survive restart. The local authority cannot run with Windows off; missed events are cancelled without invented results/rewards. `server/tournament-schedule.cjs` owns fixed windows and `server/tournament-lifecycle.cjs` owns check-in/roster/replacement state. The audit handoff records the complete approved timetable.
 
-Valid tournaments contain eight distinct five-participant teams, with no bot duplicated across teams. Registration/invitation decisions use existing personality/state and commitments. Quarterfinals and semifinals are BO3; the final is BO5 using standard 5v5 TDM rules without normal-stat writes. Placement among same-round eliminations sorts by game differential, kill differential, damage differential and initial seed.
+Valid tournaments contain eight distinct five-participant teams, with no bot duplicated across teams. Registration/invitation decisions use existing personality/state and commitments. New quarterfinals and semifinals require all three games; finals require all five. Advance by aggregate kills, then total team damage; an exact tie awaits an explicit ruling. Per-game 50-kill/five-minute rules and isolated statistics remain. Older rulesets remain intelligible. Placement among same-round eliminations sorts by game differential, kill differential, damage differential and initial seed.
 
 Official fictional earnings per participant are `[50000,35000,20000,12500,7500,5000,2500,1000]` for placements 1–8. Never divide by five. Persist payout identity and history so retries cannot pay twice. Custom tournaments use the same engine, preserve their own results and pay zero. Tournament results must not contaminate normal player/bot combat careers, seasons, Weapon Meta or Gun Score.
 
-Calendar display converts authoritative timestamps to the player's local timezone. Phone reactions consume persisted invitation, acceptance, bracket, elimination, placement and championship facts; they cannot fabricate tournament progress.
+Calendar converts authoritative timestamps for display and identifies Eastern schedule rules. Check-in closes 90 seconds into two-minute preparation. Permanent no-show replacements own the slot payout. Tournament reservations precede background allocation; conflicts never clone bots. Phone continues to expose the four retained statistics/spectator apps.
 
 ## Startup, persistence and release delivery
 
@@ -122,7 +127,7 @@ node .\dev\live-circuit-assets-check.mjs
 node .\tools\blender_validate.mjs
 ```
 
-Run changed-system checks first, then relevant integration checks. The existing game suite covers mechanics, navigation, migration, weapon balance/meta, actual player matches, model mechanisms, map cutaways, audio, pointer lock, resolved damage numbers and movement spread. Client tests cover revision checkpoints, cached mode and social UI. Add tournament/profile/UI tests alongside their implementation; do not describe planned checks as passing evidence.
+Run changed-system checks first, then relevant integration checks. The existing game suite covers mechanics, navigation, migration, weapon balance/meta, actual player matches, model mechanisms, map cutaways, audio, pointer lock, resolved damage numbers and movement spread. Client tests cover revision checkpoints, cached mode and safe retired-draft exports. Phone tests cover the device and its four retained apps. The historical dialogue checks are retired. Add tournament/profile/UI tests alongside their implementation; do not describe planned checks as passing evidence.
 
 Current acceptance must demonstrate:
 

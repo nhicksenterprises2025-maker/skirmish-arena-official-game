@@ -7,7 +7,7 @@ const {chromium}=require(process.env.SAR_PLAYWRIGHT||path.join(os.homedir(),'.ca
 const out=path.resolve(process.env.SAR_TEST_OUTPUT||path.join(os.tmpdir(),'sar-blue-circuit-evidence'));
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'sar-blue-browser-')),dbPath=path.join(temp,'fixture.sqlite'),profilePath=path.join(temp,'edge-profile');
 fs.mkdirSync(out,{recursive:true});
-process.env.SAR_OLLAMA_URL='http://127.0.0.1:1';
+
 const {createServer}=require('../server/index.cjs'),{createDatabase}=require('../server/db.cjs');
 const source=fs.readFileSync(path.join(__dirname,'../game.js'),'utf8');
 assert.equal(source.split('if(!state.paused&&!document.hidden){').length,2,'One authoritative simulation loop');

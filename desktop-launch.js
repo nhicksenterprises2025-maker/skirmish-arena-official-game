@@ -67,7 +67,7 @@
         const healthResponse=await fetch('./api/status?desktop='+Date.now(),{cache:'no-store',redirect:'error',signal:AbortSignal.timeout(10000)});
         const health=await healthResponse.json();
         if(healthResponse.ok&&health.ok===true){
-          if(health.version!==expected||health.databaseSchema!==5)throw Error(`Version mismatch: desktop ${expected}, active backend ${health.version||'unknown'}. Reopen the updated app to finish its service handoff.`);
+          if(health.version!==expected||health.databaseSchema!==10)throw Error(`Startup compatibility mismatch: desktop ${expected}, active backend ${health.version||'unknown'}, account schema ${health.databaseSchema??'unknown'} (expected 10). Reopen the updated app to finish its service handoff.`);
         }else if(health.localShell!==true)throw Error('The game service has not completed startup. Retry after it becomes healthy.');
         stage='shell-activation';window.SARBoot?.stage?.(stage,'Preparing the installed game files…',125000);
         await activateRelease();

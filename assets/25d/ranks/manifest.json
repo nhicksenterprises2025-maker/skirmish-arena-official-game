@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "blue-circuit-ranks-ba0c627502c0",
+  "version": "blue-circuit-ranks-e75993527206",
   "units": "game-world-units",
   "upAxis": "Y",
   "frontAxis": "+Z",
@@ -9,8 +9,8 @@
   "rankSource": "progression.js SARProgression.ranks",
   "files": {
     "blue-circuit-ranks.glb": {
-      "sha256": "ba0c627502c0ede5525cf9d08b16aa8d73e9b05252491a597a5e02a9baa0bebc",
-      "bytes": 1141300
+      "sha256": "e7599352720664692d90b43900fd30dea3aa43bb985a745a85ed1e03f2f1c2e0",
+      "bytes": 1150452
     }
   },
   "models": [
@@ -25,13 +25,14 @@
       "division": 1,
       "thumbnail": "beginner-i.png",
       "dimensions": {
-        "x": 51.945,
-        "y": 57.861,
-        "z": 6.8
+        "x": 51.839,
+        "y": 57.588,
+        "z": 7.9
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "98d45e1bf9be368354946bf35900f808e6677848eed9a3f22300d93c1c5a1ab6"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "2497c5fc72a26a840c91029c13e0b601f328d5b704b55d53ad4c324440f9ad3b"
     },
     {
       "name": "rank-badge-beginner-ii",
@@ -44,13 +45,14 @@
       "division": 2,
       "thumbnail": "beginner-ii.png",
       "dimensions": {
-        "x": 51.945,
-        "y": 57.861,
-        "z": 6.8
+        "x": 51.839,
+        "y": 57.588,
+        "z": 7.9
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "e19fec1f6c1d278cec70f9430b8940a2045429a4a172e2eaba6a354ce7eaed1f"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "e6887ec3992a0869ba8dcaa398a0acad68a512066eb524996a21e30026688393"
     },
     {
       "name": "rank-badge-beginner-iii",
@@ -63,13 +65,14 @@
       "division": 3,
       "thumbnail": "beginner-iii.png",
       "dimensions": {
-        "x": 51.945,
-        "y": 57.861,
-        "z": 6.8
+        "x": 51.839,
+        "y": 57.588,
+        "z": 7.9
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "862d025efc1e00b3cafd11851721f04c05610fd5411d48227b0df47bece51718"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "f7dd24cbf4c4cca65348129d89c976b10d67f4c6d36180f53e4388dcc5a325a5"
     },
     {
       "name": "rank-badge-rookie-i",
@@ -82,13 +85,14 @@
       "division": 1,
       "thumbnail": "rookie-i.png",
       "dimensions": {
-        "x": 51.945,
-        "y": 57.861,
-        "z": 6.8
+        "x": 51.839,
+        "y": 57.588,
+        "z": 7.9
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "1f2f2f1fb07b8c63ca9c05ab98c8e413fb6b827ba216814852fb245f5ad56fa7"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "816b080439babeb77a473e1e88b3079f982cb6d2ee73d33b4823a309899325c2"
     },
     {
       "name": "rank-badge-rookie-ii",
@@ -101,13 +105,14 @@
       "division": 2,
       "thumbnail": "rookie-ii.png",
       "dimensions": {
-        "x": 51.945,
-        "y": 57.861,
-        "z": 6.8
+        "x": 51.839,
+        "y": 57.588,
+        "z": 7.9
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "7adb98945940eb217e173af159afc84b97bd4fcea4a638f5b9b9c28be4b2dc1d"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "f4b80a38d9dfc346a6a74fbc2d288ccf484632d607abac6a547227ebc3ab0ad7"
     },
     {
       "name": "rank-badge-rookie-iii",
@@ -120,13 +125,14 @@
       "division": 3,
       "thumbnail": "rookie-iii.png",
       "dimensions": {
-        "x": 51.945,
-        "y": 57.861,
-        "z": 6.8
+        "x": 51.839,
+        "y": 57.588,
+        "z": 7.9
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "c47355e6202c7d2811987bf1d7f9dcf1c4f146f6a0c6345372d671689550b4e6"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "fe0d3030dcfcee2dee0222bf0a5c91d9743e2743447ea337a17e0950469f0cbb"
     },
     {
       "name": "rank-badge-trainer-i",
@@ -139,13 +145,14 @@
       "division": 1,
       "thumbnail": "trainer-i.png",
       "dimensions": {
-        "x": 51.945,
-        "y": 57.861,
-        "z": 6.8
+        "x": 51.839,
+        "y": 57.588,
+        "z": 7.9
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "7fdf69de2e2e51823e991196f30165d6da119a2f991bec0e6564fb8805807529"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "ef55a4fa1d93a235a8a3aabe61b6e1e43899c7594fff522a999f8fb0acea93f5"
     },
     {
       "name": "rank-badge-trainer-ii",
@@ -158,13 +165,14 @@
       "division": 2,
       "thumbnail": "trainer-ii.png",
       "dimensions": {
-        "x": 51.945,
-        "y": 57.861,
-        "z": 6.8
+        "x": 51.839,
+        "y": 57.588,
+        "z": 7.9
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "96650ea268e177c432c3cc60fe3a6b647ff5db15739d4621c2ee1829fa7d8f17"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "8e9529e231ce1ee64a1cc6c82b6046f56747cd0b0187300701eeb34b2059b0a4"
     },
     {
       "name": "rank-badge-trainer-iii",
@@ -177,13 +185,14 @@
       "division": 3,
       "thumbnail": "trainer-iii.png",
       "dimensions": {
-        "x": 51.945,
-        "y": 57.861,
-        "z": 6.8
+        "x": 51.839,
+        "y": 57.588,
+        "z": 7.9
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "91af941f3c41ad186d3f5719c73f8bb95f197a6b612bfac84e5580754b3c11fc"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "87cc81239e61b35bd8d41cb2f17a6fdfbfd3b4224898770753153af003d78ea1"
     },
     {
       "name": "rank-badge-challenger-i",
@@ -197,12 +206,13 @@
       "thumbnail": "challenger-i.png",
       "dimensions": {
         "x": 64.045,
-        "y": 57.861,
-        "z": 8.1
+        "y": 57.588,
+        "z": 9.2
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "24adaaa84adb56fd5c600eb07ee5f3f5ca0e63973983a777ce1f26b557702fa2"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "0eba28081df9744e8422e73ac427a4996f50a4b17e9ec04621901e222a0352de"
     },
     {
       "name": "rank-badge-challenger-ii",
@@ -216,12 +226,13 @@
       "thumbnail": "challenger-ii.png",
       "dimensions": {
         "x": 64.045,
-        "y": 57.861,
-        "z": 8.1
+        "y": 57.588,
+        "z": 9.2
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "78f206b806b277ca64afef3099fe5d8aa5b7452225659e108d01374e6ccdd6f8"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "00cfd11d0b72e49b2924f6271e1a75b699eb54b89f7962ffcd18f0520e2876d1"
     },
     {
       "name": "rank-badge-challenger-iii",
@@ -235,12 +246,13 @@
       "thumbnail": "challenger-iii.png",
       "dimensions": {
         "x": 64.045,
-        "y": 57.861,
-        "z": 8.1
+        "y": 57.588,
+        "z": 9.2
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "cbebaf76ba7e42e6d4efd8acb63603d2cc54e50fcaa458b762409fd0f70ddc51"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "554e018f5a7af4067e7a6cdbee57d2684b7d88e92787b001164c521321c743b0"
     },
     {
       "name": "rank-badge-veteran-i",
@@ -254,12 +266,13 @@
       "thumbnail": "veteran-i.png",
       "dimensions": {
         "x": 64.745,
-        "y": 57.861,
-        "z": 8.4
+        "y": 57.588,
+        "z": 9.5
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "83cff7feff62f7642a3655dd6f0cdad6c775e72e39a7425726856b7de54d1336"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "e7f472a767b5aefba1f22081e136527028e082f4b0c709a21dd4f2a1ca924d5c"
     },
     {
       "name": "rank-badge-veteran-ii",
@@ -273,12 +286,13 @@
       "thumbnail": "veteran-ii.png",
       "dimensions": {
         "x": 64.745,
-        "y": 57.861,
-        "z": 8.4
+        "y": 57.588,
+        "z": 9.5
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "0a82533afef7b15061f5b9d1b4880d65256627b37dd3844ec15b37d551bc39c4"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "c8fa931ef17c3afce0a0664476ad8f017cf586c8f8be30f659c6a93cfc2bf499"
     },
     {
       "name": "rank-badge-veteran-iii",
@@ -292,12 +306,13 @@
       "thumbnail": "veteran-iii.png",
       "dimensions": {
         "x": 64.745,
-        "y": 57.861,
-        "z": 8.4
+        "y": 57.588,
+        "z": 9.5
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "6a44665ca31c4571b73c5d8ec2d7025680e9363077ecb888cf7060d043f9a60f"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "c3e26de8c051d3d5d498eef4e1e095214c52197f7efa2a73e82a0e8e06316961"
     },
     {
       "name": "rank-badge-elite-veteran-i",
@@ -311,12 +326,13 @@
       "thumbnail": "elite-veteran-i.png",
       "dimensions": {
         "x": 65.445,
-        "y": 57.861,
-        "z": 8.4
+        "y": 57.588,
+        "z": 9.5
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "1e6666771df2cce016f94a2e683f81eb7843e628ea97292724b34b58de4dd71d"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "c95e3a5162ee23fbb2c50f5b010a9a28d196a04fba89f3db4fb94679557c061a"
     },
     {
       "name": "rank-badge-elite-veteran-ii",
@@ -330,12 +346,13 @@
       "thumbnail": "elite-veteran-ii.png",
       "dimensions": {
         "x": 65.445,
-        "y": 57.861,
-        "z": 8.4
+        "y": 57.588,
+        "z": 9.5
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "f949fb5760897c809c2e4913a637df599c1cf8919127d7dfe82a2f7e6d577416"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "1c93f3f912e824930fa451584a71848ffcd5fd864ddfbf991cd2306e3497e6fc"
     },
     {
       "name": "rank-badge-pro-i",
@@ -349,12 +366,13 @@
       "thumbnail": "pro-i.png",
       "dimensions": {
         "x": 66.145,
-        "y": 65.782,
-        "z": 8.5
+        "y": 65.509,
+        "z": 9.6
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "de59fdfec299416ef70744b4d10009420aa1cd78d7e6e6fac6159dfb622ae6a8"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "b5a15306dde8fd39fb732d6239387f6b70f7829d6c46bc7ca851b2083d2977e9"
     },
     {
       "name": "rank-badge-pro-ii",
@@ -368,12 +386,13 @@
       "thumbnail": "pro-ii.png",
       "dimensions": {
         "x": 66.145,
-        "y": 65.782,
-        "z": 8.5
+        "y": 65.509,
+        "z": 9.6
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "92b799b7013279607f236fe8faa1ed71b0eca2c81841bcad0516384d3e85a95d"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "d2b6a3cec284eaf51edceefc12cd29b7a09e13ad7191803e6a1b1d2b78c8a317"
     },
     {
       "name": "rank-badge-master-i",
@@ -387,12 +406,13 @@
       "thumbnail": "master-i.png",
       "dimensions": {
         "x": 66.845,
-        "y": 65.782,
-        "z": 8.5
+        "y": 65.509,
+        "z": 9.6
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "0980243476db4bd31353e848bb5a330f5c0e1e3c3422c644717fa76fd1f7e53f"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "27bb96b8d0bcdda7113757586c04c045a83b19d783757d5ecee91c4cdbb47024"
     },
     {
       "name": "rank-badge-master-ii",
@@ -406,12 +426,13 @@
       "thumbnail": "master-ii.png",
       "dimensions": {
         "x": 66.845,
-        "y": 65.782,
-        "z": 8.5
+        "y": 65.509,
+        "z": 9.6
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "b869e3069a706348d01fd101ee6ed5daa8137863ade137411003f042bbfffee4"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "237c6b28c0d4ac942e16453fbca6e8e3f484f48872d03ccaf9ce6440583a3b7f"
     },
     {
       "name": "rank-badge-grandmaster-i",
@@ -425,12 +446,13 @@
       "thumbnail": "grandmaster-i.png",
       "dimensions": {
         "x": 67.545,
-        "y": 65.782,
-        "z": 8.5
+        "y": 65.509,
+        "z": 9.6
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "473f921aa0e216fa11c2dcfcabcb8bbc23e4a2140cd417075dd9b12690d41a54"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "130371a57aab485f652bbeecd221ae553aa1d9b50a3eb247d8bc86980b8e491e"
     },
     {
       "name": "rank-badge-grandmaster-ii",
@@ -444,12 +466,13 @@
       "thumbnail": "grandmaster-ii.png",
       "dimensions": {
         "x": 67.545,
-        "y": 65.782,
-        "z": 8.5
+        "y": 65.509,
+        "z": 9.6
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "8293e707c54367fd206e00a85a03a3c800e612e2774822e3770281a6cc49b3b3"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "a7958b90ca4405f96a1b8173f39f85073115a21f17a3509ecf82b8e0db87bf7e"
     },
     {
       "name": "rank-badge-champion",
@@ -463,12 +486,13 @@
       "thumbnail": "champion.png",
       "dimensions": {
         "x": 68.245,
-        "y": 67.782,
-        "z": 8.5
+        "y": 67.509,
+        "z": 9.6
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "a910622f4d0cd6cb3a6c07ac2a0934bc5a97c59159aa5b7565d34e09064b48c4"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "fba48735d8911902a879603504163219b2c436bdffbee96914b229bb2bb97796"
     },
     {
       "name": "rank-badge-legend",
@@ -482,12 +506,13 @@
       "thumbnail": "legend.png",
       "dimensions": {
         "x": 68.945,
-        "y": 69.782,
-        "z": 8.5
+        "y": 69.509,
+        "z": 9.6
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "e77901784d762d0401fb9a6e8715695366cafaf91f412a2e51867b89af813abf"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "95e5478973f60ff99153c8ae13b7eb9e7c3bebddbfa99cffbdaec6bf96318928"
     },
     {
       "name": "rank-badge-ascendant",
@@ -501,12 +526,13 @@
       "thumbnail": "ascendant.png",
       "dimensions": {
         "x": 69.645,
-        "y": 71.782,
-        "z": 8.5
+        "y": 71.509,
+        "z": 9.6
       },
       "castShadow": false,
       "presentationOnly": true,
-      "thumbnailSha256": "479cc8066d0d999001d1f15f49204bb227f685018fe05a89053d48a3eab4d37a"
+      "construction": "extruded chamfered metal shield; formed enamel face; attached raised heraldry",
+      "thumbnailSha256": "fb9350c0d252318fe450285eeba8cdff0fa47da6373471967b3e5156c0fc6e5e"
     }
   ]
 }

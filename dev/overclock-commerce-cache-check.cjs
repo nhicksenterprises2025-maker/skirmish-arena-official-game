@@ -1,0 +1,42 @@
+'use strict';
+// Real service worker, account server and browser storage; isolated fixtures only.
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto');
+const {chromium}=require(process.env.SAR_PLAYWRIGHT||path.join(os.homedir(),'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
+process.env.SAR_COMMERCE_ENV='test';
+const db=require('../server/db.cjs').createDatabase(':memory:'),app=require('../server/index.cjs').createServer({db}),Wallet=require('../server/wallet.cjs');
+const root=path.resolve(__dirname,'..'),manifest=JSON.parse(fs.readFileSync(path.join(root,'assets/25d/cosmetics/manifest.json'),'utf8'));
+const ids=Object.keys(manifest.cosmetics),file=id=>manifest.cosmetics[id].styles.main.file,checks=[];
+const output=path.resolve(process.env.SAR_TEST_OUTPUT||path.join(os.tmpdir(),'sar-commerce-cache'));
+const pass=name=>{checks.push(name);console.log('PASS '+name);};let browser,context,page,base;
+const progress=()=>page.evaluate(()=>{const w=SAR.getUniverse();return {account:SARCloud.state.account.id,xp:w.progression,career:w.playerCareer,fingerprint:w.patchState.fingerprint,archives:w.patchArchives.length};});
+(async()=>{try{
+ fs.mkdirSync(output,{recursive:true});await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));base='http://127.0.0.1:'+app.server.address().port;
+ browser=await chromium.launch({headless:true,channel:'msedge'});context=await browser.newContext({viewport:{width:1280,height:800},serviceWorkers:'allow'});
+ const auth=await context.request.post(base+'/api/auth/signup',{data:{username:'cache_'+Date.now().toString(36),password:crypto.randomBytes(18).toString('hex')},headers:{origin:base}});assert.equal(auth.status(),201);const user=(await auth.json()).account.id;
+ Wallet.snapshot(db,user,'test');db.prepare('INSERT INTO ac_ledger(id,user_id,environment,idempotency_key,delta_units,source,source_id,created_at) VALUES(?,?,?,?,?,?,?,?)').run(crypto.randomUUID(),user,'test','cache-fixture',50000,'test-fixture','cache-check',Date.now());
+ // Seed an already-owned retired appearance from before Store curation. The
+ // live purchase endpoint must keep rejecting new sales of this same item.
+ const legacyOrder=crypto.randomUUID(),legacyLedger=crypto.randomUUID(),legacyAt=Date.now();
+ db.prepare('INSERT INTO ac_ledger(id,user_id,environment,idempotency_key,delta_units,source,source_id,created_at) VALUES(?,?,?,?,?,?,?,?)').run(legacyLedger,user,'test','offline-legacy-purchase',-50000,'cosmetic-purchase',legacyOrder,legacyAt);
+ db.prepare("INSERT INTO cosmetic_orders(id,user_id,environment,request_id,cosmetic_id,price_units,ledger_id,status,created_at) VALUES(?,?,?,?,?,?,?,'COMPLETED',?)").run(legacyOrder,user,'test','offline-cache-fixture',ids[0],50000,legacyLedger,legacyAt);
+ db.prepare('INSERT INTO cosmetic_entitlements(user_id,environment,cosmetic_id,order_id,purchased_at) VALUES(?,?,?,?,?)').run(user,'test',ids[0],legacyOrder,legacyAt);
+ Wallet.equip(db,user,{cosmeticId:ids[0],operatorId:manifest.cosmetics[ids[0]].operatorId,styleId:'main'},'test');
+ page=await context.newPage();page.on('dialog',dialog=>dialog.accept());await page.goto(base+'/app-icon.svg');
+ const old=structuredClone(manifest);old.cosmetics[ids[1]].styles.main.sha256='0'.repeat(64);
+ await page.evaluate(async({old,files})=>{localStorage.setItem('commerce-cache-safety','preserved');await caches.open('unrelated-user-cache');const cache=await caches.open('sar-shell-old-commerce-fixture');await cache.put('/assets/25d/cosmetics/manifest.json',new Response(JSON.stringify(old)));for(const file of files)await cache.put('/'+file,await fetch('/'+file));const registration=await navigator.serviceWorker.register('/sw.js');await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));},{old,files:[file(ids[0]),file(ids[1])]});
+ const cached=()=>page.evaluate(async()=>{const key=(await caches.keys()).find(k=>k.startsWith('sar-shell-'));return (await(await caches.open(key)).keys()).map(r=>new URL(r.url).pathname).filter(p=>p.endsWith('.glb')&&p.includes('/cosmetics/'));});
+ assert.deepEqual(await cached(),['/'+file(ids[0])]);assert.equal(await page.evaluate(()=>caches.has('sar-shell-old-commerce-fixture')),false);assert.equal(await page.evaluate(()=>caches.has('unrelated-user-cache')),true);pass('Activation retains only identical previously loaded cosmetics, rejects changed hashes, and preserves unrelated storage');
+ const fetched=await page.evaluate(async file=>{const r=await fetch('/'+file);return {status:r.status,bytes:(await r.arrayBuffer()).byteLength};},file(ids[2]));assert.equal(fetched.status,200);assert.ok(fetched.bytes>1000);assert.equal((await cached()).length,2);
+ assert.equal((await context.request.get(base+'/assets/25d/cosmetics/overclock-cosmetics.blend')).status(),404);assert.equal((await context.request.get(base+'/assets/25d/cosmetics/not-approved.glb')).status(),404);pass('Runtime cosmetics load and cache on demand; source Blender files and unknown models are excluded');
+ // A server with newer bytes cannot poison an older active shell's cached model.
+ const corruptionFile=file(ids[3]);await page.evaluate(async file=>{const key=(await caches.keys()).find(k=>k.startsWith('sar-shell-')),cache=await caches.open(key),r=await cache.match('/assets/25d/cosmetics/manifest.json'),m=await r.json();for(const item of Object.values(m.cosmetics))for(const style of Object.values(item.styles))if(style.file===file)style.sha256='0'.repeat(64);await cache.put('/assets/25d/cosmetics/manifest.json',new Response(JSON.stringify(m)));},corruptionFile);
+ assert.equal(await page.evaluate(async file=>(await fetch('/'+file)).status,corruptionFile),503);assert.equal((await cached()).length,2);await page.evaluate(async m=>{const key=(await caches.keys()).find(k=>k.startsWith('sar-shell-'));await(await caches.open(key)).put('/assets/25d/cosmetics/manifest.json',new Response(JSON.stringify(m)));},manifest);pass('Mismatched model bytes fail honestly and are never retained as current assets');
+ await page.goto(base+'/?diagnostics=1');await page.waitForFunction(()=>window.SAR&&SARCloud.state.loaded&&!document.getElementById('sarBoot'),null,{timeout:45000});await page.evaluate(()=>SARFullscreen.setAutoEnter(false));await page.evaluate(()=>SARCommerce.init());
+ const op=manifest.cosmetics[ids[0]].operatorId;await page.evaluate(id=>SAR.equipCosmeticOperator(id),op);
+ await page.evaluate(async()=>{const canvas=document.getElementById('lobbyOperator');await SAR.paintCosmeticPreview(canvas,{operatorId:SAR.getOperators()[SAR.getConfig().skin].id,cosmeticId:SARCommerce.getEquipped(SAR.getOperators()[SAR.getConfig().skin].id).id,styleId:'main'});});
+ await page.evaluate(async()=>{await SARCloud.checkpoint();await SARStorage.flush();});const before=await progress();assert.equal(await page.evaluate(op=>SARCommerce.getEquipped(op)?.id,op),ids[0]);
+ await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.SAR&&SARCloud.state.loaded&&!document.getElementById('sarBoot'),null,{timeout:45000});await page.evaluate(()=>SARCommerce.init());assert.equal(await page.evaluate(()=>SARCloud.state.localMode),true);assert.deepEqual(await progress(),before);assert.equal(await page.evaluate(op=>SARCommerce.getEquipped(op)?.id,op),ids[0]);
+ const restored=await page.evaluate(async({id,op})=>{const module=await import('./cosmetics-25d.mjs');await module.ensureCosmeticAssets({id,operatorId:op,styleId:'main'});return {ready:!!module.readyCosmetic({id,operatorId:op,styleId:'main'}),sentinel:localStorage.getItem('commerce-cache-safety')};},{id:ids[0],op});assert.deepEqual(restored,{ready:true,sentinel:'preserved'});assert.equal(await page.evaluate(()=>SARCommerce.getStatus().verified),false);pass('Genuine offline reload restores authenticated world, owned model, XP/career and shell storage; purchases remain disabled');
+ await page.screenshot({path:path.join(output,'offline-owned-cosmetic.png')});fs.writeFileSync(path.join(output,'commerce-cache-results.json'),JSON.stringify({ok:true,checks},null,2));
+ }finally{await browser?.close();await new Promise(resolve=>app.server.close(resolve));db.close();}
+})().catch(error=>{console.error(error);process.exitCode=1;});

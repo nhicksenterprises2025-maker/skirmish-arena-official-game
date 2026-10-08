@@ -1,0 +1,80 @@
+{
+  "verifiedAt": "2026-10-07T11:36:33.340Z",
+  "accountId": "acct_1TGJWg1F1wnVf2XK",
+  "accountName": "New business sandbox",
+  "livemode": false,
+  "creditPriceMap": {
+    "ac_17500": "price_1UNt8q1F1wnVf2XKQog0PHSq",
+    "ac_7500": "price_1UNt8p1F1wnVf2XKKTiqxKsG",
+    "ac_3000": "price_1UNt8o1F1wnVf2XKny0K999b",
+    "ac_1500": "price_1UNt8n1F1wnVf2XKpjcbKz8J",
+    "ac_1000": "price_1UNt8n1F1wnVf2XKB23WhYD0",
+    "ac_500": "price_1UNt8m1F1wnVf2XKptCtoGVv"
+  },
+  "testSkinPriceId": "price_1UNt881F1wnVf2XKAuYOq8nv",
+  "products": [
+    {
+      "catalogKey": "ac_17500",
+      "priceId": "price_1UNt8q1F1wnVf2XKQog0PHSq",
+      "productId": "prod_VOgVX6QJGbhWr0",
+      "currency": "usd",
+      "moneyCents": 9999,
+      "lookupKey": "skirmish-arena:sandbox:ac_17500:v1",
+      "livemode": false
+    },
+    {
+      "catalogKey": "ac_7500",
+      "priceId": "price_1UNt8p1F1wnVf2XKKTiqxKsG",
+      "productId": "prod_VOgVdZdZdWB1iY",
+      "currency": "usd",
+      "moneyCents": 4999,
+      "lookupKey": "skirmish-arena:sandbox:ac_7500:v1",
+      "livemode": false
+    },
+    {
+      "catalogKey": "ac_3000",
+      "priceId": "price_1UNt8o1F1wnVf2XKny0K999b",
+      "productId": "prod_VOgVAYksioDagm",
+      "currency": "usd",
+      "moneyCents": 2499,
+      "lookupKey": "skirmish-arena:sandbox:ac_3000:v1",
+      "livemode": false
+    },
+    {
+      "catalogKey": "ac_1500",
+      "priceId": "price_1UNt8n1F1wnVf2XKpjcbKz8J",
+      "productId": "prod_VOgV15jkYZxs9w",
+      "currency": "usd",
+      "moneyCents": 1499,
+      "lookupKey": "skirmish-arena:sandbox:ac_1500:v1",
+      "livemode": false
+    },
+    {
+      "catalogKey": "ac_1000",
+      "priceId": "price_1UNt8n1F1wnVf2XKB23WhYD0",
+      "productId": "prod_VOgVIk81fegbXO",
+      "currency": "usd",
+      "moneyCents": 1099,
+      "lookupKey": "skirmish-arena:sandbox:ac_1000:v1",
+      "livemode": false
+    },
+    {
+      "catalogKey": "ac_500",
+      "priceId": "price_1UNt8m1F1wnVf2XKptCtoGVv",
+      "productId": "prod_VOgVOlMxOXg9UK",
+      "currency": "usd",
+      "moneyCents": 699,
+      "lookupKey": "skirmish-arena:sandbox:ac_500:v1",
+      "livemode": false
+    },
+    {
+      "catalogKey": "skin_urban_polar_camo_test",
+      "priceId": "price_1UNt881F1wnVf2XKAuYOq8nv",
+      "productId": "prod_VOgVhDblVzYgOc",
+      "currency": "usd",
+      "moneyCents": 50,
+      "lookupKey": "skirmish-arena:sandbox:skin_urban_polar_camo_test:v1",
+      "livemode": false
+    }
+  ]
+}

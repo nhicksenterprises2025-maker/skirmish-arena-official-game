@@ -54,7 +54,11 @@ From the repository root:
 ```powershell
 npm run test:server
 node dev/progression-check.cjs
-node dev/core-gameplay-check.cjs
+npm run test:arena-refined
+npm run test:arena-refined-balance
+npm run test:arena-refined-ranges
+npm run test:arena-refined-schedule
+npm run test:arena-refined-profile
 npm run test:spread
 node tools/blender_validate.mjs
 ```

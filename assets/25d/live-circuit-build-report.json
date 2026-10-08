@@ -1,7 +1,7 @@
 {
   "status": "PASS",
   "blender": "5.2.2 LTS",
-  "assets": 16,
+  "assets": 17,
   "operators": "all existing operator palettes via shared kit",
   "detailedWeapons": [
     "Auto 12",
@@ -17,11 +17,12 @@
     "LR-762",
     "LW Tundra",
     "9mm",
-    "X16"
+    "X16",
+    "FAL"
   ],
-  "meshes": 53,
-  "triangles": 11708,
-  "glbBytes": 871148,
+  "meshes": 58,
+  "triangles": 12688,
+  "glbBytes": 947580,
   "contract": "named local-coordinate attachments; +X forward, Y up; no collision or animation authority",
   "source": "editable local Blender authoring"
 }

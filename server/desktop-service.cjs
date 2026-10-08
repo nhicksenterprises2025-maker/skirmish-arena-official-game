@@ -1,6 +1,7 @@
 'use strict';
 // Private desktop lifecycle control. Nothing is added to the public HTTP API.
 const fs=require('node:fs'),path=require('node:path'),net=require('node:net'),crypto=require('node:crypto');
+const startup=require('./startup-status.cjs');
 
 function checkpointOnly(){
   const file=path.resolve(process.env.SAR_DB_PATH||'');
@@ -24,8 +25,10 @@ function startDesktopService(){
   const marker=path.join(serviceRoot,'desktop-service.json'),token=crypto.randomBytes(32).toString('hex');
   const scope=crypto.createHash('sha256').update(serviceRoot+'\0'+port).digest('hex').slice(0,20);
   const pipe=process.platform==='win32'?`\\\\.\\pipe\\skirmish-arena-${scope}-${process.pid}`:path.join(serviceRoot,`desktop-${scope}-${process.pid}.sock`);
+  const origin=process.env.SAR_LOCAL_SERVER_ORIGIN||`http://${host.includes(':')?'['+host+']':host}:${port}`;
+  startup.begin({databasePath,serviceRoot,origin,entryPath:path.resolve(__filename)});
   const app=createServer();
-  const metadata={schema:1,pid:process.pid,nodeExecutable:path.resolve(process.execPath),entryPath:path.resolve(__filename),databasePath,version:require('../version.json').version,databaseSchema:app.db.prepare('PRAGMA user_version').get().user_version,origin:process.env.SAR_LOCAL_SERVER_ORIGIN||`http://${host.includes(':')?'['+host+']':host}:${port}`,controlPipe:pipe,controlToken:token,startedAt:Date.now()};
+  const metadata={schema:1,pid:process.pid,nodeExecutable:path.resolve(process.execPath),entryPath:path.resolve(__filename),databasePath,version:require('../version.json').version,databaseSchema:app.db.prepare('PRAGMA user_version').get().user_version,origin,controlPipe:pipe,controlToken:token,startedAt:Date.now()};
   let stopping=false,closed=false;
   const sockets=new Set();
   function authenticated(value){
@@ -60,7 +63,7 @@ function startDesktopService(){
     control.close();
     const deadline=setTimeout(()=>{app.server.closeAllConnections();for(const socket of sockets)socket.destroy();},5000);deadline.unref();
     await new Promise(resolve=>app.server.close(resolve));
-    // Existing server close handlers abort/dispose the dialogue worker first.
+    // Allow existing close handlers to settle before checkpointing the account DB.
     await new Promise(resolve=>setImmediate(resolve));
     try{app.db.exec('PRAGMA wal_checkpoint(TRUNCATE)');app.db.close();closed=true;}
     catch(error){console.error('Database shutdown:',error.message);process.exitCode=1;}
@@ -69,15 +72,17 @@ function startDesktopService(){
   process.on('SIGINT',()=>{void shutdown('SIGINT');});
   process.on('SIGTERM',()=>{void shutdown('SIGTERM');});
   const startupFailure=error=>{
+    startup.fail();
     console.error('Desktop backend startup failed:',error.message);removeMarker();
     if(!closed)try{app.db.close();}catch{}
     process.exit(1);
   };
   app.server.on('error',startupFailure);control.on('error',startupFailure);
+  startup.emit('listening');
   app.server.listen(port,host,()=>{
     control.listen(pipe,()=>{
       const temporary=marker+'.'+process.pid+'.tmp';
-      try{fs.writeFileSync(temporary,JSON.stringify(metadata,null,2)+'\n',{mode:0o600});fs.renameSync(temporary,marker);}
+      try{fs.writeFileSync(temporary,JSON.stringify(metadata,null,2)+'\n',{mode:0o600});fs.renameSync(temporary,marker);startup.emit('ready');}
       catch(error){startupFailure(error);return;}
       console.log('Desktop backend healthy at '+host+':'+port+'; private lifecycle control ready; shared service persists across game windows.');
     });
@@ -87,6 +92,6 @@ function startDesktopService(){
 
 if(require.main===module){
   try{if(process.argv.includes('--checkpoint-only'))checkpointOnly();else startDesktopService();}
-  catch(error){console.error('Desktop backend startup failed:',error.message);process.exitCode=1;}
+  catch(error){try{startup.fail();}catch(markerError){console.error(markerError.message);}console.error('Desktop backend startup failed:',error.message);process.exitCode=1;}
 }
 module.exports={startDesktopService,checkpointOnly};

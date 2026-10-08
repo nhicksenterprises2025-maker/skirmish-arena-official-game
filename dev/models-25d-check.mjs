@@ -36,8 +36,8 @@ function finiteTransforms(object){
 }
 function meshCount(object){let count=0;object.traverse(value=>{if(value.isMesh)count++;});return count;}
 
-test('all fourteen distinct weapon models have real muzzle apertures, feeds and optimized geometry',()=>{
-  assert.equal(names.length,14);assert.ok(names.includes('X-16 Auto'));assert.ok(names.includes('SR-Aug'));
+test('all fifteen distinct weapon models have real muzzle apertures, feeds and optimized geometry',()=>{
+  assert.equal(names.length,15);assert.ok(names.includes('X-16 Auto'));assert.ok(names.includes('SR-Aug'));assert.ok(names.includes('FAL'));
   const signatures=new Set();
   for(const name of names){
     const weapon=buildWeapon(name);weapon.updateMatrixWorld(true);finiteTransforms(weapon);
@@ -50,7 +50,7 @@ test('all fourteen distinct weapon models have real muzzle apertures, feeds and 
     signatures.add([name,weapon.userData.spec.class,weapon.userData.muzzleX].join(':'));
     disposeModel(weapon);
   }
-  assert.equal(signatures.size,14);
+  assert.equal(signatures.size,15);
 });
 
 test('operator skin palette is respected and both hands meet each weapon grip',()=>{

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "brightfield-fieldcraft-visual-fix-1",
+  "version": "brightfield-arena-refined-audit-4-fal",
   "units": "game-world-units",
   "upAxis": "Y",
   "origin": "ground-center",
@@ -418,6 +418,24 @@
         "mag": "weapon-detail-x16__mag"
       },
       "weapon": "X16"
+    },
+    {
+      "name": "weapon-detail-fal",
+      "node": "weapon-detail-fal",
+      "file": "live-circuit-details.glb",
+      "dimensions": {
+        "x": 87.0,
+        "y": 31.0,
+        "z": 11.775
+      },
+      "castShadow": true,
+      "presentationOnly": true,
+      "attachments": {
+        "body": "weapon-detail-fal__body",
+        "mag": "weapon-detail-fal__mag",
+        "bolt": "weapon-detail-fal__bolt"
+      },
+      "weapon": "FAL"
     },
     {
       "name": "phone-device",

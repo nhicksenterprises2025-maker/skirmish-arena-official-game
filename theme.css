@@ -1,5 +1,6 @@
 /* SKYLINE shared interface palette. World materials and cosmetic palettes are independent. */
 :root{
+  --arena-hud-panel:#1B241F;--arena-hud-border:#47534B;--arena-hud-text:#EDF1E9;
   --sky-background:#101C2A;--sky-background-rgb:16 28 42;
   --sky-surface-dark:#192C40;--sky-surface-dark-rgb:25 44 64;
   --sky-surface-raised:#25425D;--sky-surface-raised-rgb:37 66 93;

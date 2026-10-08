@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import {buildEnvironment} from './environment-25d.mjs';
-import {buildOperator,animateOperator,setOperatorWeapon,setOperatorPresentation,disposeModel} from './models-25d.mjs';
+import {buildOperator,animateOperator,setOperatorWeapon,setOperatorPresentation,disposeModel,ensureCosmeticAssets,cosmeticKey} from './models-25d.mjs';
 import {loadAssetLibrary} from './asset-loader-25d.mjs';
 
 // Presentation only: one watched match, driven by the authoritative snapshot.
@@ -9,7 +9,7 @@ const clamp=THREE.MathUtils.clamp;
 function overlay(id,z){const c=document.createElement('canvas');c.id=id;c.style.cssText=`position:fixed;inset:0;z-index:${z};pointer-events:none;display:none`;document.body.appendChild(c);return c;}
 function round(g,x,y,w,h,r){g.beginPath();g.roundRect(x,y,w,h,r);}
 export function createRenderer(snapshot){
-  const theme=getComputedStyle(document.documentElement),uiColors={panel:theme.getPropertyValue('--sky-surface-dark').trim()||'#192C40',border:theme.getPropertyValue('--sky-border-dark').trim()||'#37556F',text:theme.getPropertyValue('--sky-text-dark').trim()||'#F0F7FC'};
+  const theme=getComputedStyle(document.documentElement),uiColors={panel:theme.getPropertyValue('--arena-hud-panel').trim()||'#1B241F',border:theme.getPropertyValue('--arena-hud-border').trim()||'#47534B',text:theme.getPropertyValue('--arena-hud-text').trim()||'#EDF1E9'};
   const canvas=overlay('game3d',1);canvas.setAttribute('aria-label','Brightfield Blocks dimensional battlefield');
   const labels=overlay('game3dLabels',3),mini=overlay('game3dMap',6);mini.style.inset='auto';
   const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
@@ -41,9 +41,10 @@ export function createRenderer(snapshot){
   }
   function miniMap(s){
     if(s.mode==='menu'){mini.style.display='none';return;}
-    const full=!!s.fullMap,w=full?Math.min(width-30,690):Math.min(190,width*.23),h=full?Math.min(height-30,455):Math.min(142,width*.172),ratio=Math.min(2,devicePixelRatio||1);
+    const full=!!s.fullMap,w=full?Math.min(width-30,690):Math.min(190,width*.23),h=full?Math.min(height-30,455):Math.min(142,width*.172);
+    const top=clamp(s.hudMinimapTop||75,12,Math.max(12,height-24)),bottom=Math.min(height-12,s.hudMinimapBottom??height-12),scale=full?1:Math.min(clamp((s.hudSize||100)/100,.75,1.4),(width-24)/w,Math.max(12,bottom-top)/h),ratio=Math.min(2,devicePixelRatio||1)*scale;
     const pw=Math.round(w*ratio),ph=Math.round(h*ratio);if(mini.width!==pw)mini.width=pw;if(mini.height!==ph)mini.height=ph;
-    mini.style.width=w+'px';mini.style.height=h+'px';mini.style.left=full?'50%':'12px';mini.style.top=full?'50%':'75px';mini.style.transform=full?'translate(-50%,-50%)':'none';mini.style.display='block';
+    mini.style.width=w*scale+'px';mini.style.height=h*scale+'px';mini.style.left=full?'50%':'12px';mini.style.top=full?'50%':top+'px';mini.style.transform=full?'translate(-50%,-50%)':'none';mini.style.display='block';
     const g=mini.getContext('2d');g.setTransform(ratio,0,0,ratio,0,0);g.clearRect(0,0,w,h);g.fillStyle=uiColors.panel;round(g,0,0,w,h,6);g.fill();g.strokeStyle=uiColors.border;g.lineWidth=1;round(g,.5,.5,w-1,h-1,5.5);g.stroke();
     const pad=full?25:12,sx=(w-pad*2)/s.world.w,sy=(h-pad*2)/s.world.h;g.fillStyle='#819f61';g.fillRect(pad,pad,w-pad*2,h-pad*2);
     g.fillStyle='#737f78';for(const r of s.geometry.roads)g.fillRect(pad+r.x*sx,pad+r.y*sy,r.w*sx,r.h*sy);
@@ -93,7 +94,18 @@ export function createRenderer(snapshot){
     cameraAt(s);environment.update(s,dt);const seen=new Set();
     for(const a of s.actors){
       seen.add(a.id);let e=actors.get(a.id);
-      if(!e){e=buildOperator(a.team,a.skin,a.skinPalette);actors.set(a.id,e);actorRoot.add(e.group);}
+      const appearanceKey=cosmeticKey(a.cosmetic);
+      if(!e||e.appearanceKey!==appearanceKey||e.appearanceReady){
+        const observedState=e?.state;
+        if(e){actorRoot.remove(e.group);disposeModel(e.group);}
+        e=buildOperator(a.team,a.skin,a.skinPalette,a.cosmetic);e.appearanceKey=appearanceKey;actors.set(a.id,e);actorRoot.add(e.group);
+        setOperatorWeapon(e,a.weapon);
+        if(observedState)e.state={...observedState};
+        if(appearanceKey&&!e.cosmetic){
+          const pending=e;e.appearanceState='loading';
+          ensureCosmeticAssets(a.cosmetic).then(()=>{if(actors.get(a.id)===pending&&!pending.group.userData.disposed){pending.appearanceReady=true;pending.appearanceState='ready';}}).catch(error=>{if(actors.get(a.id)===pending)pending.appearanceState='unavailable';console.warn('Equipped appearance:',error.message);});
+        }else e.appearanceState=appearanceKey?'ready':'base';
+      }
       setOperatorPresentation(e,a.presentation);
       if(e.gunName!==a.weapon)setOperatorWeapon(e,a.weapon);
       animateOperator(e,a,time,dt);
@@ -106,6 +118,6 @@ export function createRenderer(snapshot){
   }
   function hide(){active=false;lastTime=null;canvas.style.display=labels.style.display=mini.style.display='none';document.querySelector('#game').style.opacity='1';}
   function screenToWorld(x,y){if(!active)return null;ray.setFromCamera(new THREE.Vector2(x/width*2-1,-y/height*2+1),camera);if(!ray.ray.intersectPlane(groundPlane,hit))return null;return {x:clamp(hit.x,0,snapshot.world.w),y:clamp(hit.z,0,snapshot.world.h)};}
-  function diagnostics(){return {active,assetState,assetCount,actors:actors.size,labels:active&&lastSnapshot.mode!=='menu',view:environment.stats,roofs:environment.houses.map(h=>({id:h.floor.id,opacity:+h.opacity.toFixed(3)})),drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,averageFrameCostMs:+frameCost.toFixed(2),pixelRatio:renderer.getPixelRatio(),watchedMatch:lastSnapshot.matchId};}
+  function diagnostics(){return {active,assetState,assetCount,actors:actors.size,cosmetics:[...actors.values()].filter(e=>e.appearanceKey).map(e=>({key:e.appearanceKey,state:e.appearanceState})),labels:active&&lastSnapshot.mode!=='menu',view:environment.stats,roofs:environment.houses.map(h=>({id:h.floor.id,opacity:+h.opacity.toFixed(3)})),drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,memory:{geometries:renderer.info.memory.geometries,textures:renderer.info.memory.textures,programs:renderer.info.programs.length},averageFrameCostMs:+frameCost.toFixed(2),pixelRatio:renderer.getPixelRatio(),watchedMatch:lastSnapshot.matchId};}
   resize(width,height);return {render,resize,hide,screenToWorld,diagnostics};
 }

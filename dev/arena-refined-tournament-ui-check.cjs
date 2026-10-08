@@ -1,0 +1,47 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {load,event,teams}=require('./tournaments-ui-check.cjs');
+const rulesetId='arena-refined-aggregate-kills-v1';
+const roster=()=>{const value=teams();value[1].participants[0]={id:'isolated',name:'Fixture',kind:'user'};return value;};
+const series=(extra={})=>({id:'cup:QF0',round:'QF',rulesetId,requiredGames:3,teamIds:['team0','team1'],wins:[2,0],aggregateKills:[108,76],games:[{id:'game1',score:[56,30]},{id:'game2',score:[52,46]}],completedGames:2,remainingGames:1,status:'in-progress',advancement:{status:'pending'},winnerTeamId:null,...extra});
+const cup=s=>event({rulesetId,status:'ACTIVE',teams:roster(),series:[s]});
+const checks=[];
+const pass=name=>{checks.push(name);console.log('PASS '+name);};
+(async()=>{
+ const partial=await load([cup(series())]);await partial.event('cup');
+ assert.match(partial.html,/3-game aggregate kills/);assert.doesNotMatch(partial.html,/BO3|BO5|Historical/);
+ assert.match(partial.html,/aria-label="Total team kills 108 to 76">108 — 76/);
+ assert.match(partial.html,/2 \/ 3 games complete · 1 remaining/);
+ assert.match(partial.html,/<td>56<\/td><td>52<\/td>/);assert.match(partial.html,/<td>30<\/td><td>46<\/td>/);
+ assert.equal(partial.controls.find(c=>c.dataset.circuitAction==='play').disabled,false,'winning two games does not disable game three');
+ pass('Aggregate labels, actual cumulative/per-game kills and third-game readiness after two wins');
+ const finished=series({games:[{id:'game1',score:[56,30]},{id:'game2',score:[52,46]},{id:'game3',score:[20,60]}],aggregateKills:[128,136],completedGames:3,remainingGames:0,wins:[2,1],status:'complete',advancement:{status:'decided',winnerTeamId:'team1'},winnerTeamId:'team1'});
+ const example=await load([cup(finished)]);await example.event('cup');
+ assert.match(example.html,/Total team kills 128 to 136/);assert.match(example.html,/data-winner="true"[^>]*>Team 1/);assert.doesNotMatch(example.html,/Series score 2 to 1/);assert.match(example.html,/3 \/ 3 games complete · 0 remaining/);
+ assert.match(example.html,/<td>56<\/td><td>52<\/td><td>20<\/td>/);assert.match(example.html,/<td>30<\/td><td>46<\/td><td>60<\/td>/);
+ assert.equal(example.controls.find(c=>c.dataset.circuitAction==='play').disabled,true);
+ pass('128–136 fixture presents Team 2 advancement independently of individual wins');
+ const final=await load([cup(series({round:'FINAL',requiredGames:5,wins:[3,1],games:[{score:[60,30]},{score:[60,42]},{score:[60,55]},{score:[30,60]}],aggregateKills:[210,187],completedGames:4,remainingGames:1}))]);await final.event('cup');
+ assert.match(final.html,/5-game aggregate kills/);assert.match(final.html,/4 \/ 5 games complete · 1 remaining/);assert.equal(final.controls.find(c=>c.dataset.circuitAction==='play').disabled,false);
+ pass('Final remains playable through required game five despite three individual wins');
+ const tie=await load([cup(series({...finished,winnerTeamId:null,aggregateKills:[136,136],status:'awaiting-tie-policy',advancement:{status:'tied'}}))]);await tie.event('cup');
+ assert.match(tie.html,/Aggregate tied · awaiting a confirmed tie policy/);assert.match(tie.html,/All scheduled games are complete/);assert.match(tie.html,/data-status="AWAITING_TIE_POLICY"/);assert.doesNotMatch(tie.html,/circuit-winner|data-winner="true"/);
+ assert.equal(tie.controls.find(c=>c.dataset.circuitAction==='play').disabled,true);await tie.click('play');assert.equal(tie.calls,1);
+ const snapshot=JSON.stringify(tie.window.SARTournaments.getState().events);await tie.click('calendar');await tie.event('cup');assert.equal(JSON.stringify(tie.window.SARTournaments.getState().events),snapshot);assert.equal(tie.calls,1,'reopening tie result is presentation only');
+ pass('Tied completed series shows policy blocker, no play/advancement or reopening mutations');
+ const historical=await load([event({status:'COMPLETED',teams:roster(),series:[{...finished,rulesetId:'legacy-best-of-v1',bestOf:3}]})]);await historical.event('cup');
+ assert.match(historical.html,/HISTORICAL FORMAT/);assert.match(historical.html,/Historical · BO3/);assert.match(historical.html,/Series score 2 to 1/);assert.doesNotMatch(historical.html,/Total team kills/);assert.match(historical.html,/Recorded game kills/);
+ pass('Historical results retain explicitly labeled original best-of scoring');
+ for(const status of ['REGISTRATION','ANNOUNCED','UPCOMING'])for(const ruleset of [undefined,'legacy-best-of-v1']){
+  const unstarted=await load([event({status,rulesetId:ruleset})]);const before=JSON.stringify(unstarted.window.SARTournaments.getState().events);
+  assert.match(unstarted.html,/3-game aggregate kills · final: 5-game aggregate kills/);assert.doesNotMatch(unstarted.html,/BO3|BO5|Historical format/);await unstarted.event('cup');assert.match(unstarted.html,/FINAL: 5-game aggregate kills/);assert.doesNotMatch(unstarted.html,/BO3|BO5|HISTORICAL FORMAT/);
+  assert.equal(JSON.stringify(unstarted.window.SARTournaments.getState().events),before,'format presentation cannot migrate stored historical data');assert.equal(unstarted.calls,1);
+ }
+ const recorded=await load([event({status:'UPCOMING',rulesetId:'legacy-best-of-v1',teams:roster(),series:[{...finished,rulesetId:'legacy-best-of-v1',bestOf:3}]})]);await recorded.event('cup');assert.match(recorded.html,/HISTORICAL FORMAT/);assert.match(recorded.html,/Historical · BO3/);
+ pass('Unstarted legacy events predict aggregate-at-start without rewriting stored data; recorded events stay historical');
+ await partial.click('calendar');assert.match(partial.html,/3-game aggregate kills · final: 5-game aggregate kills/);assert.doesNotMatch(partial.html,/BO3|BO5/);await partial.click('create');assert.match(partial.html,/Final: 5-game aggregate kills/);assert.match(partial.html,/All scheduled games count; higher total team kills advances/);assert.doesNotMatch(partial.html,/BO3|BO5/);
+ pass('Calendar/create format text reflects new scoring without changing prize/exclusion controls');
+ const starting=await load([cup(series())]);starting.window.SAR.getState=()=>({matches:[{id:4,status:'countdown',tournamentId:'cup'}]});await starting.event('cup');assert.match(starting.html,/data-circuit-action="watch"/);await starting.click('watch');assert.equal(starting.calls,1,'Watching the authoritative countdown does not allocate another game');assert.equal(starting.watched[0].matchId,4);assert.equal(starting.watched[0].tournamentId,'cup');starting.window.SAR.getState=()=>({matches:[{id:4,status:'ended',tournamentId:'cup'}]});await starting.click('calendar');await starting.event('cup');assert.doesNotMatch(starting.html,/data-circuit-action="watch"/);
+ pass('Tournament countdown is watchable from its current state without another play request; finalized games leave live controls');
+ console.log('Tournament aggregate UI: '+checks.length+' groups passed.');
+})().catch(error=>{console.error(error);process.exitCode=1;});

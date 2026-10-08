@@ -2,6 +2,8 @@ import * as THREE from './vendor/three.module.js';
 import './team-presentation.js';
 import {mergeGeometries} from './vendor/addons/utils/BufferGeometryUtils.js';
 import {loadAssetLibrary} from './asset-loader-25d.mjs';
+import {readyCosmetic,attachCosmetic} from './cosmetics-25d.mjs';
+export {ensureCosmeticAssets,cosmeticKey,cosmeticDiagnostics} from './cosmetics-25d.mjs';
 
 let detailLibrary;
 export function ensureModelAssets(){return loadAssetLibrary().then(library=>(detailLibrary=library));}
@@ -131,18 +133,19 @@ function batchStatic(parent,key,excluded=new Set()){
 
 export const WEAPON_VISUALS=Object.freeze({
   'AR-15':{class:'rifle',muzzle:62,recoil:4.2,cycle:.30,support:30,rear:5},
-  AK47:{class:'rifle',muzzle:62,recoil:5.3,cycle:.4,support:29,rear:4},
+  AK47:{class:'rifle',muzzle:62,recoil:5.3,cycle:.35,support:29,rear:4},
+  FAL:{class:'rifle',muzzle:76,recoil:5.8,cycle:.26,support:29,rear:4},
   'SMG-9':{class:'smg',muzzle:48,recoil:2.5,cycle:.17,support:26,rear:5},
   'SPAS-12':{class:'shotgun',muzzle:69,recoil:7,cycle:1,support:30,rear:4},
   'Pump Shotgun':{class:'pump',muzzle:72,recoil:8.2,cycle:1.5,support:31,rear:3},
   'Auto 12':{class:'shotgun',muzzle:66,recoil:6.1,cycle:.51,support:30,rear:4},
-  'LR-762':{class:'marksman',muzzle:75,recoil:5.3,cycle:.84,support:31,rear:4},
-  'LW Tundra':{class:'sniper',muzzle:84,recoil:9.1,cycle:1.6,support:31,rear:4},
-  'War Head LMG':{class:'lmg',muzzle:77,recoil:7.2,cycle:.47,support:31,rear:4},
-  P90:{class:'smg',muzzle:58,recoil:2.7,cycle:.24,support:29,rear:9},
-  '9mm':{class:'pistol',muzzle:38,recoil:4,cycle:.34,support:10,rear:10},
+  'LR-762':{class:'marksman',muzzle:75,recoil:5.3,cycle:.77,support:31,rear:4},
+  'LW Tundra':{class:'sniper',muzzle:84,recoil:9.1,cycle:1.4,support:31,rear:4},
+  'War Head LMG':{class:'lmg',muzzle:77,recoil:7.2,cycle:.42,support:31,rear:4},
+  P90:{class:'smg',muzzle:58,recoil:2.7,cycle:.23,support:29,rear:9},
+  '9mm':{class:'pistol',muzzle:38,recoil:4,cycle:.27,support:10,rear:10},
   X16:{class:'pistol',muzzle:34,recoil:3,cycle:.19,support:9,rear:9},
-  'SR-Aug':{class:'burst-rifle',muzzle:62,recoil:3.8,cycle:.55,support:30,rear:5},
+  'SR-Aug':{class:'burst-rifle',muzzle:62,recoil:3.8,cycle:.70,support:30,rear:5},
   'X-16 Auto':{class:'auto-pistol',muzzle:42,recoil:3.3,cycle:.19,support:10,rear:10}
 });
 
@@ -200,10 +203,38 @@ export function buildWeapon(name){
     box(body,3,7,6,edge,61,0,0,.5);grip(body,7,15,0x865331);triggerGuard(body,18);
     mag=new THREE.Group();body.add(mag);
     silhouette(mag,'ak-mag',[[22,-5],[30,-5],[31,-12],[34,-19],[40,-26],[33,-29],[26,-22],[23,-14]],7,0x344747);
-    for(let t=0;t<3;t++)box(mag,1,15,.3,0x1e302f,26+t*2.8,-16,3.8,.1);
+    // Stamped ribs follow the curved feed body and seat into its side surface.
+    // Keep them on this articulated magazine, including during removal/return.
+    const ribPath=[[24,-8],[25,-14],[28,-21],[32,-26]];
+    for(let t=0;t<3;t++)for(let i=1;i<ribPath.length;i++){
+      const [ax,ay]=ribPath[i-1],[bx,by]=ribPath[i],dx=bx-ax,dy=by-ay;
+      const rib=box(mag,.75,Math.hypot(dx,dy)+.3,.38,0x1e302f,(ax+bx)/2+t*2.7,(ay+by)/2,3.55,.08);
+      rib.rotation.z=Math.atan2(-dx,dy);
+    }
     box(body,27,2,7,0x546259,12,6,0,.35);
     bolt=box(body,8,1.7,2,0x89978c,17,2,5,.4);pin(body,2,-1,4.6);pin(body,27,-1,4.6);
     box(body,2,7,3,edge,52,4,0,.3);
+  }else if(name==='FAL'){
+    // Fixed-stock battle-rifle proportions, a straight box feed and iron sights.
+    // Each sight/gas fitting intersects its receiver or barrel support.
+    silhouette(body,'fal-stock',[[-32,4],[-8,3],[-5,1],[-5,-3],[-27,-10],[-32,-10]],8,0x43554b);
+    box(body,3,16,10,edge,-32,-3,0,.7);
+    box(body,34,10.5,9.5,steel,11,0,0,1);
+    box(body,29,2.5,8.6,0x53615e,10.5,5,0,.5);
+    grip(body,4,15,0x3a4d43);triggerGuard(body,16,12);
+    mag=magazine(body,23,19,10,0x3b4a48);
+    silhouette(body,'fal-handguard',[[27,4.5],[51,3],[53,0],[51,-4],[27,-5]],9.2,0x4d6151);
+    barrel(body,50,73.5,1.85,edge);
+    barrel(body,29,58,1.15,0x5b6c65,4.2);
+    const regulator=rod(body,2.1,4,0x6d7c72,54,4.2,0);regulator.rotation.z=-Math.PI/2;
+    box(body,4,8,5,steel,58,3.3,0,.5);
+    box(body,3,5.5,2.8,edge,58,8.1,0,.3);
+    box(body,4.5,3.5,6,steel,-.5,7.1,0,.45);
+    barrel(body,72.5,76,2.65,edge);
+    for(const side of [-1,1])for(const x of [73.5,75])box(body,.8,2.2,.35,0x708078,x,0,side*2.6,.1);
+    bolt=new THREE.Group();bolt.position.set(16,2,4.75);body.add(bolt);
+    box(bolt,9,2.6,.7,0x7f9087,0,0,.25,.3);
+    for(const side of [-1,1])pin(body,25,-1,side*4.85);
   }else if(name==='SPAS-12'){
     box(body,4,7,7,0x425550,-2,6,0,.6);pin(body,-2,6,3.6);
     box(body,43,3,9,0x74817a,-4,10,0,.6);box(body,3,19,9,0x425550,-24,2,0,.6);
@@ -281,6 +312,7 @@ export function buildWeapon(name){
   if(shell)shell.visible=false;
   group.userData={...group.userData,spec,name,body,moving,flash,muzzleX:spec.muzzle,muzzlePosition:new THREE.Vector3(spec.muzzle,35+aperture.position.y,0),
     grips:{rear:new THREE.Vector3(spec.rear,29,4),support:new THREE.Vector3(spec.support,34,-3)}};
+  if(name==='FAL')group.userData.handling={mag:new THREE.Vector3(0,-4,-3.8),charge:new THREE.Vector3(4,1.7,-5.5)};
   const add=()=>{if(group.userData.disposed)return;const entry=detailLibrary.entries.find(entry=>entry.weapon===name);if(!entry)return;for(const part of Object.keys(entry.attachments))attachDetails(part==='body'?body:moving[part],entry.name,part);group.userData.blenderDetails=entry.name;};
   if(detailLibrary)add();else ensureModelAssets().then(add).catch(error=>console.warn('Weapon details:',error.message));
   const dynamic=new Set([flash,...Object.values(moving).filter(Boolean)]);
@@ -297,6 +329,20 @@ const defaultSkins=[
 ];
 function segment(parent,radius,length,color){return rod(parent,radius,length,material(color),0,0,0);}
 function joint(parent,rx,ry,rz,color){return ball(parent,rx,ry,rz,color,0,0,0);}
+function fittedFaceCover(parent,color){
+  // A continuous cheek-to-chin wrap replaces the old rectangular mouth block.
+  // This is only the visible cloth surface; physical head regions stay in game.js.
+  const geometry=sharedGeometry('operator-fitted-face-cover',()=>{
+    const positions=[],indices=[],rings=[[47.8,10.4,3.8,5.7],[49.6,11.6,3.8,7.8],[52,10.9,3.8,9.0]];
+    for(const[y,front,back,width]of rings)for(const[x,z]of[[front,0],[front-1.15,width*.65],[front-3.4,width],[back,width*.85],[back,-width*.85],[front-3.4,-width],[front-1.15,-width*.65]])positions.push(x,y,z);
+    const count=7;
+    for(let row=0;row<rings.length-1;row++)for(let i=0;i<count;i++){const a=row*count+i,b=row*count+(i+1)%count,c=b+count,d=a+count;indices.push(a,d,b,b,d,c);}
+    for(let i=1;i<count-1;i++){indices.push(0,i,i+1);const top=(rings.length-1)*count;indices.push(top,top+i+1,top+i);}
+    const value=new THREE.BufferGeometry(),uv=[];for(let i=0;i<positions.length;i+=3)uv.push((positions[i+2]+9)/18,(positions[i+1]-47.8)/4.2);
+    value.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));value.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));value.setIndex(indices);value.computeVertexNormals();return value;
+  });
+  return mesh(parent,geometry,material(color));
+}
 function twoBone(parent,start,lengthA,lengthB,width,colorA,colorB){
   const upper=segment(parent,width,lengthA,colorA),lower=segment(parent,width*.85,lengthB,colorB),knee=joint(parent,width*1.13,width*.9,width*1.13,colorB);
   return {start:new THREE.Vector3(...start),lengthA,lengthB,upper,lower,knee,end:new THREE.Vector3(),bend:new THREE.Vector3(1,0,0)};
@@ -314,8 +360,9 @@ function poseLimb(limb,end,bend){
   temp.p.copy(limb.start).addScaledVector(temp.d,along).addScaledVector(temp.n,rise);
   temp.q.set(0,0,0,1);limb.knee.position.copy(temp.p);alignSegment(limb.upper,limb.start,temp.p);alignSegment(limb.lower,temp.p,end);limb.end.copy(end);
 }
-export function buildOperator(team=0,skin=0,palette=null){
-  const colors={...defaultSkins[Math.abs(skin)%defaultSkins.length],...(palette||{})};
+export function buildOperator(team=0,skin=0,palette=null,cosmetic=null){
+  const appearance=readyCosmetic(cosmetic);
+  const colors={...defaultSkins[Math.abs(skin)%defaultSkins.length],...(palette||{}),...(appearance?.palette||{})};
   const teamColor=globalThis.SARTeamPresentation.COLORS[team===0?'blue':'red'],group=new THREE.Group(),pose=new THREE.Group(),lower=new THREE.Group(),torso=new THREE.Group();
   group.name='tactical-operator';group.add(pose);pose.add(lower,torso);
   const shadow=mesh(group,sharedGeometry('operator-shadow',()=>new THREE.CircleGeometry(27,24)),sharedShadow(),0,.5,0);shadow.rotation.x=-Math.PI/2;shadow.scale.set(1,.78,1);shadow.castShadow=false;shadow.receiveShadow=false;
@@ -330,6 +377,8 @@ export function buildOperator(team=0,skin=0,palette=null){
     box(foot,8,.7,6,0x566957,0,2.6,0,.3);
     legs.push({...limb,foot,kneePlate,side});
   }
+  let helmet;
+  if(!appearance){
   // Rounded shoulders and separate rig/backpack preserve the Canvas operator shape.
   const build=clamp(Number(colors.build)||1,.8,1.25);
   box(torso,19,23,27*build,colors.body,-1,38,0,3);
@@ -343,14 +392,18 @@ export function buildOperator(team=0,skin=0,palette=null){
     box(torso,7,11,4,colors.vest,-2,34,side*15,.9);
   }
   box(torso,1.2,4.5,11,0xc6baa0,13,43,0,.3);
-  ball(torso,6.5,6,8,colors.skin,2,51,0);
-  box(torso,8,5,14,colors.vest,7,49,0,1.5);
-  const helmet=ball(torso,12,8,13,colors.body,-1,58,0);
+  ball(torso,5.9,4.7,7.1,colors.skin,2,48,0);
+  ball(torso,9.2,8,10.2,colors.skin,.4,54.8,0);
+  fittedFaceCover(torso,colors.vest);
+  helmet=ball(torso,12,8,13,colors.body,-1,58,0);
   const helmetRim=mesh(torso,cylinder(12.1,2.8,14),material(colors.vest),-1,54,0);helmetRim.scale.z=1.06;
-  box(torso,3,7,20,0x1c353a,11,55,0,1.4);
-  box(torso,.7,4.5,8,material(0x6f999c,.25,.3),13,55,sideLens(-1),.65);
-  box(torso,.7,4.5,8,material(0x6f999c,.25,.3),13,55,sideLens(1),.65);
-  box(torso,1,1,15,0xb3cbc2,13.4,57,0,.2);
+  box(torso,2.8,6.2,19.2,0x1c353a,10.8,55.5,0,1.2);
+  for(const side of [-1,1]){
+    const lens=box(torso,.65,3.8,7.5,material(0x6f999c,.25,.3),12.35,55.7,side*4.8,.55);
+    lens.rotation.y=-side*.055;
+  }
+  box(torso,.85,2.5,2.1,0x1c353a,12.25,55.1,0,.4);
+  box(torso,.55,.65,14,0xb3cbc2,12.72,57.25,0,.2);
   for(const side of [-1,1])box(torso,7,9,4,0x253d33,-2,53,side*13.8,1.5);
   // Small silhouette cues distinguish the existing kit families without changing
   // the common rig, operator height or palette/team identification.
@@ -369,6 +422,7 @@ export function buildOperator(team=0,skin=0,palette=null){
     box(torso,12,4.3,20,colors.body,1,48,0,1.25);
     for(const z of [-7,0,7])box(torso,1.2,4.6,1,colors.accent,7.2,46,z,.2);
   }
+  }
   const gunMount=new THREE.Group();gunMount.position.set(14,0,0);torso.add(gunMount);
   const arms=[];
   for(const side of [-1,1]){
@@ -383,14 +437,16 @@ export function buildOperator(team=0,skin=0,palette=null){
   const hitRing=mesh(group,sharedGeometry('operator-hit-ring',()=>new THREE.RingGeometry(29,31,28)),hitMaterial,0,2,0);hitRing.rotation.x=-Math.PI/2;hitRing.castShadow=false;
   const spawnMaterial=new THREE.MeshBasicMaterial({color:teamColor,transparent:true,opacity:0,depthWrite:false});
   const spawnRing=mesh(group,sharedGeometry('operator-spawn-ring',()=>new THREE.RingGeometry(30,31.5,36)),spawnMaterial,0,2.2,0);spawnRing.rotation.x=-Math.PI/2;spawnRing.castShadow=false;
-  const bodyKey='operator:'+skin+':'+JSON.stringify(colors);
+  const bodyKey='operator:'+skin+':'+JSON.stringify(colors)+(appearance?':cosmetic:'+cosmetic.id+':'+(cosmetic.styleId||'main'):'');
   const moving=new Set([gunMount,...arms.flatMap(arm=>[arm.upper,arm.lower,arm.knee,arm.glove,arm.cuff])]);
   batchStatic(torso,bodyKey,moving);
   for(const leg of legs)batchStatic(leg.foot,'operator:foot');
-  const add=()=>{if(group.userData.disposed)return;attachDetails(torso,'operator-detail','torso',colors);attachDetails(lower,'operator-detail','pelvis',colors);for(const leg of legs)attachDetails(leg.foot,'operator-detail','foot',colors);for(const arm of arms)attachDetails(arm.cuff,'operator-detail','cuff',colors);batchStatic(torso,bodyKey+':fieldcraft',moving);group.userData.blenderDetails='operator-detail';};
+  const add=()=>{if(group.userData.disposed)return;if(!appearance)attachDetails(torso,'operator-detail','torso',colors);attachDetails(lower,'operator-detail','pelvis',colors);for(const leg of legs)attachDetails(leg.foot,'operator-detail','foot',colors);for(const arm of arms)attachDetails(arm.cuff,'operator-detail','cuff',colors);if(!appearance)batchStatic(torso,bodyKey+':fieldcraft',moving);group.userData.blenderDetails='operator-detail';};
   if(detailLibrary)add();else ensureModelAssets().then(add).catch(error=>console.warn('Operator details:',error.message));
-  return {group,pose,lower,torso,pelvis,helmet,legs,arms,gunMount,gunName:null,gun:null,muzzle:null,shadow,ring,hitRing,spawnRing,
+  const entity={group,pose,lower,torso,pelvis,helmet,legs,arms,gunMount,gunName:null,gun:null,muzzle:null,shadow,ring,hitRing,spawnRing,
     state:{initialized:false,yaw:0,phase:0,move:0,sprint:0,ads:0,dash:0,hit:0,dead:0,lastDead:false,spawn:1,lastX:0,lastY:0,lastShot:null,shotAge:99,recoil:0,reload:0},colors};
+  if(appearance)attachCosmetic(entity,cosmetic);
+  return entity;
 }
 function sideLens(side){return side*5;}
 export function setOperatorPresentation(entity,presentation){
@@ -427,11 +483,22 @@ function magazineOffset(progress){
 
 // now is in milliseconds and dt in seconds, matching game.js snapshots.
 // Animation consumes observed simulation events; it never changes weapons/HP/pathing.
-export function poseUnarmedShowcase(entity){
+export function poseUnarmedShowcase(entity,{lobbyIdle=false}={}){
   entity.gunMount.visible=false;entity.ring.visible=false;entity.hitRing.visible=false;entity.spawnRing.visible=false;
   entity.group.rotation.y=-Math.PI/2;entity.torso.rotation.set(0,0,0);entity.torso.position.set(0,0,0);
   for(const leg of entity.legs){temp.b.set(2,3.2,leg.side*9);poseLimb(leg,temp.b,leg.bend);leg.foot.position.copy(temp.b);leg.kneePlate.position.copy(leg.knee.position);leg.kneePlate.position.x+=4.2;leg.kneePlate.quaternion.copy(leg.upper.quaternion);}
   for(const arm of entity.arms){temp.b.set(7,14,arm.side*17.5);poseLimb(arm,temp.b,new THREE.Vector3(-1,-.1,arm.side*.02));arm.glove.position.copy(temp.b);arm.glove.rotation.set(0,0,-.1);arm.cuff.position.copy(temp.b).addScaledVector(temp.d,-2.3);arm.cuff.quaternion.copy(arm.lower.quaternion);}
+  // Included signature poses are lobby/inspection-only. Combat animation never
+  // reads them, and the on-demand preview does not acquire an idle render loop.
+  if(lobbyIdle&&entity.cosmeticLobbyPose){
+    const pose=entity.cosmeticLobbyPose;
+    for(const arm of entity.arms){
+      if(pose==='black-ice')temp.b.set(9,27,arm.side*14);
+      else if(pose==='aegis')temp.b.set(12,24,arm.side*4);
+      else temp.b.set(arm.side===1?9:7,arm.side===1?32:14,arm.side*16);
+      poseLimb(arm,temp.b,new THREE.Vector3(-1,-.2,arm.side*.4));arm.glove.position.copy(temp.b);arm.cuff.position.copy(temp.b).addScaledVector(temp.d,-2.3);arm.cuff.quaternion.copy(arm.lower.quaternion);
+    }
+  }
   return entity;
 }
 export function animateOperator(entity,actor,now,dt=1/60){
@@ -509,6 +576,8 @@ export function animateOperator(entity,actor,now,dt=1/60){
       mechanisms.mag.position.y+=drop*13;mechanisms.mag.position.x-=drop*5;mechanisms.mag.rotation.z=drop*.16;
     }else{
       mechanisms.mag.position.y-=drop*18;mechanisms.mag.position.z+=drop*7;mechanisms.mag.rotation.z=-drop*.32;
+      // Keep the FAL box feed in the support hand's reach throughout removal.
+      if(nameIs(entity.gunName,'FAL')){mechanisms.mag.position.y+=drop*5;mechanisms.mag.position.x-=drop*6;}
     }
     // The outgoing magazine leaves the grip, and a fresh magazine is inserted.
     if(reload>.34&&reload<.55)mechanisms.mag.visible=false;
@@ -539,9 +608,16 @@ export function animateOperator(entity,actor,now,dt=1/60){
     const gripKey=arm.side===1?'rear':'support',anchor=weapon.grips[gripKey];
     temp.b.copy(anchor);temp.b.y-=35;temp.b.applyMatrix4(weapon.body.matrix);temp.b.add(entity.gunMount.position);
     if(actor.reloading&&arm.side===-1){
-      const pistol=spec.class.includes('pistol'),handling=Math.sin(reload*Math.PI);
-      temp.b.x+=(pistol?-6:-15)*handling;temp.b.y-=10*handling;temp.b.z-=4*handling;
-      if(nameIs(entity.gunName,'P90'))temp.b.y+=22*handling;
+      if(weapon.handling){
+        mechanisms.mag.updateMatrix();temp.p.copy(weapon.handling.mag).applyMatrix4(mechanisms.mag.matrix);
+        temp.p.lerp(weapon.handling.charge,clamp((reload-.78)/.1));
+        temp.p.applyMatrix4(weapon.body.matrix).add(entity.gunMount.position);
+        temp.b.lerp(temp.p,clamp(reload/.13)*(1-clamp((reload-.94)/.06)));
+      }else{
+        const pistol=spec.class.includes('pistol'),handling=Math.sin(reload*Math.PI);
+        temp.b.x+=(pistol?-6:-15)*handling;temp.b.y-=10*handling;temp.b.z-=4*handling;
+        if(nameIs(entity.gunName,'P90'))temp.b.y+=22*handling;
+      }
     }
     poseLimb(arm,temp.b,arm.bend);
     arm.glove.position.copy(temp.b);arm.glove.rotation.copy(weapon.body.rotation);
@@ -559,6 +635,7 @@ export function disposeModel(object){
   object.userData.disposed=true;
   const geometries=new Set(),materials=new Set();
   object.traverse(child=>{
+    child.userData.releaseCosmetic?.();
     if(child.geometry&&!child.geometry.userData?.sarShared)geometries.add(child.geometry);
     const list=Array.isArray(child.material)?child.material:[child.material];
     for(const value of list)if(value&&!value.userData?.sarShared)materials.add(value);

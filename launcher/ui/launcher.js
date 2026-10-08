@@ -79,6 +79,15 @@
   });
   async function boot() {
     if (window.__TAURI__?.event?.listen) {
+      await window.__TAURI__.event.listen('backend-startup', event => {
+        const data = event.payload;
+        if (!data || typeof data.message !== 'string') return;
+        el('connection').textContent = 'Preparing your saved account';
+        el('status-dot').className = 'status-dot offline';
+        el('play').disabled = true;
+        el('play-note').textContent = data.message;
+        notice(data.message);
+      });
       await window.__TAURI__.event.listen('launcher-update-progress', event => {
         const data = event.payload;
         el('progress').value = data.total ? Math.min(100, data.downloaded / data.total * 100) : 0;

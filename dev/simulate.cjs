@@ -34,6 +34,8 @@ function engine(storage={},source=fs.readFileSync(gamePath,'utf8'),options={}){
   const windowEvents=new StubEventTarget(),context={console:{...console,error:noop},document,HTMLElement:StubElement,MutationObserver,localStorage,innerWidth:1440,innerHeight:900,performance:{now:()=>wallTime},Math:math,Date,setInterval:noop,setTimeout:noop,requestAnimationFrame:noop,addEventListener:windowEvents.addEventListener.bind(windowEvents),removeEventListener:windowEvents.removeEventListener.bind(windowEvents),queueMicrotask:fn=>microtasks.push(fn),URL,Blob,TextEncoder,crypto:require('node:crypto').webcrypto,location:{reload:noop,search:'?diagnostics=1'},alert:noop,confirm:()=>false};context.window=context;
   context.SARTactics=options.tactics||require('../tactical-instinct.js');
   context.SARProgression=require('../progression.js');
+  context.SARProfileStats=require('../profile-stats.js');
+  context.SARUnits=require('../distance-units.js');
   context.SARMatchModes=require('../match-modes.js');
   context.SARTeamPresentation=require('../team-presentation.js');
   const clockEpoch=Date.now()-wallTime;

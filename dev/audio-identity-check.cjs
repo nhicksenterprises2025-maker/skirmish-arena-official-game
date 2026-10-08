@@ -28,10 +28,10 @@ for(const [name,w] of Object.entries(manifest.weapons)){
  const sequence=events.map(type=>w.handlingEvents[type].map(id=>manifest.assets[id].sha256).join(':')).join('|');assert.ok(!sequences.has(sequence),name+' full reload sequence');sequences.add(sequence);
  for(const type of events){assert.equal(w.handlingEvents[type].length,3,name+' '+type+' three variations');assert.equal(new Set(w.handlingEvents[type].map(id=>manifest.assets[id].sha256)).size,3);for(const id of w.handlingEvents[type]){const asset=manifest.assets[id];assert.ok(asset.components.length>=2);assert.ok(asset.duration<=.37,name+' bounded handling phase');assert.ok(!/pitch|stretch/.test(asset.processing.replace('Unpitched','')));handling.push(id);}}
 }
-assert.equal(fireSets.size,14);assert.equal(sourceGuns.size,14);assert.equal(sequences.size,14);
-assert.equal(manifest.audioIdentityVersion,'fieldcraft-1');assert.equal(fireEntries.length,56);assert.equal(new Set(handling).size,120);assert.ok(Object.values(manifest.assets).reduce((n,a)=>n+a.bytes,0)<4*1024*1024,'runtime audio stays below four MB');
+assert.equal(fireSets.size,15);assert.equal(sourceGuns.size,15);assert.equal(sequences.size,15);
+assert.equal(manifest.audioIdentityVersion,'fieldcraft-1');assert.equal(fireEntries.length,60);assert.equal(new Set(handling).size,129);assert.ok(Object.values(manifest.assets).reduce((n,a)=>n+a.bytes,0)<4*1024*1024,'runtime audio stays below four MB');
 for(const name of ['SMG-9','P90','X16','X-16 Auto'])assert.ok(manifest.weapons[name].masteringProfile.tailSeconds<.18,name+' compact fire tail');assert.ok(manifest.weapons['LW Tundra'].masteringProfile.tailSeconds>.5,'sniper natural report remains distinct');
-pass('All 14 weapons have four real firing cuts and three variations per reload phase, with distinct class mastering and a bounded runtime size');
+pass('All 15 weapons have four real firing cuts and three variations per reload phase, with distinct class mastering and a bounded runtime size');
 function correlation(a,b){
  // Compare actual PCM waveforms, allowing +/- 8 ms alignment. Similar envelopes
  // from two loud reports do not count as duplicate recordings.
@@ -62,11 +62,12 @@ async function manager(){
  const ambientNode=started.find(node=>node.buffer.id==='ambience_wind'),ambientBus=ambientNode.output.output,duckBus=ambientBus.output;assert.equal(ambientBus.gain.value,.25,'saved ambience preference is separate from ducking');assert.ok(duckBus.gain.value<1,'nearby fire briefly reduces ambience');context.currentTime=1;audio.flush();assert.equal(duckBus.gain.value,1,'ambience recovers after fire');
  let feedbackAt=started.length;for(let i=0;i<12;i++)audio.emit({type:'resolved-hit',ownerId:1,feedbackId:5,targetId:2,head:i===4,killing:i===11});audio.flush();assert.equal(started.length-feedbackAt,2,'one head and one kill cue for twelve pellets');assert.ok(manifest.events['head-hit'].assets.includes(started[feedbackAt].buffer.id));assert.equal(started[feedbackAt+1].buffer.id,'kill_confirm');assert.equal(duckBus.gain.value,.55);assert.equal(ambientBus.gain.value,.25);context.currentTime=2;audio.flush();assert.equal(duckBus.gain.value,1);
  audio.emit({type:'resolved-hit',ownerId:1,feedbackId:5,targetId:2,head:true,killing:true});audio.flush();assert.equal(started.length-feedbackAt,2,'no repeated pellet cue in later frames');
- const uiAt=started.length;audio.emit({type:'message'});assert.equal(started.length-uiAt,1,'one Phone alert per delivered event');assert.equal(started[uiAt].buffer.id,'message_received');assert.equal(started[uiAt].playbackRate.value,1);assert.ok(manifest.assets.kill_confirm.duration<.18);assert.ok(manifest.assets.message_received.duration<.2);
- pass('Brief head/kill feedback coalesces real pellets, Phone delivery gets one soft alert, and ambience ducks/rebounds without changing saved volumes');
+ const uiAt=started.length;audio.emit({type:'message'});assert.equal(started.length,uiAt,'retired message events are silent');assert.equal(manifest.events.message,undefined);assert.equal(manifest.assets.message_received,undefined);assert.ok(manifest.assets.kill_confirm.duration<.18);
+ pass('Brief head/kill feedback coalesces real pellets; retired message alerts are absent and ambience ducks/rebounds without changing saved volumes');
  const {engine}=require('./simulate.cjs'),gameSource=fs.readFileSync(path.join(root,'game.js'),'utf8');
  const exposed=gameSource.replace('window.SAR = {','window.__audioPhases={makeWeaponState,startReload,updateHandlingAudio,finishReload};window.SAR = {');
  const e=engine({},exposed),a=e.dev.inspect().state.actors[0],resolved=[];e.context.SARAudio={emit:event=>resolved.push(event),flush(){}};Object.assign(a,{dead:false,currentSlot:0,matchId:2,x:0,y:0});
+ assert.deepEqual(Object.keys(manifest.weapons),Object.keys(e.context.SAR.getWeapons()),'every canonical weapon has a routed audio identity');
  for(const [weapon,w] of Object.entries(e.context.SAR.getWeapons())){
   a.slots[0]=e.context.__audioPhases.makeWeaponState(weapon);const s=a.slots[0];s.ammo=0;resolved.length=0;
   e.context.__audioPhases.startReload(a,10000);assert.equal(s.reloadEnd,10000+w.reload*1000);e.context.__audioPhases.updateHandlingAudio(a,s,10000+w.reload*1000*.8);e.context.__audioPhases.finishReload(s,a);
@@ -75,7 +76,7 @@ async function manager(){
   assert.equal(phases.filter(event=>event.type==='reload-ready').length,1);assert.equal(s.ammo,w.mag,'existing reload result');
   if(w.pellets>1&&manifest.weapons[weapon].handling==='shell')assert.ok(!phases.some(event=>event.type==='mag-out'||event.type==='mag-in'));
  }
- pass('All 14 real reload paths resolve the equipped weapon, route each phase to its identity, and retain original reload duration, ammo result and shotgun shell behavior');
+ pass('All 15 real reload paths resolve the equipped weapon, route each phase to its identity, and retain authoritative reload duration, ammo result and shotgun shell behavior');
  const at=started.length;audio.emit({type:'mag-out',matchId:2,x:0,y:0});assert.equal(started[at].buffer.id,manifest.events['mag-out'].assets[0]);audio.setVolume('SFX',0);let count=started.length;audio.emit({type:'mag-in',weapon:'P90',matchId:2,x:0,y:0});assert.equal(started.length,count);assert.equal(JSON.parse(storage.get('sar.audio.volumes.v1')).SFX,0);audio.setVolume('SFX',.7);audio.emit({type:'mag-in',weapon:'P90',matchId:0,x:0,y:0});assert.equal(started.length,count);
  audio.setVolume('WEAPONS',0);count=started.length;audio.emit({type:'shot',weapon:'SR-Aug',matchId:2,x:0,y:0});assert.equal(started.length,count);assert.ok(audio.getDiagnostics().maxVoices<=47);document.hidden=true;await callbacks.get('visibilitychange')();assert.equal(context.state,'suspended');assert.equal(audio.getDiagnostics().failures.length,0);
  pass('Weapon-specific handling retains shared mixer, category mute persistence, active-match filtering, voice bounds and focus-loss behavior');

@@ -4,19 +4,15 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const os=require('node:os');
 const path=require('node:path');
-const http=require('node:http');
 const crypto=require('node:crypto');
 const {DatabaseSync}=require('node:sqlite');
 const {createDatabase,botId,upsertWorldTables,LATEST_DB_SCHEMA}=require('../db.cjs');
 const {createServer}=require('../index.cjs');
 const {engine}=require('../../dev/simulate.cjs');
 const {readWorld,migrateLocalWorld,validateWorld,writeWorld,refreshWorldSeason}=require('../world.cjs');
-const {processEvents,replyToBot,botContext,tournamentEvent}=require('../messages.cjs');
 const copy=value=>JSON.parse(JSON.stringify(value));
-const previousOllama=process.env.SAR_OLLAMA_URL;
-process.env.SAR_OLLAMA_URL='http://127.0.0.1:1';
-test.after(()=>{if(previousOllama===undefined)delete process.env.SAR_OLLAMA_URL;else process.env.SAR_OLLAMA_URL=previousOllama;});
 const SEASON_MS=15*86400000;
+const CURRENT_WEAPON_COUNT=Object.keys(engine().context.SAR.getWeapons()).length;
 function seedUser(db,id='user-test'){
   db.prepare('INSERT INTO users(id,username,username_key,password_hash,created_at,updated_at) VALUES(?,?,?,?,?,?)').run(id,id,id,'not-a-login-hash',Date.now(),Date.now());return id;
 }
@@ -61,14 +57,13 @@ function seedStoredWorld(db,id,save,revision=7){
   upsertWorldTables(db,id,save,now);
 }
 
-test('published weapon additions migrate an existing 11-weapon cloud world into 14 without losing data or accepting forged measurements',async()=>{
+test('published weapon additions migrate an existing 11-weapon cloud world into the current registry without losing data or accepting forged measurements',async()=>{
   const db=createDatabase(':memory:'),id=seedUser(db,'balance-migration-user'),cookie=sessionFor(db,id),app=createServer({db}),base=await listen(app.server);
   try{
     const oldEngine=engine({},precedingBalanceSource());for(let i=0;i<500;i++)oldEngine.step();const old=copy(oldEngine.dev.inspect().SAVE);assert.equal(Object.keys(old.patchState.weaponStats).length,11);
     old.futureWorld={preserved:913};old.bots.Ace.profile.customCosmetic={owned:true};old.config.sidearm='X16';seedStoredWorld(db,id,old);
-    const messageId=crypto.randomUUID();db.prepare('INSERT INTO messages(id,user_id,bot_id,direction,type,body,created_at,source) VALUES(?,?,?,?,?,?,?,?)').run(messageId,id,'bot_0001','bot','PLAYER_REPLY','Keep this conversation.',Date.now(),'test');
     const fetched=await request(base,'/api/world',{cookie});assert.equal(fetched.status,200);assert.deepEqual(fetched.body.world.save,old);assert.equal(fetched.body.world.revision,7);
-    const nextEngine=engine({'sar-persistent-save':JSON.stringify(fetched.body.world.save)}),next=copy(nextEngine.dev.inspect().SAVE);assert.equal(Object.keys(next.patchState.weaponStats).length,14);assert.equal(next.patchState.weaponStats['X-16 Auto'].damage,21);assert.equal(next.patchState.generation,old.patchState.generation+1);
+    const nextEngine=engine({'sar-persistent-save':JSON.stringify(fetched.body.world.save)}),next=copy(nextEngine.dev.inspect().SAVE);assert.equal(Object.keys(next.patchState.weaponStats).length,CURRENT_WEAPON_COUNT);assert.equal(next.patchState.weaponStats['X-16 Auto'].damage,21);assert.equal(next.patchState.generation,old.patchState.generation+1);
     assert.deepEqual(next.patchArchives.at(-1).meta,old.patchState.meta);assert.deepEqual(next.patchArchives.at(-1).perBot,old.patchState.perBot);assert.deepEqual(next.patchArchives.at(-1).skillStrata,old.patchState.skillStrata);assert.deepEqual(next.patchArchives.at(-1).weaponStats,old.patchState.weaponStats);
     assert.equal(next.patchArchives.at(-1).meta['X-16 Auto'],undefined,'new weapon gets no invented old samples');assert.equal(next.patchState.meta['X-16 Auto'].kills,0);assert.equal(next.patchState.meta['X-16 Auto'].shots,0);
     assert.deepEqual(next.seasons,old.seasons);assert.deepEqual(next.playerCareer.kills,old.playerCareer.kills);assert.deepEqual(next.futureWorld,old.futureWorld);assert.equal(next.config.sidearm,'X16');
@@ -76,14 +71,13 @@ test('published weapon additions migrate an existing 11-weapon cloud world into 
     const rejected=mutate=>{const forged=copy(next);mutate(forged);assert.throws(()=>writeWorld(db,id,forged,7),error=>error.status===400||error.code==='SAVE_REJECTED');assert.equal(readWorld(db,id).revision,7);};
     rejected(s=>delete s.patchState.meta['X-16 Auto']);rejected(s=>s.patchState.meta['unknown weapon']=copy(s.patchState.meta['X-16 Auto']));rejected(s=>s.patchArchives=s.patchArchives.filter(p=>p.id!==old.patchState.id));rejected(s=>delete s.patchArchives.at(-1).meta['9mm']);rejected(s=>s.bots.Ace.career.weaponUsage['X-16 Auto'].damage=1);
     const updated=await request(base,'/api/world',{method:'PUT',cookie,body:{baseRevision:7,save:next}});assert.equal(updated.status,200);assert.equal(updated.body.revision,8);assert.deepEqual(readWorld(db,id).save,next);
-    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM weapon_patch_stats WHERE user_id=? AND patch_id=?').get(id,old.patchState.id).n,11);assert.equal(db.prepare('SELECT COUNT(*) AS n FROM weapon_patch_stats WHERE user_id=? AND patch_id=?').get(id,next.patchState.id).n,14);
-    const backup=db.prepare('SELECT save_json FROM world_backups WHERE user_id=? AND revision=7').get(id);assert.deepEqual(JSON.parse(backup.save_json),old);assert.equal(db.prepare('SELECT body FROM messages WHERE id=?').get(messageId).body,'Keep this conversation.');
-    const context=botContext(db,id,'bot_0001');assert.equal(context.authoritativeGameFacts.currentPatchId,next.patchState.id);assert.equal(context.patchPerformance,undefined,'current dialogue context does not mix archived patch telemetry');
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM weapon_patch_stats WHERE user_id=? AND patch_id=?').get(id,old.patchState.id).n,11);assert.equal(db.prepare('SELECT COUNT(*) AS n FROM weapon_patch_stats WHERE user_id=? AND patch_id=?').get(id,next.patchState.id).n,CURRENT_WEAPON_COUNT);
+    const backup=db.prepare('SELECT save_json FROM world_backups WHERE user_id=? AND revision=7').get(id);assert.deepEqual(JSON.parse(backup.save_json),old);
     for(let i=0;i<1800;i++)nextEngine.step();const continued=copy(nextEngine.dev.inspect().SAVE);assert.ok(continued.patchState.meta['X-16 Auto'].shots>0,'new sidearm must have actual automatic combat measurements');
     const saved=await request(base,'/api/world',{method:'PUT',cookie,body:{baseRevision:8,save:continued}});assert.equal(saved.status,200);assert.equal(saved.body.revision,9);assert.deepEqual(readWorld(db,id).save.patchArchives,next.patchArchives);
     const reloaded=engine({'sar-persistent-save':JSON.stringify(readWorld(db,id).save)});assert.equal(reloaded.dev.inspect().SAVE.patchArchives.length,next.patchArchives.length);assert.equal(reloaded.dev.inspect().SAVE.patchState.id,next.patchState.id);
-    const localMigration=migrateLocalWorld(old);assert.equal(Object.keys(localMigration.patchState.weaponStats).length,14);assert.deepEqual(localMigration.patchArchives.at(-1).meta,old.patchState.meta);assert.equal(writeWorld(db,seedUser(db,'local-old-sheet'),localMigration,0,{importing:true,originalSave:old}).revision,1);
-  }finally{await stop(app.server);await processEvents(db,id,2);db.close();}
+    const localMigration=migrateLocalWorld(old);assert.equal(Object.keys(localMigration.patchState.weaponStats).length,CURRENT_WEAPON_COUNT);assert.deepEqual(localMigration.patchArchives.at(-1).meta,old.patchState.meta);assert.equal(writeWorld(db,seedUser(db,'local-old-sheet'),localMigration,0,{importing:true,originalSave:old}).revision,1);
+  }finally{await stop(app.server);db.close();}
 });
 
 test('a dormant old-balance cloud account can cross its season deadline after a weapon addition',()=>{
@@ -94,7 +88,7 @@ test('a dormant old-balance cloud account can cross its season deadline after a 
     const refreshed=refreshWorldSeason(db,id,now);assert.equal(refreshed.revision,8);assert.equal(refreshed.save.seasons.current.number,2);assert.equal(refreshed.save.playerSeasons.current.number,2);assert.equal(Object.keys(refreshed.save.patchState.weaponStats).length,11,'deadline refresh keeps cached-client balance available for its checkpoint');
     assert.deepEqual(refreshed.save.patchState.meta,save.patchState.meta);assert.deepEqual(refreshed.save.seasons.history[0].stats,save.seasons.current.stats);assert.deepEqual(refreshed.save.playerSeasons.history[0].stats,save.playerSeasons.current.stats);assert.deepEqual(refreshed.save.futureWorld,save.futureWorld);assert.equal(refreshed.save.bots.Ace.profile.id,save.bots.Ace.profile.id);assert.equal(refreshed.save.bots.Ace.career.kills,save.bots.Ace.career.kills);
     assert.equal(refreshWorldSeason(db,id,now).revision,8);assert.deepEqual(JSON.parse(db.prepare('SELECT save_json FROM world_backups WHERE user_id=? AND revision=7').get(id).save_json),save);
-    const upgraded=migrateLocalWorld(refreshed.save);assert.equal(Object.keys(upgraded.patchState.weaponStats).length,14);assert.deepEqual(upgraded.patchArchives.at(-1).meta,save.patchState.meta);assert.equal(writeWorld(db,id,upgraded,8).revision,9);assert.equal(refreshWorldSeason(db,id,now).revision,9);
+    const upgraded=migrateLocalWorld(refreshed.save);assert.equal(Object.keys(upgraded.patchState.weaponStats).length,CURRENT_WEAPON_COUNT);assert.deepEqual(upgraded.patchArchives.at(-1).meta,save.patchState.meta);assert.equal(writeWorld(db,id,upgraded,8).revision,9);assert.equal(refreshWorldSeason(db,id,now).revision,9);
   }finally{db.close();}
 });
 
@@ -111,11 +105,11 @@ test('a cached old PWA checkpoints its persisted patch after deploy, then update
     const result=await request(base,'/api/world',{method:'PUT',cookie,body:{baseRevision:7,save:checkpoint}});assert.equal(result.status,200);assert.equal(result.body.revision,8);assert.deepEqual(readWorld(db,id).save,checkpoint);
     const stale=await request(base,'/api/world',{method:'PUT',cookie,body:{baseRevision:7,save:checkpoint}});assert.equal(stale.status,409);assert.equal(stale.body.code,'REVISION_CONFLICT');
     // Applying1.5.1 after its checkpoint runs the actual game's balance migration.
-    const updated=engine({'sar-persistent-save':JSON.stringify(readWorld(db,id).save)}),current=copy(updated.dev.inspect().SAVE);assert.equal(Object.keys(current.patchState.weaponStats).length,14);assert.deepEqual(current.patchArchives.at(-1).meta,checkpoint.patchState.meta);assert.deepEqual(current.patchArchives.at(-1).perBot,checkpoint.patchState.perBot);assert.deepEqual(current.patchArchives.at(-1).skillStrata,checkpoint.patchState.skillStrata);
+    const updated=engine({'sar-persistent-save':JSON.stringify(readWorld(db,id).save)}),current=copy(updated.dev.inspect().SAVE);assert.equal(Object.keys(current.patchState.weaponStats).length,CURRENT_WEAPON_COUNT);assert.deepEqual(current.patchArchives.at(-1).meta,checkpoint.patchState.meta);assert.deepEqual(current.patchArchives.at(-1).perBot,checkpoint.patchState.perBot);assert.deepEqual(current.patchArchives.at(-1).skillStrata,checkpoint.patchState.skillStrata);
     const applied=await request(base,'/api/world',{method:'PUT',cookie,body:{baseRevision:8,save:current}});assert.equal(applied.status,200);assert.equal(applied.body.revision,9);
     const oldClientAfterUpdate=engine({'sar-persistent-save':JSON.stringify(current)},oldSource),rollback=copy(oldClientAfterUpdate.dev.inspect().SAVE);await rejected(rollback,9);assert.deepEqual(readWorld(db,id).save,current);
     const backup=db.prepare('SELECT save_json FROM world_backups WHERE user_id=? AND revision=8').get(id);assert.deepEqual(JSON.parse(backup.save_json),checkpoint);
-  }finally{await stop(app.server);await processEvents(db,id,2);db.close();}
+  }finally{await stop(app.server);db.close();}
 });
 
 test('database migration keeps existing users and takes a pre-migration backup',()=>{
@@ -170,7 +164,7 @@ test('username/password signup, persistent sessions, recovery rotation, logout a
   }finally{await stop(app.server);app.db.close();fs.rmSync(dir,{recursive:true,force:true});}
 });
 
-test('HTTP import/revision/profile isolation, message read/delete cancellation and admin event transactions',async()=>{
+test('HTTP import/revision/profile isolation and admin tournament transactions',async()=>{
   const db=createDatabase(':memory:'),a=seedUser(db,'universe_a'),b=seedUser(db,'universe_b'),cookieA=sessionFor(db,a),cookieB=sessionFor(db,b),app=createServer({db}),base=await listen(app.server),previousAdmin=process.env.SAR_ADMIN_TOKEN;
   process.env.SAR_ADMIN_TOKEN='backend-test-admin-secret';
   try{
@@ -185,22 +179,13 @@ test('HTTP import/revision/profile isolation, message read/delete cancellation a
     const profile=await request(base,'/api/profile',{cookie:cookieA});assert.deepEqual(profile.body.playerSeasons,save.playerSeasons);assert.equal(profile.body.preferences.primary,save.config.primary);
     assert.equal((await request(base,'/api/world',{cookie:cookieB})).body.world,null);assert.equal((await request(base,'/api/bots/bot_0001',{cookie:cookieB})).status,404);
     const bot=await request(base,'/api/bots/bot_0001',{cookie:cookieA});assert.equal(bot.body.bot.career.kills,77);assert.equal(bot.body.bot.power,97);
-    const messageId=crypto.randomUUID(),eventId=a+':pending-player-message';
-    db.prepare('INSERT INTO messages(id,user_id,bot_id,direction,type,event_id,body,created_at,source) VALUES(?,?,?,?,?,?,?,?,?)').run(messageId,a,'bot_0001','player','PLAYER_REPLY',eventId,'remove-this-text',Date.now(),'player');
-    db.prepare('INSERT INTO structured_events(id,user_id,bot_id,type,payload_json,created_at) VALUES(?,?,?,?,?,?)').run(eventId,a,'bot_0001','PLAYER_REPLY',JSON.stringify({playerReply:'remove-this-text'}),Date.now());
-    db.prepare('INSERT INTO conversation_summaries(user_id,bot_id,summary,last_message_at) VALUES(?,?,?,?)').run(a,'bot_0001','player: remove-this-text',Date.now());
-    assert.equal((await request(base,'/api/messages/'+messageId+'/read',{method:'POST',cookie:cookieB})).status,200);assert.equal(db.prepare('SELECT read_at FROM messages WHERE id=?').get(messageId).read_at,null);
-    assert.equal((await request(base,'/api/messages/'+messageId,{method:'DELETE',cookie:cookieB})).status,404);
-    assert.equal((await request(base,'/api/messages/'+messageId+'/read',{method:'POST',cookie:cookieA})).status,200);assert.ok(db.prepare('SELECT read_at FROM messages WHERE id=?').get(messageId).read_at>0);
-    assert.equal((await request(base,'/api/messages/'+messageId,{method:'DELETE',cookie:cookieA})).status,200);assert.equal(db.prepare('SELECT COUNT(*) AS n FROM messages WHERE id=?').get(messageId).n,0);
-    const cancelled=db.prepare('SELECT payload_json,messaged_at FROM structured_events WHERE id=?').get(eventId);assert.equal(cancelled.payload_json,'{"deleted":true}');assert.ok(cancelled.messaged_at>0);assert.equal(db.prepare('SELECT summary FROM conversation_summaries WHERE user_id=? AND bot_id=?').get(a,'bot_0001').summary,'');
     const details={name:'Test Cup',startsAt:Date.now()+86400000,participants:['bot_0001'],status:'UPCOMING'};
     assert.equal((await request(base,'/api/admin/tournaments',{method:'POST',cookie:cookieA,body:details})).status,403);
     const duplicate=await request(base,'/api/admin/tournaments',{method:'POST',cookie:cookieA,headers:{'x-sar-admin-token':process.env.SAR_ADMIN_TOKEN},body:{...details,participants:['bot_0001','bot_0001']}});assert.equal(duplicate.status,400);
-    const unknown=await request(base,'/api/admin/tournaments',{method:'POST',cookie:cookieA,headers:{'x-sar-admin-token':process.env.SAR_ADMIN_TOKEN},body:{...details,participants:['bot_0001','bot_unknown']}});assert.equal(unknown.status,400);assert.equal(db.prepare("SELECT COUNT(*) AS n FROM tournaments WHERE kind='legacy'").get().n,0,'failed admin writes roll back the tournament and events');
+    const unknown=await request(base,'/api/admin/tournaments',{method:'POST',cookie:cookieA,headers:{'x-sar-admin-token':process.env.SAR_ADMIN_TOKEN},body:{...details,participants:['bot_0001','bot_unknown']}});assert.equal(unknown.status,400);assert.equal(db.prepare("SELECT COUNT(*) AS n FROM tournaments WHERE kind='legacy'").get().n,0,'failed admin writes roll back the tournament and participants');
     const added=await request(base,'/api/admin/tournaments',{method:'POST',cookie:cookieA,headers:{'x-sar-admin-token':process.env.SAR_ADMIN_TOKEN},body:details});assert.equal(added.status,201);
     assert.equal((await request(base,'/api/tournaments',{cookie:cookieA})).body.tournaments.filter(t=>t.kind==='legacy').length,1);assert.equal((await request(base,'/api/tournaments',{cookie:cookieB})).body.tournaments.filter(t=>t.kind==='legacy').length,0);
-  }finally{if(previousAdmin===undefined)delete process.env.SAR_ADMIN_TOKEN;else process.env.SAR_ADMIN_TOKEN=previousAdmin;await stop(app.server);await processEvents(db,a,2);db.close();}
+  }finally{if(previousAdmin===undefined)delete process.env.SAR_ADMIN_TOKEN;else process.env.SAR_ADMIN_TOKEN=previousAdmin;await stop(app.server);db.close();}
 });
 
 test('schema 16 import preserves real progress, IDs, patch/season history and normalized SQL',()=>{
@@ -283,31 +268,6 @@ test('existing Meta archive/restart action keeps careers and continues a separat
     const continued=copy(reloaded.dev.inspect().SAVE),second=await request(base,'/api/world',{method:'PUT',cookie,body:{baseRevision:2,save:continued}});assert.equal(second.status,200);assert.equal(second.body.revision,3);
     assert.deepEqual(readWorld(db,id).save.patchArchives,restarted.patchArchives);assert.ok(continued.bots.Ace.career.timeAlive>=sampled.bots.Ace.career.timeAlive);
     const damaged=copy(continued);damaged.patchArchives.at(-1).reason='edited archive';const rejected=await request(base,'/api/world',{method:'PUT',cookie,body:{baseRevision:3,save:damaged}});assert.equal(rejected.status,409);assert.equal(rejected.body.code,'SAVE_REJECTED');assert.equal(readWorld(db,id).revision,3);
-  }finally{await stop(app.server);await processEvents(db,id,2);db.close();}
+  }finally{await stop(app.server);db.close();}
 });
 
-test('event-driven GPT mock has bounded real context, retries failures, serializes workers and never alters gameplay',async()=>{
-  const previousEndpoint=process.env.SAR_GPT_OSS_URL,requests=[],db=createDatabase(':memory:'),id=seedUser(db),save=copy(engine().dev.inspect().SAVE);
-  let failNext=false;
-  const mock=http.createServer(async(req,res)=>{const chunks=[];for await(const chunk of req)chunks.push(chunk);requests.push(JSON.parse(Buffer.concat(chunks).toString()));if(failNext){failNext=false;res.writeHead(503);res.end('{}');return;}res.setHeader('content-type','application/json');res.end(JSON.stringify({choices:[{message:{content:'<b>Ace:</b> Your message is received. I will keep my aim steady.'}}]}));});
-  const endpoint=await listen(mock);process.env.SAR_GPT_OSS_URL=endpoint+'/v1/chat/completions';
-  try{
-    writeWorld(db,id,save,0);const before=copy(readWorld(db,id).save),botIdValue=save.bots.Ace.profile.id;
-    const context=botContext(db,id,botIdValue);assert.equal(context.power,99);assert.equal(context.powerRank,1);assert.equal(context.currentSeason.number,save.seasons.current.number);assert.deepEqual(context.career,save.bots.Ace.career);
-    db.prepare('INSERT INTO structured_events(id,user_id,bot_id,type,payload_json,created_at) VALUES(?,?,?,?,?,?)').run('real-event',id,botIdValue,'CAREER_MILESTONE',JSON.stringify({kills:500,actualCareerKills:500}),Date.now());
-    const [a,b]=await Promise.all([processEvents(db,id,2),processEvents(db,id,2)]);assert.equal(a.sent+b.sent,1);assert.equal(requests.length,1);
-    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM messages WHERE event_id=?').get('real-event').n,1);
-    assert.equal(requests[0].model,'gpt-oss-20b');assert.match(requests[0].messages[0].content,/Never invent/);
-    const payload=JSON.parse(requests[0].messages[1].content);assert.equal(payload.event.id,'real-event');assert.equal(payload.bot.name,'Ace');assert.ok(payload.bot.recentMessages.length<=6);
-    db.prepare('INSERT INTO structured_events(id,user_id,bot_id,type,payload_json,created_at) VALUES(?,?,?,?,?,?)').run('cooldown-event',id,botIdValue,'CAREER_MILESTONE','{}',Date.now());
-    const reply=await replyToBot(db,id,botIdValue,'Tell me about your current playstyle.');assert.equal(reply.generated,true,'cooldown event must not starve a direct player reply');
-    const latest=JSON.parse(requests.at(-1).messages[1].content);assert.equal(latest.event.type,'PLAYER_REPLY');assert.match(latest.event.playerReply,/current playstyle/);assert.ok(latest.bot.recentMessages.length<=6&&latest.bot.conversationSummary.length<=700);
-    failNext=true;const delayed=await replyToBot(db,id,botIdValue,'Try this reply after a temporary endpoint outage.');assert.equal(delayed.generated,false);assert.equal(delayed.pending,true);
-    await processEvents(db,id,2);assert.equal(db.prepare("SELECT COUNT(*) AS n FROM messages WHERE user_id=? AND direction='bot' AND type='PLAYER_REPLY'").get(id).n,2,'failed generation is retried from stored event');
-    assert.deepEqual(readWorld(db,id).save,before,'messages must never mutate careers, balance, Meta, Form or seasons');
-    const summary=db.prepare('SELECT summary FROM conversation_summaries WHERE user_id=? AND bot_id=?').get(id,botIdValue).summary;assert.ok(summary.length<=700);
-    assert.throws(()=>validateWorld({...before,playerCareer:{...before.playerCareer,hits:-1}}),/Invalid statistics counter/);
-    await assert.rejects(replyToBot(db,id,'bot_unknown','Hello'),/Bot profile not found/);await assert.rejects(replyToBot(db,id,botIdValue,'x'.repeat(501)),/1–500/);
-    tournamentEvent(db,id,{id:'actual-admin-event',name:'Scheduled League Cup',starts_at:Date.now()+86400000,status:'UPCOMING'},botIdValue);const event=JSON.parse(db.prepare('SELECT payload_json FROM structured_events WHERE type=?').get('TOURNAMENT').payload_json);assert.equal(event.name,'Scheduled League Cup');assert.equal(event.status,'UPCOMING');
-  }finally{if(previousEndpoint===undefined)delete process.env.SAR_GPT_OSS_URL;else process.env.SAR_GPT_OSS_URL=previousEndpoint;await stop(mock);db.close();}
-});

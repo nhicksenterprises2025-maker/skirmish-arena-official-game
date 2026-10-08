@@ -1,0 +1,24 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {DatabaseSync}=require('node:sqlite'),{createDatabase}=require('../db.cjs');
+const {fixture,snapshot}=require('../../dev/live-circuit-tournament-check.cjs');
+const Circuit=require('../tournaments.cjs'),{game}=require('../../dev/arena-refined-tournament-series-check.cjs');
+const USER='live-circuit-fixture';
+function rows(db){const tables=['users','worlds','bots','bot_careers','user_career_stats','user_weapon_stats','bot_weapon_stats','seasons','balance_patches','weapon_patch_stats','tournaments','tournament_teams','tournament_registrations','tournament_series','tournament_matches','tournament_stats','tournament_placements','tournament_earnings'];return Object.fromEntries(tables.map(table=>[table,db.prepare('SELECT * FROM '+table+' ORDER BY rowid').all().map(row=>({...row}))]));}
+test('schema nine populated world and tournament migrate to cancellation support with recoverable original and exact preserved rows',()=>{
+ const f=fixture();let migrated;try{
+  let t=Circuit.createCustom(f.db,USER,{name:'Recorded fixture',startsAt:f.season.startAt},f.season.startAt);f.db.prepare("UPDATE tournaments SET kind='official' WHERE id=?").run(t.id);for(let n=0;n<8;n++)t=Circuit.registerTeam(f.db,USER,t.id,{name:'Team '+n,participantIds:Array.from({length:5},(_,i)=>'bot_'+String(n*5+i+1).padStart(4,'0'))},t.startsAt);t=Circuit.startTournament(f.db,USER,t.id,t.startsAt);
+  for(let n=0;t.status!=='COMPLETED';n++){const s=t.series.find(s=>Circuit.canPlaySeries(s,t));t=Circuit.recordGame(f.db,USER,t.id,s.id,game(t,s,[50,20]),t.startsAt+n+1);}
+  assert.equal(t.earnings.length,40);assert.ok(t.earnings.every(row=>row.amount>0));
+  f.db.prepare('UPDATE tournaments SET metadata_json=? WHERE id=?').run(JSON.stringify({runtimeGames:{retainedOriginal:{sourceHash:'fixture',bytes:16,data:'recoverable-fixture'}},history:{name:'Original event name'}}),t.id);
+  // Recreate the exact schema-9 tournament constraint around genuine populated
+  // rows; this fixture never accesses an installed account or production file.
+  const oldSchema=f.db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='tournaments'").get().sql.replace('CREATE TABLE "tournaments"','CREATE TABLE tournaments_v9').replace('CREATE TABLE tournaments (','CREATE TABLE tournaments_v9 (').replace(",'CANCELLED'",'');
+  f.db.exec('PRAGMA foreign_keys=OFF');f.db.exec('BEGIN IMMEDIATE');f.db.exec(oldSchema);f.db.exec('INSERT INTO tournaments_v9 SELECT * FROM tournaments');f.db.exec('DROP TABLE tournaments');f.db.exec('ALTER TABLE tournaments_v9 RENAME TO tournaments');f.db.exec("CREATE UNIQUE INDEX official_tournament_schedule ON tournaments(user_id,season_id,starts_at) WHERE kind='official'");f.db.exec('CREATE INDEX tournaments_visible ON tournaments(user_id,deleted_at,starts_at)');f.db.exec('DELETE FROM save_migrations WHERE version=10');f.db.exec('PRAGMA user_version=9');f.db.exec('COMMIT');f.db.exec('PRAGMA foreign_keys=ON');
+  assert.equal(f.db.prepare('PRAGMA user_version').get().user_version,9);assert.ok(!f.db.prepare("SELECT sql FROM sqlite_master WHERE name='tournaments'").get().sql.includes('CANCELLED'));assert.deepEqual(f.db.prepare('PRAGMA foreign_key_check').all(),[]);
+  const before=rows(f.db),world=snapshot(f.db);f.db.close();migrated=createDatabase(f.file);assert.equal(migrated.prepare('PRAGMA user_version').get().user_version,10);assert.deepEqual(rows(migrated),before);assert.deepEqual(snapshot(migrated),world);assert.deepEqual(migrated.prepare('PRAGMA foreign_key_check').all(),[]);assert.equal(migrated.prepare('PRAGMA integrity_check').get().integrity_check,'ok');
+  const backups=fs.readdirSync(f.directory).filter(name=>name.includes('.pre-schema9-')&&name.endsWith('.sqlite'));assert.equal(backups.length,1);const original=new DatabaseSync(path.join(f.directory,backups[0]),{readOnly:true});try{assert.equal(original.prepare('PRAGMA user_version').get().user_version,9);assert.deepEqual(rows(original),before);assert.equal(original.prepare('PRAGMA integrity_check').get().integrity_check,'ok');}finally{original.close();}
+  migrated.close();migrated=createDatabase(f.file);assert.deepEqual(rows(migrated),before);assert.equal(fs.readdirSync(f.directory).filter(name=>name.includes('.pre-schema9-')).length,1);assert.equal(migrated.prepare('SELECT count(*) n FROM save_migrations WHERE version=10').get().n,1);
+  migrated.prepare("UPDATE tournaments SET status='CANCELLED' WHERE id=?").run(t.id);assert.equal(Circuit.getTournament(migrated,USER,t.id).status,'CANCELLED');assert.equal(migrated.prepare('SELECT count(*) n FROM tournament_matches WHERE tournament_id=?').get(t.id).n,23);
+ }finally{if(migrated?.isOpen)migrated.close();f.close();}
+});

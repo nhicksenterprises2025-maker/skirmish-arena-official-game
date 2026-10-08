@@ -22,12 +22,18 @@ const DESIGN_WORLD = { w: 4800, h: 3200 };
 const MAP_SCALE = 0.90;
 const WORLD = { w: Math.round(DESIGN_WORLD.w * MAP_SCALE), h: Math.round(DESIGN_WORLD.h * MAP_SCALE) };
 const TILE = 70;
+const DISTANCE_UNITS=window.SARUnits;
+const MAP_CALIBRATION=DISTANCE_UNITS.mapCalibration('brightfield-blocks');
+if(MAP_CALIBRATION.worldWidth!==WORLD.w||MAP_CALIBRATION.worldHeight!==WORLD.h)throw Error('Map calibration does not match the current world');
+const DISTANCE_PROVENANCE=DISTANCE_UNITS.worldProvenance(MAP_CALIBRATION);
+const metersText=world=>DISTANCE_UNITS.worldDistanceToMeters(world,MAP_CALIBRATION).toFixed(2)+' m';
 const MATCH_DURATION_MS = 5 * 60 * 1000;
 const SEASON_LENGTH_MS = 15 * 24 * 60 * 60 * 1000;
 const MAX_HP = 250;
 const BOT_COUNT = 50;
 const MATCH_COUNT = 4;
-const PLAYER_MATCH_SLOT_ID = MATCH_COUNT - 1;
+const BACKGROUND_SLOT_MODES = Object.freeze(['tdm','tdm','deathmatch','deathmatch']);
+const PLAYER_MATCH_SLOT_ID = 1;
 const TEAM_SIZE = 5;
 const SCORE_LIMIT = 60;
 const SLOT_COOLDOWN_MS = 15000;
@@ -46,26 +52,28 @@ const DASH_DISTANCE = 260;
 const DASH_SPEED = DASH_DISTANCE / (DASH_DURATION_MS / 1000);
 
 const WEAPONS = {
-  'AR-15': { type:'primary', damage:28, spread:2.7, walkSpread:2.9, sprintSpread:3.6, adsSpread:1.5, falloffStart:22, falloff:0.025, head:42, speed:80, hitSpeed:0.3, mag:40, reload:2.1, reserve:120, role:'All-rounder', auto:true, pellets:1, color:'#d9bf79', preferred:900 },
-  'AK47': { type:'primary', damage:34, spread:4, walkSpread:4.5, sprintSpread:5.2, adsSpread:1.6, falloffStart:25, falloff:0.028, head:50, speed:74, hitSpeed:0.35, mag:36, reload:2.75, reserve:120, role:'Heavy rifle', auto:true, pellets:1, color:'#ad7046', preferred:820 },
-  'SMG-9': { type:'primary', damage:19, spread:3.1, walkSpread:3.3, sprintSpread:3.7, adsSpread:1.8, falloffStart:11, falloff:0.043, head:29, speed:62, hitSpeed:0.17, mag:42, reload:1.9, reserve:144, role:'Close tracking', auto:true, pellets:1, color:'#91a4b0', preferred:520 },
-  'Pump Shotgun': { type:'primary', damage:124, spread:6.5, walkSpread:7.5, sprintSpread:9, adsSpread:3, falloffStart:3.5, falloff:0.10, head:248, speed:48, hitSpeed:1.5, mag:5, reload:2.4, reserve:30, role:'Burst shotgun', auto:false, pellets:8, color:'#46545c', preferred:330 },
-  'Auto 12': { type:'primary', damage:49, spread:7.45, walkSpread:8.5, sprintSpread:10, adsSpread:3.4, falloffStart:5, falloff:0.08, head:84, speed:50, hitSpeed:0.51, mag:10, reload:4.6, reserve:50, role:'Auto shotgun', auto:true, pellets:6, color:'#566775', preferred:300 },
-  'LR-762': { type:'primary', damage:63, spread:10, walkSpread:12, sprintSpread:15, adsSpread:1.2, falloffStart:32, falloff:0.015, head:124, speed:100, hitSpeed:0.84, mag:10, reload:3.2, reserve:60, role:'Marksman rifle', auto:false, pellets:1, color:'#6c7c66', preferred:1250 },
-  'LW Tundra': { type:'primary', damage:121, spread:12.2, walkSpread:14, sprintSpread:18, adsSpread:1, falloffStart:45, falloff:0.010, head:181, speed:125, hitSpeed:1.4, mag:4, reload:2.8, reserve:25, role:'Sniper rifle', auto:false, pellets:1, color:'#acc5d4', preferred:1500 },
-  'War Head LMG': { type:'primary', damage:45, spread:5.35, walkSpread:5.8, sprintSpread:6.2, adsSpread:1.8, falloffStart:24, falloff:0.020, head:65, speed:81, hitSpeed:0.42, mag:75, reload:4.7, reserve:225, role:'Sustained-fire LMG', auto:true, pellets:1, color:'#756b52', preferred:1000 },
-  'P90': { type:'primary', damage:25, spread:2.2, walkSpread:2.4, sprintSpread:2.8, adsSpread:1.2, falloffStart:20, falloff:0.032, head:40, speed:70, hitSpeed:0.23, mag:36, reload:2.2, reserve:144, role:'Ranged SMG', auto:true, pellets:1, color:'#4f93ad', preferred:720 },
-  '9mm': { type:'sidearm', damage:28, spread:4.75, walkSpread:5, sprintSpread:5.45, adsSpread:1.1, falloffStart:13, falloff:0.040, head:50, speed:60, hitSpeed:0.34, mag:16, reload:1.5, reserve:60, role:'Heavy sidearm', auto:false, pellets:1, color:'#4e5960', preferred:440 },
-  'X16': { type:'sidearm', damage:24, spread:4, walkSpread:4.4, sprintSpread:4.75, adsSpread:1.3, falloffStart:11, falloff:0.045, head:34, speed:58, hitSpeed:0.19, mag:18, reload:1.2, reserve:72, role:'Fast sidearm', auto:false, pellets:1, color:'#252d32', preferred:390 },
-  'X-16 Auto': { type:'sidearm', damage:21, spread:4.65, walkSpread:5, sprintSpread:5.35, adsSpread:1.5, falloffStart:10, falloff:0.0475, head:30, speed:62, hitSpeed:0.19, mag:26, reload:1.6, reserve:104, role:'Auto sidearm', auto:true, pellets:1, color:'#546c72', preferred:430 },
-  'SR-Aug': { type:'primary', damage:23, head:45, spread:4.50, walkSpread:4.75, sprintSpread:5.50, adsSpread:2.20, falloffStart:19, falloff:0.024, speed:88, hitSpeed:0.70, burstCount:3, burstSpacing:0.065, mag:39, reserve:156, reload:2.40, role:'Triple Burst AR', auto:true, pellets:1, color:'#7c8964', preferred:750 },
-  'SPAS-12': { type:'primary', role:'3 Shot Shotgun', auto:false, damage:100, head:210, spread:5.8, walkSpread:5.925, sprintSpread:6.25, adsSpread:1.7, falloffStart:7, falloff:0.05, speed:75, hitSpeed:1, mag:3, reserve:12, reload:3.6, pellets:12, preferred:420, color:'#7b8380' }
+  "AR-15": {"type":"primary","damage":28,"spread":2.7,"walkSpread":2.9,"sprintSpread":3.6,"adsSpread":1.5,"falloffStart":22,"falloff":0.025,"head":42,"speed":80,"hitSpeed":0.3,"mag":40,"reload":2.1,"reserve":120,"role":"All-rounder","auto":true,"pellets":1,"color":"#d9bf79","preferred":900},
+  "AK47": {"type":"primary","damage":34,"spread":4,"walkSpread":4.5,"sprintSpread":5.2,"adsSpread":1.6,"falloffStart":25,"falloff":0.028,"head":50,"speed":74,"hitSpeed":0.35,"mag":36,"reload":2.75,"reserve":120,"role":"Heavy rifle","auto":true,"pellets":1,"color":"#ad7046","preferred":820},
+  "SMG-9": {"type":"primary","damage":19,"spread":3.1,"walkSpread":3.3,"sprintSpread":3.7,"adsSpread":1.8,"falloffStart":11,"falloff":0.043,"head":29,"speed":62,"hitSpeed":0.17,"mag":42,"reload":1.9,"reserve":144,"role":"Close tracking","auto":true,"pellets":1,"color":"#91a4b0","preferred":520},
+  "Pump Shotgun": {"type":"primary","damage":124,"spread":6.5,"walkSpread":7.5,"sprintSpread":9,"adsSpread":3,"falloffStart":4,"falloff":0.1,"head":248,"speed":48,"hitSpeed":1.5,"mag":5,"reload":2.4,"reserve":30,"role":"Burst shotgun","auto":false,"pellets":8,"color":"#46545c","preferred":330},
+  "Auto 12": {"type":"primary","damage":49,"spread":7.45,"walkSpread":8.5,"sprintSpread":10,"adsSpread":2.5,"falloffStart":5,"falloff":0.08,"head":99,"speed":50,"hitSpeed":0.51,"mag":10,"reload":4.6,"reserve":50,"role":"Auto shotgun","auto":true,"pellets":6,"color":"#566775","preferred":300},
+  "LR-762": {"type":"primary","damage":63,"spread":10,"walkSpread":12,"sprintSpread":15,"adsSpread":1.2,"falloffStart":32,"falloff":0.015,"head":124,"speed":105,"hitSpeed":0.77,"mag":10,"reload":3.05,"reserve":60,"role":"Marksman rifle","auto":false,"pellets":1,"color":"#6c7c66","preferred":1250},
+  "LW Tundra": {"type":"primary","damage":115,"spread":12.2,"walkSpread":14,"sprintSpread":18,"adsSpread":1,"falloffStart":45,"falloff":0.01,"head":175,"speed":125,"hitSpeed":1.4,"mag":4,"reload":2.8,"reserve":25,"role":"Sniper rifle","auto":false,"pellets":1,"color":"#acc5d4","preferred":1500},
+  "War Head LMG": {"type":"primary","damage":40,"spread":5.35,"walkSpread":5.8,"sprintSpread":6.2,"adsSpread":1.8,"falloffStart":24,"falloff":0.02,"head":60,"speed":81,"hitSpeed":0.42,"mag":75,"reload":4.7,"reserve":225,"role":"Sustained-fire LMG","auto":true,"pellets":1,"color":"#756b52","preferred":1000},
+  "P90": {"type":"primary","damage":25,"spread":2.2,"walkSpread":2.4,"sprintSpread":2.8,"adsSpread":1.2,"falloffStart":20,"falloff":0.032,"head":40,"speed":70,"hitSpeed":0.23,"mag":36,"reload":2.2,"reserve":144,"role":"Ranged SMG","auto":true,"pellets":1,"color":"#4f93ad","preferred":720},
+  "9mm": {"type":"sidearm","damage":28,"spread":4.75,"walkSpread":5,"sprintSpread":5.45,"adsSpread":1.1,"falloffStart":13,"falloff":0.04,"head":50,"speed":60,"hitSpeed":0.27,"mag":16,"reload":1.5,"reserve":60,"role":"Heavy sidearm","auto":false,"pellets":1,"color":"#4e5960","preferred":440},
+  "X16": {"type":"sidearm","damage":24,"spread":4.75,"walkSpread":4.4,"sprintSpread":4.75,"adsSpread":1.3,"falloffStart":11,"falloff":0.045,"head":34,"speed":58,"hitSpeed":0.19,"mag":12,"reload":1,"reserve":72,"role":"Fast sidearm","auto":false,"pellets":1,"color":"#252d32","preferred":390},
+  "X-16 Auto": {"type":"sidearm","damage":21,"spread":4.65,"walkSpread":5,"sprintSpread":5.35,"adsSpread":1.5,"falloffStart":10,"falloff":0.0475,"head":30,"speed":62,"hitSpeed":0.19,"mag":26,"reload":1.6,"reserve":104,"role":"Auto sidearm","auto":true,"pellets":1,"color":"#546c72","preferred":430},
+  "SR-Aug": {"type":"primary","damage":23,"head":40,"spread":7,"walkSpread":4.75,"sprintSpread":5.5,"adsSpread":2.2,"falloffStart":19,"falloff":0.024,"speed":88,"hitSpeed":0.7,"burstCount":3,"burstSpacing":0.065,"mag":39,"reserve":156,"reload":2.9,"role":"Triple Burst AR","auto":true,"pellets":1,"color":"#7c8964","preferred":750},
+  "SPAS-12": {"type":"primary","role":"3 Shot Shotgun","auto":false,"damage":100,"head":210,"spread":5.8,"walkSpread":5.925,"sprintSpread":6.25,"adsSpread":1.7,"falloffStart":7,"falloff":0.05,"speed":75,"hitSpeed":1,"mag":3,"reserve":12,"reload":3.6,"pellets":12,"preferred":420,"color":"#7b8380"},
+  "FAL": {"color":"#65735d","type":"primary","role":"Semi-Auto AR","auto":false,"damage":48,"head":72,"spread":8.5,"walkSpread":10,"sprintSpread":12.5,"adsSpread":2,"falloffStart":28,"falloff":0.03,"speed":88,"hitSpeed":0.26,"mag":20,"reserve":80,"reload":3.4,"pellets":1,"preferred":1100}
 }
 const PRIMARYS = Object.keys(WEAPONS).filter(k => WEAPONS[k].type === 'primary');
 const SIDEARMS = Object.keys(WEAPONS).filter(k => WEAPONS[k].type === 'sidearm');
 
 
 const WEAPON_PATCH_NOTES = [
+  {"version":"WEAPON BALANCE UPDATE 9.0","date":"OCTOBER 8, 2026","title":"ARENA REFINED","letter":"The supplied weapon data and new semi-automatic FAL are active. Prior complete patch samples are archived once at configuration activation. Lifetime careers, familiarity, progression, seasons, earnings and historical samples are preserved. Application and ruleset versions remain separate.","changes":[{"weapon":"Pump Shotgun","kind":"ADJUSTED","items":["Falloff start: 10.83 m → 12.37 m"]},{"weapon":"Auto 12","kind":"ADJUSTED","items":["ADS spread: 3.4° → 2.5°","Headshot damage: 84 → 99"]},{"weapon":"LR-762","kind":"ADJUSTED","items":["Projectile speed: 309.36 m/s → 324.83 m/s","Firing interval: 0.84s → 0.77s","Reload: 3.20s → 3.05s"]},{"weapon":"LW Tundra","kind":"ADJUSTED","items":["Body damage: 121 → 115","Headshot damage: 181 → 175"]},{"weapon":"War Head LMG","kind":"ADJUSTED","items":["Body damage: 45 → 40","Headshot damage: 65 → 60"]},{"weapon":"9mm","kind":"ADJUSTED","items":["Firing interval: 0.34s → 0.27s"]},{"weapon":"X16","kind":"ADJUSTED","items":["Hip spread: 4° → 4.75°","Magazine: 18 → 12","Reload: 1.20s → 1.00s"]},{"weapon":"SR-Aug","kind":"ADJUSTED","items":["Headshot damage: 45 → 40","Hip spread: 4.5° → 7°","Reload: 2.40s → 2.90s"]},{"weapon":"FAL","kind":"NEW WEAPON","items":["Body damage: new → 48","Headshot damage: new → 72","Hip spread: new → 8.5°","Walk hip spread: new → 10°","Sprint hip spread: new → 12.5°","ADS spread: new → 2°","Falloff start: new → 86.62 m","Falloff per meter: new → 0.97% / m","Projectile speed: new → 272.24 m/s","Firing interval: new → 0.26s","Magazine: new → 20","Reserve: new → 80","Reload: new → 3.40s","Preferred range: new → 48.61 m"]}]},
   {version:'WEAPON BALANCE UPDATE 8.0',date:'OCTOBER 2, 2026',title:'CORE TUNING',letter:'Four weapons adjusted. The previous complete Weapon Meta dataset is archived, including its tactical revision samples. Lifetime careers, familiarity, seasons and tournament history are preserved.',changes:[
     {weapon:'War Head LMG',kind:'ADJUSTED',items:['Projectile speed: 78 → 81 tiles/s','Firing interval: 0.47s → 0.42s']},
     {weapon:'P90',kind:'ADJUSTED',items:['Headshot damage: 35 → 40','Firing interval: 0.24s → 0.23s','Reload: 2.40s → 2.20s']},
@@ -133,14 +141,14 @@ const WEAPON_PATCH_NOTES = [
 ];
 
 const SKINS = [
-  {name:'Urban Assault', body:'#4a5962', vest:'#28353c', accent:'#93a4ad', pants:'#2f3a40', skin:'#c38f6a', build:1.02},
-  {name:'Woodland Scout', body:'#627d4d', vest:'#3e5437', accent:'#a3c47c', pants:'#405044', skin:'#805b47', build:.98},
-  {name:'Desert Runner', body:'#c5a36d', vest:'#8c744e', accent:'#f0d3a1', pants:'#786b52', skin:'#d3a079', build:.95},
-  {name:'Blue Strike', body:'#26384a', vest:'#182631', accent:'#25a8ff', pants:'#1e2c35', skin:'#a96f55', build:1.00},
-  {name:'Crimson Guard', body:'#342f35', vest:'#201f24', accent:'#e64f5c', pants:'#29282d', skin:'#70483b', build:1.05},
-  {name:'Steel Recon', body:'#8c989e', vest:'#59666d', accent:'#d8e1e4', pants:'#4b575c', skin:'#e2b28e', build:.97},
-  {name:'Ranger Elite', body:'#6c7147', vest:'#464a31', accent:'#b3945b', pants:'#4d4b35', skin:'#9c684e', build:1.04},
-  {name:'Night Ops', body:'#222f3e', vest:'#151e29', accent:'#5f7fa2', pants:'#17222d', skin:'#bb8262', build:1.00}
+  {id:'urban-assault', name:'Urban Assault', body:'#4a5962', vest:'#28353c', accent:'#93a4ad', pants:'#2f3a40', skin:'#c38f6a', build:1.02},
+  {id:'woodland-scout', name:'Woodland Scout', body:'#627d4d', vest:'#3e5437', accent:'#a3c47c', pants:'#405044', skin:'#805b47', build:.98},
+  {id:'desert-runner', name:'Desert Runner', body:'#c5a36d', vest:'#8c744e', accent:'#f0d3a1', pants:'#786b52', skin:'#d3a079', build:.95},
+  {id:'blue-strike', name:'Blue Strike', body:'#26384a', vest:'#182631', accent:'#25a8ff', pants:'#1e2c35', skin:'#a96f55', build:1.00},
+  {id:'crimson-guard', name:'Crimson Guard', body:'#342f35', vest:'#201f24', accent:'#e64f5c', pants:'#29282d', skin:'#70483b', build:1.05},
+  {id:'steel-recon', name:'Steel Recon', body:'#8c989e', vest:'#59666d', accent:'#d8e1e4', pants:'#4b575c', skin:'#e2b28e', build:.97},
+  {id:'ranger-elite', name:'Ranger Elite', body:'#6c7147', vest:'#464a31', accent:'#b3945b', pants:'#4d4b35', skin:'#9c684e', build:1.04},
+  {id:'night-ops', name:'Night Ops', body:'#222f3e', vest:'#151e29', accent:'#5f7fa2', pants:'#17222d', skin:'#bb8262', build:1.00}
 ];
 
 const BOT_NAMES = [
@@ -235,13 +243,7 @@ const STRATEGIC_ROLE_DESCRIPTIONS={
   Flex:'changes range, route and risk level according to the match state'
 };
 function strategicRole(archetype){return STRATEGIC_ROLE_NAMES[archetype]||'Adaptive Flex';}
-const STYLE_WEAPON_PREFS={
-  Marksman:['LW Tundra','LR-762','AK47','AR-15','War Head LMG','P90','SMG-9','Pump Shotgun','Auto 12'],
-  Rusher:['SMG-9','P90','Auto 12','Pump Shotgun','AK47','AR-15','War Head LMG','LR-762','LW Tundra'],
-  Flanker:['P90','SMG-9','AR-15','AK47','Pump Shotgun','Auto 12','War Head LMG','LR-762','LW Tundra'],
-  Anchor:['War Head LMG','AR-15','AK47','LR-762','P90','LW Tundra','SMG-9','Auto 12','Pump Shotgun'],
-  Flex:['AR-15','AK47','P90','War Head LMG','SMG-9','LR-762','Pump Shotgun','Auto 12','LW Tundra']
-};
+const STYLE_WEAPON_PREFS={"Marksman":["LW Tundra","LR-762","FAL","AK47","AR-15","War Head LMG","P90","SMG-9","Pump Shotgun","Auto 12"],"Rusher":["SMG-9","P90","Auto 12","Pump Shotgun","AK47","AR-15","War Head LMG","FAL","LR-762","LW Tundra"],"Flanker":["P90","SMG-9","AR-15","AK47","FAL","Pump Shotgun","Auto 12","War Head LMG","LR-762","LW Tundra"],"Anchor":["War Head LMG","AR-15","AK47","FAL","LR-762","P90","LW Tundra","SMG-9","Auto 12","Pump Shotgun"],"Flex":["AR-15","AK47","FAL","P90","War Head LMG","SMG-9","LR-762","Pump Shotgun","Auto 12","LW Tundra"]};
 function personalityBlueprint(name,index,power,archetype){
   const lim=(v,a,b)=>Math.max(a,Math.min(b,v));
   const r=seeded(profileSeed(name)^0x9e3779b9),prefs=STYLE_WEAPON_PREFS[archetype]||PRIMARYS;
@@ -270,7 +272,7 @@ function blankWeaponMeta(name){
   return { name, picks:0, kills:0, deaths:0, damage:0, shots:0, hits:0, headshots:0, killDistance:0, killDistanceN:0, engagementDistance:0, engagementDistanceN:0, classifiedKills:0, soloKills:0, finisherKills:0, equippedTime:0 };
 }
 const PARTICIPANT_ANALYTICS_SCHEMA=1;
-function blankCohortSample(){return {meta:Object.fromEntries(Object.keys(WEAPONS).map(n=>[n,blankWeaponMeta(n)])),skillStrata:{},participants:{},completedMatches:0};}
+function blankCohortSample(){return {distanceProvenance:cloneData(DISTANCE_PROVENANCE),meta:Object.fromEntries(Object.keys(WEAPONS).map(n=>[n,blankWeaponMeta(n)])),skillStrata:{},participants:{},completedMatches:0};}
 function ensureParticipantAnalytics(save){
   // Older combined measurements remain intact. None are attributed from names,
   // roster positions or inferred human shares; exact collection begins here.
@@ -291,7 +293,7 @@ function participantSample(cohort='human',mode='tdm'){
 }
 function recordParticipantEvent(a,weapon,key,value){
   const match=getMatch(a.matchId),identity=participantIdentity(a);
-  if(!identity||!MATCH_MODES.officialStats(match)||!WEAPONS[weapon])return;
+  if(!identity||!MATCH_MODES.officialStats(match)||!matchUsesCurrentBalance(match)||!WEAPONS[weapon])return;
   const sample=participantSample(identity.type,match.mode),band=skillBand(a);
   sample.participants[identity.id]??={participantId:identity.id,type:identity.type,meta:{}};
   const actor=sample.participants[identity.id];
@@ -299,7 +301,7 @@ function recordParticipantEvent(a,weapon,key,value){
   for(const row of [sample.meta[weapon],sample.skillStrata[band][weapon],actor.meta[weapon]])row[key]=(row[key]||0)+value;
 }
 function recordParticipantCompletion(match,participants){
-  if(!MATCH_MODES.officialStats(match))return;
+  if(!MATCH_MODES.officialStats(match)||!matchUsesCurrentBalance(match))return;
   for(const cohort of new Set(participants.map(a=>participantIdentity(a)?.type).filter(Boolean)))participantSample(cohort,match.mode).completedMatches++;
 }
 function blankBotCareer(name){
@@ -366,11 +368,11 @@ function balanceSnapshot(){
   return Object.fromEntries(Object.keys(WEAPONS).sort().map(n=>[n,Object.fromEntries(fields.map(k=>[k,WEAPONS[n][k]]))]));
 }
 function balanceFingerprint(snapshot=balanceSnapshot()){return 'b-'+profileSeed(JSON.stringify(snapshot)).toString(16);}
-function freshAiSample(){return {revision:AI_REVISION,startedAt:wallNow(),meta:Object.fromEntries(Object.keys(WEAPONS).map(n=>[n,blankWeaponMeta(n)])),perBot:{},skillStrata:{},completedMatches:0,observedSeconds:0};}
+function freshAiSample(){return {revision:AI_REVISION,startedAt:wallNow(),distanceProvenance:cloneData(DISTANCE_PROVENANCE),meta:Object.fromEntries(Object.keys(WEAPONS).map(n=>[n,blankWeaponMeta(n)])),perBot:{},skillStrata:{},completedMatches:0,observedSeconds:0};}
 function freshPatch(reason='balance',generation=1){
   const stats=balanceSnapshot(),fingerprint=balanceFingerprint(stats);
   const note=WEAPON_PATCH_NOTES[0];
-  return {id:`${fingerprint}-${generation}`,fingerprint,generation,rulesetRevision:RULESET_REVISION,label:note.version,balanceVersion:note.version.split(' ').at(-1),updateName:note.title,reason,startedAt:wallNow(),weaponStats:stats,aiSamples:{[AI_REVISION]:freshAiSample()},completedMatches:0,observedSeconds:0,meta:Object.fromEntries(Object.keys(WEAPONS).map(n=>[n,blankWeaponMeta(n)])),perBot:{},skillStrata:{}};
+  return {id:`${fingerprint}-${generation}`,fingerprint,generation,rulesetRevision:RULESET_REVISION,distanceProvenance:cloneData(DISTANCE_PROVENANCE),label:note.version,balanceVersion:note.version.split(' ').at(-1),updateName:note.title,reason,startedAt:wallNow(),weaponStats:stats,aiSamples:{[AI_REVISION]:freshAiSample()},completedMatches:0,observedSeconds:0,meta:Object.fromEntries(Object.keys(WEAPONS).map(n=>[n,blankWeaponMeta(n)])),perBot:{},skillStrata:{}};
 }
 function personalityDefaults(profile,index){
   const base=personalityBlueprint(profile.name,index,profile.power,profile.archetype),p={...base,...profile.personality};
@@ -445,6 +447,8 @@ function normalizeSave(raw){
   out.config.skin=Math.max(0,Math.min(SKINS.length-1,Math.floor(Number(out.config.skin)||0)));out.config.mouseSensitivity=Math.max(.25,Math.min(2.5,Number(out.config.mouseSensitivity)||1));
   out.config.adsSensitivity=Math.max(.30,Math.min(1,Number(out.config.adsSensitivity)||.65));out.config.cameraAimBias=out.config.cameraAimBias===true;
   out.config.damageNumbers=out.config.damageNumbers!==false;
+  out.config.hudSize=out.config.hudSize!=null&&Number.isFinite(Number(out.config.hudSize))?Math.max(75,Math.min(140,Math.round(Number(out.config.hudSize)))):100;
+  out.config.maximumFPS=[0,60,120,144,165,200,240,300,360].includes(Number(out.config.maximumFPS))?Number(out.config.maximumFPS):0;
   out.config.viewMode='2.5D';out.config.weaponInspection='2.5D';out.config.operatorInspection='2.5D';
   out.config.spectatorCamera=out.config.spectatorCamera==='TACTICAL'?'TACTICAL':'FOLLOW';
   const binds={...out.config.binds},used=new Set();
@@ -465,6 +469,15 @@ function normalizeSave(raw){
     const current=balanceSnapshot(),changes=[];
     for(const [n,w] of Object.entries(current))for(const [k,v] of Object.entries(w))if(old.weaponStats?.[n]?.[k]!==v)changes.push({weapon:n,field:k,before:old.weaponStats?.[n]?.[k]??null,after:v});
     out.balancePatchHistory.push({at:wallNow(),from:old.id,fromLabel:old.label,to:balanceFingerprint(),label:WEAPON_PATCH_NOTES[0].version,updateName:WEAPON_PATCH_NOTES[0].title,changes});out.patchState=freshPatch('weapon statistics changed',(old.generation||1)+1);
+    // An unfinished old-config match cannot resume under its previous identity.
+    // Finished results and their authoritative restart deadlines stay intact.
+    for(const slot of Object.values(out.matchSlots||{}))if(slot){
+      slot.balanceFingerprint??=old.fingerprint;
+      if(slot.phase==='active'||slot.phase==='waiting'&&slot.resumeStatus!=='cooldown'){
+        slot.phase='pending';slot.previousMatchId=slot.matchId;delete slot.matchId;delete slot.resumeStatus;
+        slot.balanceFingerprint=out.patchState.fingerprint;
+      }
+    }
   }
   out.patchState.meta={...out.patchState.meta};out.patchState.perBot={...out.patchState.perBot};out.patchState.skillStrata={...out.patchState.skillStrata};
   for(const w of Object.keys(WEAPONS))out.patchState.meta[w]=sanitizeStats(out.patchState.meta[w],blankWeaponMeta(w));
@@ -492,6 +505,30 @@ let SAVE=(()=>{
   catch(error){STORE.set('sar-recovery-backup',text);saveWriteProtected=true;console.error('Save preserved in recovery backup:',error);window.SARBoot?.fail('Your saved world could not be loaded. The original has been preserved. Retry to continue.',error);throw error;}
 })();
 const CONFIG=SAVE.config;
+// Only screen-space HUD panels share this scale. Keep camera/aim/reticle and
+// world-space labels in the renderer's existing coordinate system.
+const HUD_LAYOUT={minimapTop:75,minimapBottom:innerHeight-12};
+function updateHudLayout(){
+  let bottom=63;
+  document.querySelectorAll('#hud .topbar,#spectatorHud .spectate-top').forEach(el=>{const r=el.getBoundingClientRect?.();if(r?.width&&r.height)bottom=Math.max(bottom,r.bottom);});
+  HUD_LAYOUT.minimapTop=Math.ceil(bottom+12);
+  let lower=innerHeight-12;
+  document.querySelectorAll('#hud .player-hud,#spectatorHud .spectate-help').forEach(el=>{const r=el.getBoundingClientRect?.();if(r?.width&&r.height)lower=Math.min(lower,r.top-12);});
+  HUD_LAYOUT.minimapBottom=Math.floor(lower);
+  document.documentElement?.style?.setProperty('--hud-content-top',HUD_LAYOUT.minimapTop+'px');
+}
+function applyHudSize(){
+  document.documentElement?.style?.setProperty('--hud-scale',String(CONFIG.hudSize/100));
+  const slider=document.getElementById('hudSize'),value=document.getElementById('hudSizeValue');
+  if(slider)slider.value=String(CONFIG.hudSize);if(value)value.textContent=CONFIG.hudSize+'%';
+  updateHudLayout();
+}
+applyHudSize();
+if(typeof ResizeObserver==='function'){
+  const hudObserver=new ResizeObserver(updateHudLayout);
+  document.querySelectorAll('#hud .topbar,#spectatorHud .spectate-top,#hud .player-hud,#spectatorHud .spectate-help').forEach(el=>hudObserver.observe(el));
+}
+addEventListener('resize',updateHudLayout);
 let meta=SAVE.meta;
 let botCareerStore=Object.fromEntries(BOT_NAMES.slice(0,BOT_COUNT).map(n=>[n,SAVE.bots[n].career]));
 function botData(a){return a.tournamentBot||SAVE.bots[a.name];}
@@ -1064,8 +1101,12 @@ function resetBrain(a){
 }
 function shuffle(items){const result=items.slice();for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]];}return result;}
 function registerPick(a){
+  if(!matchUsesCurrentBalance(getMatch(a.matchId)))return;
   for(const s of a.slots){ actorMeta(a,s.name).picks++; a.weaponUsage[s.name].picks++;recordPatchEvent(a,s.name,'picks'); }
 }
+// Configuration is immutable for a running page. Reload is the release boundary;
+// late work from another fingerprint must never enter this patch's dataset.
+function matchUsesCurrentBalance(match){return !match||match.balanceFingerprint===SAVE.patchState.fingerprint;}
 function officialTdm(a){const m=getMatch(a.matchId);return !a.sandbox&&(!m||m.eligible!==false)&&m?.mode!=='deathmatch';}
 function isAlly(a,b){return a!==b&&a.matchId===b.matchId&&getMatch(a.matchId)?.mode!=='deathmatch'&&a.team===b.team;}
 function isEnemy(a,b){return a!==b&&a.matchId===b.matchId&&!isAlly(a,b);}
@@ -1116,11 +1157,17 @@ function commitMatchXP(match){
   const result=XP.award(SAVE.progression,{matchId:snapshot.matchId,participantId:player.participantId,kind,mode:snapshot.mode,sessionType:snapshot.sessionType,eligible:!!kind,practice:snapshot.practice,at:snapshot.at,stats:player.stats,events:player.events,leaders:player.leaders,won:player.won,winStreak:player.xpWinStreak,...(kind==='official'?{tournamentId:snapshot.tournamentId,seriesId:snapshot.seriesId}:{})});
   match.xpAward=cloneData(result.receipt);updateProgressionUi();return result;
 }
+function recordArenaCreditCompletion(match){
+  // Only this new human completion may become a pending report. The account
+  // backend decides eligibility and never treats a local receipt as wallet funds.
+  if(!match.hasPlayer||match.practice||!match.eligible||!['standard','ranked'].includes(match.sessionType)||!match.xpAward)return;
+  void window.SARCommerce?.recordMatch?.(match.matchId);
+}
 function rewardSnapshot(match){
   const actors=actorsInMatch(match.id),rows=standings(match),winners=match.mode==='deathmatch'?ffaWinners(rows):rows.filter(r=>r.team===match.winner).map(r=>r.id),kind=XP.eligibility(match);
   return frozen({matchId:match.matchId,sessionType:match.sessionType,mode:match.mode,eligible:match.eligible===true,practice:!!match.practice,at:wallNow(),winnerTeam:match.mode==='tdm'?match.winner:null,...(match.context?.tournamentId?{tournamentId:match.context.tournamentId,seriesId:match.context.seriesId}:{}),rows:actors.map(a=>{
     const identity=participantIdentity(a),s=a.stats,won=match.mode==='deathmatch'?(winners.length===1?winners[0]===a.id:winners.includes(a.id)?null:false):match.winner===null?null:a.team===match.winner;
-    return {participantId:identity?.id||a.participantId,type:identity?.type||'unknown',team:a.team,stats:Object.fromEntries(['kills','deaths','assists','damage','headshots','timeAlive'].map(k=>[k,s[k]])),events:cloneData(a.xpEvents||XP.events()),leaders:{kills:s.kills===Math.max(...rows.map(r=>r.kills)),assists:s.assists===Math.max(...rows.map(r=>r.assists)),alive:s.timeAlive===Math.max(...rows.map(r=>r.timeAlive))},won,xpWinStreak:['standard','ranked'].includes(kind)&&won?(a.career.currentWinStreak||0)+1:0};
+    return {participantId:identity?.id||a.participantId,type:identity?.type||'unknown',team:a.team,stats:Object.fromEntries(['kills','deaths','assists','damage','headshots','timeAlive','shots','hits'].map(k=>[k,s[k]])),events:cloneData(a.xpEvents||XP.events()),leaders:{kills:s.kills===Math.max(...rows.map(r=>r.kills)),assists:s.assists===Math.max(...rows.map(r=>r.assists)),alive:s.timeAlive===Math.max(...rows.map(r=>r.timeAlive))},won,xpWinStreak:['standard','ranked'].includes(kind)&&won?(a.career.currentWinStreak||0)+1:0};
   })});
 }
 function commitMatchRanked(match){
@@ -1132,19 +1179,20 @@ function commitMatchRanked(match){
   match.rankedAwards=receipts;return receipts;
 }
 function rankBadgeHtml(rank,className=''){return `<canvas class="rank-badge ${className}" data-rank-preview="${rank.rankIndex}" width="128" height="128" role="img" aria-label="${escapeHtml(rank.rankName)} ranked badge"></canvas>`;}
+function rankInspectionButtonHtml(rank){return `<button class="rank-inspect" data-action="rank-inspect" title="View ranked statistics and ladder" aria-label="View your ${escapeHtml(rank.rankName)} ranked statistics and ladder">${rankBadgeHtml(rank)}</button>`;}
 function rankProgressHtml(rank){return `<strong>${escapeHtml(rank.rankName)}</strong><span>${formatXP(rank.rating)} ELO${rank.maxRank?' · TOP RANK':''}</span><progress max="1" value="${rank.progress}" aria-label="Rank progress"></progress><small>${rank.maxRank?'Ascendant · highest rank':formatXP(rank.remaining)+' ELO to '+escapeHtml(rank.nextRank)}</small>`;}
 function rankedSummaryHtml(receipt){
   if(!receipt)return '';const breakdown=XP.rewardBreakdown(null,receipt).ranked,rank=breakdown.after,delta=breakdown.appliedUnits/XP.SCALE,calculated=breakdown.calculatedUnits/XP.SCALE;
-  return `<section class="xp-summary ranked-result"><div class="ranked-result-heading">${rankBadgeHtml(rank)}<div><span>RANKED ELO</span><strong>${delta>=0?'+':''}${formatXP(delta)} ELO · ${escapeHtml(rank.rankName)}</strong><p>${formatXP(rank.rating)} TOTAL ELO${breakdown.appliedUnits!==breakdown.calculatedUnits?' · Calculated '+formatXP(calculated)+'; minimum rating 0.':''}</p></div></div><details><summary>ELO BREAKDOWN</summary>${receipt.won?'':`<p>Performance determines the final loss penalty, from −31 to −19 ELO. Deaths are included once.</p>`}<dl>${breakdown.lines.map(line=>`<div><dt>${escapeHtml(line.label)}</dt><dd>${line.units>=0?'+':''}${formatXP(line.units/XP.SCALE)}</dd></div>`).join('')}${receipt.won?'':`<div><dt>NET PERFORMANCE</dt><dd>${formatXP(breakdown.performanceUnits/XP.SCALE)} ELO</dd></div>`}<div><dt>CALCULATED RESULT</dt><dd>${calculated>=0?'+':''}${formatXP(calculated)} ELO</dd></div><div class="xp-total"><dt>APPLIED RESULT</dt><dd>${delta>=0?'+':''}${formatXP(delta)} ELO</dd></div></dl></details></section>`;
+  return `<section class="xp-summary ranked-result"><div class="ranked-result-heading">${rankInspectionButtonHtml(rank)}<div><span>RANKED ELO</span><strong>${delta>=0?'+':''}${formatXP(delta)} ELO · ${escapeHtml(rank.rankName)}</strong><p>${formatXP(rank.rating)} TOTAL ELO${breakdown.appliedUnits!==breakdown.calculatedUnits?' · Calculated '+formatXP(calculated)+'; minimum rating 0.':''}</p></div></div><details><summary>ELO BREAKDOWN</summary>${receipt.won?'':`<p>Performance determines the final loss penalty, from −31 to −19 ELO. Deaths are included once.</p>`}<dl>${breakdown.lines.map(line=>`<div><dt>${escapeHtml(line.label)}</dt><dd>${line.units>=0?'+':''}${formatXP(line.units/XP.SCALE)}</dd></div>`).join('')}${receipt.won?'':`<div><dt>NET PERFORMANCE</dt><dd>${formatXP(breakdown.performanceUnits/XP.SCALE)} ELO</dd></div>`}<div><dt>CALCULATED RESULT</dt><dd>${calculated>=0?'+':''}${formatXP(calculated)} ELO</dd></div><div class="xp-total"><dt>APPLIED RESULT</dt><dd>${delta>=0?'+':''}${formatXP(delta)} ELO</dd></div></dl></details></section>`;
 }
 function formatXP(value){return Number(value).toLocaleString(undefined,{maximumFractionDigits:2});}
 function levelProgressHtml(p){return `<strong>LVL ${p.currentLevel}</strong><span>${p.maxLevel?'MAX LEVEL':formatXP(p.currentXP)+' / '+formatXP(p.requiredXP)+' XP'}</span><progress max="1" value="${p.progress}" aria-label="Level progress"></progress>`;}
 function updateProgressionUi(){
   const summary=XP.summary(SAVE.progression,SAVE.ranked,currentAccount()?.id||'local-player'),host=document.getElementById('lobbyProgression'),rankHost=document.getElementById('lobbyRanked');
   if(host&&host.dataset.units!==String(summary.xp.totalXPUnits)){host.dataset.units=String(summary.xp.totalXPUnits);host.innerHTML='<span class="progression-label">ACCOUNT LEVEL</span>'+levelProgressHtml(summary.xp);}
-  if(rankHost&&rankHost.dataset.units!==String(summary.ranked.ratingUnits)){rankHost.dataset.units=String(summary.ranked.ratingUnits);rankHost.innerHTML=rankBadgeHtml(summary.ranked)+'<div class="ranked-progress-copy"><span class="progression-label">RANKED</span>'+rankProgressHtml(summary.ranked)+'</div>';requestAnimationFrame(()=>paintRankPreviews(rankHost));}
+  if(rankHost&&rankHost.dataset.units!==String(summary.ranked.ratingUnits)){rankHost.dataset.units=String(summary.ranked.ratingUnits);rankHost.innerHTML=rankInspectionButtonHtml(summary.ranked)+'<div class="ranked-progress-copy"><span class="progression-label">RANKED</span>'+rankProgressHtml(summary.ranked)+'</div>';requestAnimationFrame(()=>paintRankPreviews(rankHost));}
 }
-function progressionProfileHtml(){const summary=XP.summary(SAVE.progression,SAVE.ranked,currentAccount()?.id||'local-player'),p=summary.xp;return `<section class="profile-progression" aria-label="Account progression"><div><span class="progression-label">ACCOUNT LEVEL</span>${levelProgressHtml(p)}</div><dl><div><dt>XP TO NEXT LEVEL</dt><dd>${p.maxLevel?'MAX LEVEL':formatXP(p.remainingXP)}</dd></div><div><dt>LIFETIME XP</dt><dd>${formatXP(p.totalXP)}</dd></div></dl><div class="profile-ranked" aria-label="Ranked progression">${rankBadgeHtml(summary.ranked)}<div class="ranked-progress-copy"><span class="progression-label">RANKED ELO</span>${rankProgressHtml(summary.ranked)}</div></div></section>`;}
+function progressionProfileHtml(){const summary=XP.summary(SAVE.progression,SAVE.ranked,currentAccount()?.id||'local-player'),p=summary.xp;return `<section class="profile-progression" aria-label="Account progression"><div><span class="progression-label">ACCOUNT LEVEL</span>${levelProgressHtml(p)}</div><dl><div><dt>XP TO NEXT LEVEL</dt><dd>${p.maxLevel?'MAX LEVEL':formatXP(p.remainingXP)}</dd></div><div><dt>LIFETIME XP</dt><dd>${formatXP(p.totalXP)}</dd></div></dl><div class="profile-ranked" aria-label="Ranked progression">${rankInspectionButtonHtml(summary.ranked)}<div class="ranked-progress-copy"><span class="progression-label">RANKED ELO</span>${rankProgressHtml(summary.ranked)}</div></div></section>`;}
 function xpSummaryHtml(r){if(!r)return '';const p=XP.view(r.beforeUnits+r.units),old=XP.view(r.beforeUnits),lines=XP.breakdown(r);return `<section class="xp-summary"><div class="xp-summary-heading"><div><span>XP EARNED</span><strong>+${formatXP(r.units/XP.SCALE)} XP</strong></div><div class="xp-result-level"><span>LEVEL PROGRESS${p.currentLevel>old.currentLevel?' · LEVEL UP':''}</span>${levelProgressHtml(p)}</div></div><details><summary>XP BREAKDOWN</summary><dl>${lines.map(l=>`<div><dt>${escapeHtml(l.label)}</dt><dd>+${formatXP(l.units/XP.SCALE)}</dd></div>`).join('')}${r.kind==='official'?`<div class="xp-total"><dt>BASE XP</dt><dd>${formatXP(r.baseUnits/XP.SCALE)}</dd></div><div><dt>TOURNAMENT BONUS</dt><dd>×1.3</dd></div>`:''}<div class="xp-total"><dt>${r.kind==='official'?'FINAL XP':'TOTAL'}</dt><dd>+${formatXP(r.units/XP.SCALE)} XP</dd></div></dl></details></section>`;}
 
 function resetActorMatchStats(a){
@@ -1189,7 +1237,8 @@ function startMatch(matchId, participants, hasPlayer=false,context=null){
   const shuffled=context&&!context.shuffle?participants.slice():shuffle(participants);
   const mode=context?.mode==='deathmatch'?'deathmatch':'tdm',sessionType=context?.sessionType||(context?.tournamentId?'tournament':'standard');
   const policy=MATCH_MODES.resolve({mode,sessionType});if(sessionType==='ranked'&&!policy?.ranked)throw Error('Unsupported ranked rules');
-  const match={context,participants:shuffled,id:matchId,matchId:context?.gameId||('match:'+wallNow()+':'+matchId+':'+nextActorId+':'+Math.random().toString(36).slice(2)),mode,sessionType,eligible:policy?.officialStats===true,aiRevision:AI_REVISION,rulesetRevision:RULESET_REVISION,balanceVersion:SAVE.patchState.balanceVersion,balanceFingerprint:balanceFingerprint(),appVersion:window.SARBuild?.version||'1.11.0',score:[0,0],limit:policy?.target??(mode==='deathmatch'?30:sessionType==='tournament'?50:SCORE_LIMIT),status:'active',hasPlayer,startedAt:gameNow(),durationMs:policy?.durationMs??(mode==='deathmatch'?240000:MATCH_DURATION_MS),overtime:false,endedAt:0,winner:null,endReason:null,teamIntentions:new Map()};
+  const match={context,participants:shuffled,id:matchId,matchId:context?.gameId||('match:'+wallNow()+':'+matchId+':'+nextActorId+':'+Math.random().toString(36).slice(2)),mode,sessionType,eligible:policy?.officialStats===true,aiRevision:AI_REVISION,rulesetRevision:RULESET_REVISION,balanceVersion:SAVE.patchState.balanceVersion,balanceFingerprint:balanceFingerprint(),appVersion:window.SARBuild?.version||'1.13.0',score:[0,0],limit:policy?.target??(mode==='deathmatch'?30:sessionType==='tournament'?50:SCORE_LIMIT),status:'active',hasPlayer,startedAt:gameNow(),durationMs:policy?.durationMs??(mode==='deathmatch'?240000:MATCH_DURATION_MS),overtime:false,endedAt:0,winner:null,endReason:null,teamIntentions:new Map()};
+  Object.assign(match,{mapId:MAP_CALIBRATION.mapId,calibrationId:MAP_CALIBRATION.calibrationId,distanceUnit:'world-unit'});
   state.matches[matchId]=match;
   shuffled.forEach((a,i)=>{
     const team=mode==='deathmatch'?i:(context?.teamsByActor?.[a.id]??(i<TEAM_SIZE?0:1));
@@ -1198,24 +1247,99 @@ function startMatch(matchId, participants, hasPlayer=false,context=null){
   for(const a of shuffled) respawnActor(a,true);
   return match;
 }
+function beginMatchCountdown(match,now=gameNow()){
+  if(match.status==='countdown'&&Number.isFinite(match.countdownUntil))return false;
+  match.status='countdown';match.countdownStartedAt=now;match.countdownUntil=now+3000;match.fightUntil=0;match.audioCountdown=null;
+  if(Number.isFinite(match.context?.schedule?.matchStartAt)){const offset=now-wallNow();match.countdownStartedAt=offset+match.context.schedule.countdownAt;match.countdownUntil=offset+match.context.schedule.matchStartAt;}
+  return true;
+}
+function matchCountdownSnapshot(match,now=gameNow()){
+  const schedule=match?.context?.schedule,scheduled=Number.isFinite(schedule?.matchStartAt),remainingMs=match?.status==='countdown'?Math.max(0,scheduled?schedule.matchStartAt-wallNow():(match.countdownUntil??state.countdownUntil??now)-now):0,preparing=scheduled&&wallNow()<schedule.countdownAt;
+  return {phase:match?.status==='countdown'?(preparing?'preparing':'countdown'):match?.status==='active'&&(scheduled?wallNow()<schedule.matchStartAt+650:match.fightUntil>now)?'fight':'none',startedAt:match?.countdownStartedAt??null,endsAt:match?.countdownUntil??null,remainingMs,number:match?.status==='countdown'?Math.max(1,Math.ceil(remainingMs/1000)):0,fightUntil:match?.fightUntil||0};
+}
+function renderMatchCountdown(now=gameNow()){
+  const overlay=document.getElementById('matchCountdown');if(!overlay)return;
+  const match=state.running?getMatch(visibleMatchId()):null,snapshot=matchCountdownSnapshot(match,now);
+  if(snapshot.phase==='none'){overlay.classList.add('hidden');return;}
+  overlay.classList.remove('hidden');overlay.classList.toggle('fight',snapshot.phase==='fight');overlay.classList.toggle('preparing',snapshot.phase==='preparing');
+  const number=overlay.querySelector('strong'),label=overlay.querySelector('span');if(number)number.textContent=snapshot.phase==='fight'?'FIGHT':snapshot.phase==='preparing'?'READY':String(snapshot.number);if(label)label.textContent=snapshot.phase==='fight'?'':snapshot.phase==='preparing'?'WAITING FOR SCHEDULED START':'MATCH STARTS IN';
+  if(snapshot.phase==='countdown'&&match.audioCountdown!==snapshot.number){match.audioCountdown=snapshot.number;audioEvent('countdown',getFocusActor());}
+  else if(snapshot.phase==='fight'&&!match.fightAudioPlayed){match.fightAudioPlayed=true;audioEvent('fight',getFocusActor());}
+}
+function updateMatchCountdowns(now){
+  for(const match of state.matches){
+    if(!match||match.status!=='countdown')continue;
+    // Older standard-session checkpoints used the player-level deadline.
+    if(!Number.isFinite(match.countdownUntil)){match.countdownUntil=match.hasPlayer&&Number.isFinite(state.countdownUntil)?state.countdownUntil:now+3000;match.countdownStartedAt=match.countdownUntil-3000;}
+    if(Number.isFinite(match.context?.schedule?.matchStartAt)){const schedule=match.context.schedule;match.countdownUntil=now+schedule.matchStartAt-wallNow();match.countdownStartedAt=now+schedule.countdownAt-wallNow();}
+    if(now>=match.countdownUntil){match.status='active';match.startedAt=match.sessionType==='tournament'?match.countdownUntil:now;match.fightUntil=match.startedAt+650;match.fightAudioPlayed=false;}
+  }
+  renderMatchCountdown(now);
+}
 function startBotMatch(matchId, bots, restoring=false){
-  const match=startMatch(matchId,bots,false);
+  const mode=BACKGROUND_SLOT_MODES[matchId];
+  if(!mode||bots.length!==10||new Set(bots).size!==10||bots.some(a=>!MATCH_MODES.botEligible(a,mode)))throw Error('A background match needs ten available persistent bots.');
+  for(const a of bots){restoreDeathmatchStats(a);if(mode==='deathmatch')bindDeathmatchStats(a,true);}
+  const match=startMatch(matchId,bots,false,{mode,sessionType:'standard',shuffle:true});
   SAVE.matchSlots??={};const prior=SAVE.matchSlots[matchId];
   // An active slot is rehydrated under its existing identity on app restart.
-  const resume=restoring&&prior?.phase==='active'&&!prior.hasPlayer&&prior.matchId;
+  const resume=restoring&&prior?.phase==='active'&&!prior.hasPlayer&&prior.matchId&&(prior.mode||'tdm')===mode&&(!prior.balanceFingerprint||prior.balanceFingerprint===match.balanceFingerprint);
   if(resume)match.matchId=prior.matchId;
-  SAVE.matchSlots[matchId]={phase:'active',matchId:match.matchId,generation:(prior?.generation||0)+(resume?0:1),participants:bots.map(a=>a.name)};
+  SAVE.matchSlots[matchId]={phase:'active',mode,matchId:match.matchId,balanceFingerprint:match.balanceFingerprint,generation:(prior?.generation||0)+(resume?0:1),participants:bots.map(a=>a.name)};
   return match;
 }
 function beginSlotCooldown(match){
-  if(match.id>=MATCH_COUNT||!MATCH_MODES.officialStats(match)||match.mode!=='tdm')return;
+  if(match.id>=MATCH_COUNT||!MATCH_MODES.officialStats(match))return;
   SAVE.matchSlots??={};const previous=SAVE.matchSlots[match.id];
   match.cooldownUntil=wallNow()+SLOT_COOLDOWN_MS;
   const bots=match.participants.filter(a=>!a.isPlayer);
-  SAVE.matchSlots[match.id]={phase:'cooldown',matchId:match.matchId,generation:previous?.generation||1,endedAt:match.cooldownUntil-SLOT_COOLDOWN_MS,readyAt:match.cooldownUntil,participants:bots.map(a=>a.name),poses:bots.map(a=>({name:a.name,x:a.x,y:a.y,angle:a.angle,team:a.team,dead:a.dead}))};
+  SAVE.matchSlots[match.id]={phase:'cooldown',mode:match.mode,matchId:match.matchId,balanceFingerprint:match.balanceFingerprint,generation:previous?.generation||1,endedAt:match.cooldownUntil-SLOT_COOLDOWN_MS,readyAt:match.cooldownUntil,participants:bots.map(a=>a.name),poses:bots.map(a=>({name:a.name,x:a.x,y:a.y,angle:a.angle,team:a.team,dead:a.dead}))};
 }
 function slotCooldownRemaining(match){return Math.max(0,(match?.cooldownUntil||0)-wallNow());}
+function tournamentReservationMap(events){
+  const reservations=new Map();
+  for(const event of Array.isArray(events)?events:[])if(event?.kind==='official'&&!['COMPLETED','CANCELLED'].includes(event.status)){
+    if(Array.isArray(event.scheduling?.reservations)){for(const id of event.scheduling.reservations)if(typeof id==='string')reservations.set(id,event.id);}
+    else if(event.status==='ACTIVE')for(const team of event.teams||[])for(const person of team.participants||[])if(person.kind!=='user'&&typeof person.id==='string')reservations.set(person.id,event.id);
+  }
+  return reservations;
+}
+function cachedTournamentReservations(){
+  if(Array.isArray(window.SARCloud?.state?.tournamentReservations))return window.SARCloud.state.tournamentReservations;
+  const owner=currentAccount()?.id;if(!owner)return [];
+  try{return JSON.parse(STORE.get('sar.tournament.calendar.'+owner,'null'))?.tournaments||[];}catch{return [];}
+}
+function persistWaitingSlot(match){
+  match.availableParticipants=match.participants.length;
+  if(match.id>=MATCH_COUNT)return;
+  const previous=SAVE.matchSlots[match.id]||{};
+  SAVE.matchSlots[match.id]={...previous,phase:'waiting',mode:match.mode,matchId:match.matchId,balanceFingerprint:match.balanceFingerprint,resumeStatus:match.resumeStatus,readyAt:match.cooldownUntil,participants:match.participants.filter(a=>!a.isPlayer).map(a=>a.name)};
+}
+function waitForTournamentPool(match){
+  if(match.status==='waiting')return;
+  match.resumeStatus=match.status;match.waitStartedAt=gameNow();match.status='waiting';match.waitReason='tournament-reservations';match.requiredParticipants=10;
+  clearMatchEffects(match.id);for(const a of match.participants){a.vx=a.vy=0;a.target=null;}
+  persistWaitingSlot(match);
+}
+function waitingBackgroundMatch(matchId,bots,saved){
+  const mode=BACKGROUND_SLOT_MODES[matchId],policy=MATCH_MODES.get(mode),sameMode=(saved?.mode||'tdm')===mode;
+  const match={id:matchId,matchId:sameMode&&saved?.matchId||('waiting:'+wallNow()+':'+matchId),balanceFingerprint:sameMode&&saved?.balanceFingerprint||SAVE.patchState.fingerprint,mode,sessionType:'standard',eligible:true,hasPlayer:false,participants:bots,score:[0,0],limit:policy.target,durationMs:policy.durationMs,startedAt:gameNow(),status:'waiting',resumeStatus:sameMode&&saved?.phase==='cooldown'?'cooldown':sameMode&&saved?.resumeStatus||'active',needsFreshStart:true,waitStartedAt:gameNow(),waitReason:'tournament-reservations',requiredParticipants:10,cooldownUntil:sameMode?saved?.readyAt:undefined};
+  state.matches[matchId]=match;bots.forEach((a,i)=>{a.matchId=matchId;a.team=mode==='deathmatch'?i:i<TEAM_SIZE?0:1;a.vx=a.vy=0;});persistWaitingSlot(match);return match;
+}
+function resumeWaitingSlots(){
+  for(const match of state.matches.filter(m=>m?.status==='waiting')){
+    const needed=10-match.participants.length,available=state.idleBots.filter(a=>MATCH_MODES.botEligible(a,match.mode));
+    if(available.length<needed)continue;
+    const additions=available.slice(0,needed);state.idleBots=state.idleBots.filter(a=>!additions.includes(a));
+    if(match.needsFreshStart&&match.resumeStatus!=='cooldown'){startBotMatch(match.id,[...match.participants,...additions],true);continue;}
+    for(const a of additions){restoreDeathmatchStats(a);if(match.mode==='deathmatch')bindDeathmatchStats(a,match.id<MATCH_COUNT);const team=match.mode==='deathmatch'?Array.from({length:10},(_,i)=>i).find(t=>!match.participants.some(p=>p.team===t)):match.participants.filter(p=>p.team===0).length<5?0:1;prepareActorForMatch(a,match.id,team);match.participants.push(a);if(match.resumeStatus==='active'||match.resumeStatus==='countdown')respawnActor(a,true);else a.dead=true;}
+    const waited=gameNow()-(match.waitStartedAt??gameNow());match.startedAt+=waited;if(match.resumeStatus==='countdown'){if(Number.isFinite(match.countdownUntil)){match.countdownStartedAt+=waited;match.countdownUntil+=waited;}else if(match.hasPlayer)state.countdownUntil+=waited;}
+    match.status=match.resumeStatus||'active';delete match.resumeStatus;delete match.waitStartedAt;delete match.waitReason;
+    if(match.id<MATCH_COUNT){const prior=SAVE.matchSlots[match.id]||{};SAVE.matchSlots[match.id]={...prior,phase:match.status,mode:match.mode,participants:match.participants.filter(a=>!a.isPlayer).map(a=>a.name)};delete SAVE.matchSlots[match.id].resumeStatus;}
+  }
+}
 function updateOfficialSlots(){
+  resumeWaitingSlots();
   for(const match of state.matches.slice(0,MATCH_COUNT)){
     if(match?.status!=='cooldown'||slotCooldownRemaining(match)>0)continue;
     // Replacing the slot synchronously consumes this transition exactly once.
@@ -1228,19 +1352,23 @@ function initializeLeague(){
   const bots=[];
   for(let i=0;i<BOT_COUNT;i++) bots.push(makeActor(BOT_NAMES[i],false,i));
   state.actors.push(...bots);
-  const shuffled=shuffle(bots);SAVE.matchSlots??={};
+  const reservations=tournamentReservationMap(cachedTournamentReservations());
+  for(const a of bots)if(reservations.has(a.profile.id)){a.officialTournamentReservation=reservations.get(a.profile.id);a.officialReservation='tournament:'+a.officialTournamentReservation;}
+  const shuffled=shuffle(bots.filter(a=>!a.officialReservation));SAVE.matchSlots??={};
   // Reserve saved cooldown rosters first, so a reload cannot book those bots
   // into another slot while their original slot is still cooling down.
   for(let matchId=0;matchId<MATCH_COUNT;matchId++){
-    const saved=SAVE.matchSlots[matchId];if(saved?.phase!=='cooldown'||!Number.isFinite(saved.readyAt))continue;
+    const saved=SAVE.matchSlots[matchId];if(!['cooldown','waiting'].includes(saved?.phase)||!Number.isFinite(saved.readyAt)||(saved.mode||'tdm')!==BACKGROUND_SLOT_MODES[matchId])continue;
     const participants=[];for(const name of (saved.participants||[]).slice(0,10)){const at=shuffled.findIndex(a=>a.name===name);if(at>=0)participants.push(...shuffled.splice(at,1));}
     for(const a of participants){const pose=saved.poses?.find(p=>p.name===a.name);a.matchId=matchId;a.team=pose?.team??null;a.x=pose?.x??WORLD.w/2;a.y=pose?.y??WORLD.h/2;a.angle=pose?.angle??0;a.dead=pose?.dead??true;a.vx=a.vy=0;}
-    state.matches[matchId]={id:matchId,matchId:saved.matchId,status:'cooldown',sessionType:'standard',mode:'tdm',eligible:true,hasPlayer:false,participants,score:[0,0],limit:SCORE_LIMIT,durationMs:MATCH_DURATION_MS,startedAt:gameNow(),cooldownUntil:saved.readyAt};
+    const mode=BACKGROUND_SLOT_MODES[matchId],policy=MATCH_MODES.get(mode);
+    if(participants.length<10)waitingBackgroundMatch(matchId,participants,saved);
+    else state.matches[matchId]={id:matchId,matchId:saved.matchId,balanceFingerprint:saved.balanceFingerprint||SAVE.patchState.fingerprint,status:'cooldown',sessionType:'standard',mode,eligible:true,hasPlayer:false,participants,score:[0,0],limit:policy.target,durationMs:policy.durationMs,startedAt:gameNow(),cooldownUntil:saved.readyAt};
   }
   for(let matchId=0;matchId<MATCH_COUNT;matchId++)if(!state.matches[matchId]){
     const prior=SAVE.matchSlots[matchId],selected=[];
-    if(prior?.phase==='active')for(const name of (prior.participants||[]).slice(0,10)){const at=shuffled.findIndex(a=>a.name===name);if(at>=0)selected.push(...shuffled.splice(at,1));}
-    selected.push(...shuffled.splice(0,10-selected.length));startBotMatch(matchId,selected,true);
+    if(['active','waiting'].includes(prior?.phase))for(const name of (prior.participants||[]).slice(0,10)){const at=shuffled.findIndex(a=>a.name===name);if(at>=0)selected.push(...shuffled.splice(at,1));}
+    selected.push(...shuffled.splice(0,10-selected.length));if(selected.length===10)startBotMatch(matchId,selected,true);else waitingBackgroundMatch(matchId,selected,prior);
   }
   // 50 persistent bots / 40 live slots. The ten waiting bots rotate into completed
   // matches first so no bot is permanently benched.
@@ -1254,7 +1382,7 @@ function frozen(value){if(value&&typeof value==='object'){Object.values(value).f
 function snapshotResult(match){
   const rows=standings(match),player=rows.find(r=>r.isPlayer),winners=match.mode==='deathmatch'?ffaWinners(rows):rows.filter(r=>r.team===match.winner).map(r=>r.id);
   let placement=0,previous=null;rows.forEach((r,i)=>{if(!previous||r.kills!==previous.kills||r.deaths!==previous.deaths||r.damage!==previous.damage)placement=i+1;r.placement=placement;previous=r;});
-  return frozen({matchId:match.matchId,mode:match.mode,sessionType:match.sessionType,eligible:match.eligible,practice:match.practice||false,aiRevision:match.aiRevision,rulesetRevision:match.rulesetRevision,balanceVersion:match.balanceVersion,balanceFingerprint:match.balanceFingerprint,appVersion:match.appVersion,endedAt:match.endedAt,durationMs:match.endedAt-match.startedAt,reason:match.endReason,score:match.score.slice(),winner:match.winner,winnerIds:winners,rows,playerId:player?.id,xp:cloneData(match.xpAward||null),ranked:cloneData(match.rankedAwards||null),config:cloneData(match.context?.config||null)});
+  return frozen({matchId:match.matchId,mode:match.mode,sessionType:match.sessionType,eligible:match.eligible,practice:match.practice||false,aiRevision:match.aiRevision,rulesetRevision:match.rulesetRevision,balanceVersion:match.balanceVersion,balanceFingerprint:match.balanceFingerprint,appVersion:match.appVersion,endedAt:match.endedAt,endedAtWall:match.rewardResult?.at??wallNow(),durationMs:match.endedAt-match.startedAt,reason:match.endReason,score:match.score.slice(),winner:match.winner,winnerIds:winners,rows,playerId:player?.id,xp:cloneData(match.xpAward||null),ranked:cloneData(match.rankedAwards||null),config:cloneData(match.context?.config||null)});
 }
 function sessionResultHtml(result){
   const player=result.rows.find(r=>r.id===result.playerId),ffa=result.mode==='deathmatch',custom=result.sessionType==='custom',tie=ffa?result.winnerIds.length!==1:result.winner===null;
@@ -1271,18 +1399,25 @@ function enterSession(match){
   document.getElementById('hud').classList.toggle('hidden',!match.hasPlayer);document.getElementById('spectatorHud').classList.toggle('hidden',match.hasPlayer);document.getElementById('crosshair').classList.toggle('hidden',!match.hasPlayer);
   const focus=match.participants.find(a=>a.isPlayer)||match.participants[0];if(focus){state.camera.x=focus.x;state.camera.y=focus.y;}
   clearInput();input.aimX=cssW/2+Math.min(220,cssW*.22);input.aimY=cssH/2;input.fullMap=false;
-  if(match.hasPlayer){match.status='countdown';state.countdownUntil=gameNow()+3000;state.fightUntil=0;const overlay=document.getElementById('matchCountdown');overlay.classList.remove('hidden','fight');overlay.querySelector('strong').textContent='3';overlay.querySelector('span').textContent='MATCH STARTS IN';requestGameplayPointerLock();}
+  if(match.hasPlayer){beginMatchCountdown(match);renderMatchCountdown();requestGameplayPointerLock();}
 }
-function bindDeathmatchStats(a){
-  const dm=SAVE.modeStats.deathmatch;a.standardBindings={career:a.career,weaponUsage:a.weaponUsage};a.sandbox=true;a.tournamentBot=a.isPlayer?null:cloneData(SAVE.bots[a.name]);a.tournamentMeta=dm.meta;
+function bindDeathmatchStats(a,background=false){
+  if(a.standardBindings)return;
+  const dm=SAVE.modeStats.deathmatch;a.standardBindings={career:a.career,weaponUsage:a.weaponUsage,sandbox:a.sandbox,tournamentBot:a.tournamentBot,tournamentMeta:a.tournamentMeta};
+  a.sandbox=!background;a.tournamentBot=background||a.isPlayer?null:cloneData(SAVE.bots[a.name]);a.tournamentMeta=dm.meta;
   a.career=a.isPlayer?dm.player:(dm.bots[a.name]??=blankBotCareer(a.name));a.weaponUsage=a.isPlayer?(a.career.weapons??={}):(a.career.weaponUsage??={});
   for(const n of Object.keys(WEAPONS))a.weaponUsage[n]??={k:0,d:0,picks:0,games:0,damage:0,shots:0,hits:0,headshots:0,equippedTime:0};
 }
+function restoreDeathmatchStats(a){
+  if(!a.standardBindings)return;
+  Object.assign(a,a.standardBindings);delete a.standardBindings;
+}
 function startDeathmatch(){
   initializeLeague();if(state.playerMatchId!==null||state.localSessionId!=null)throw Error('Finish your current session first.');
-  if(state.idleBots.length<9)throw Error('The roster is currently reserved. Finish the active session first.');
-  const bots=state.idleBots.splice(0,9),player=makeActor('YOU',true,999,true);state.actors.push(player);
-  const actors=[player,...bots];actors.forEach(bindDeathmatchStats);
+  const bots=state.idleBots.filter(a=>MATCH_MODES.botEligible(a,'deathmatch')).slice(0,9);
+  if(bots.length<9)throw Error('The roster is currently reserved. Wait for available participants.');
+  state.idleBots=state.idleBots.filter(a=>!bots.includes(a));const player=makeActor('YOU',true,999,true);state.actors.push(player);
+  const actors=[player,...bots];actors.forEach(a=>bindDeathmatchStats(a));
   const match=startMatch(nextSessionSlot(),actors,true,{mode:'deathmatch',sessionType:'standard'});enterSession(match);return match;
 }
 function customConfiguration(raw={}){
@@ -1302,7 +1437,7 @@ function startCustomMatch(raw){
 function releaseSession(match){
   releaseTournamentReservations(match);
   clearMatchEffects(match.id);for(const a of match.participants){
-    if(a.standardBindings&&!a.isPlayer){a.career=a.standardBindings.career;a.weaponUsage=a.standardBindings.weaponUsage;delete a.standardBindings;a.sandbox=false;a.tournamentBot=null;a.tournamentMeta=null;a.matchId=null;a.team=null;a.target=null;a.vx=a.vy=0;state.idleBots.push(a);}
+    if(a.standardBindings&&!a.isPlayer){restoreDeathmatchStats(a);a.matchId=null;a.team=null;a.target=null;a.vx=a.vy=0;if(!a.officialReservation&&!state.idleBots.includes(a))state.idleBots.push(a);}
     else state.actors=state.actors.filter(actor=>actor!==a);
   }
   state.matches[match.id]=null;while(state.matches.length>MATCH_COUNT&&!state.matches.at(-1))state.matches.pop();state.localSessionId=null;state.playerMatchId=null;state.running=false;state.mode='menu';state.paused=false;
@@ -1320,9 +1455,55 @@ function updateFinalCountdown(now){
   const remaining=match?.status==='active'&&!match.overtime?matchRemainingMs(match,now):0,value=state.running&&remaining>0&&remaining<=5000?Math.ceil(remaining/1000):0;
   overlay.classList.toggle('hidden',!value);if(value&&(overlay.dataset.match!==match.matchId||overlay.dataset.second!==String(value))){overlay.dataset.match=match.matchId;overlay.dataset.second=String(value);overlay.textContent=String(value);}
 }
-function renderDeathmatchProfile(){const c=SAVE.modeStats.deathmatch.player;showModal(`<div class="eyebrow">PLAYER PROFILE / DEATHMATCH</div><h2>Deathmatch record</h2><div class="account-actions"><button data-action="player-profile">TEAM DEATHMATCH</button><button class="selected" data-action="deathmatch-profile">DEATHMATCH</button></div>${progressionProfileHtml()}${careerStatsHtml(c,true)}<h3>WEAPONS</h3>${careerWeaponTableHtml(c.weapons||{})}<h3>RECENT MATCHES</h3>${SAVE.modeStats.deathmatch.recentMatches.slice(-10).reverse().map(r=>{const p=r.rows.find(a=>a.isPlayer);return `<p>${p?'PLACE '+p.placement+' · '+p.kills+' / '+p.deaths+' / '+p.assists:'DEATHMATCH'} · ${r.reason==='time'?'TIME LIMIT':'KILL TARGET'}</p>`;}).join('')||'<p>No completed Deathmatches yet.</p>'}<p class="meta-note">Deathmatch records remain separate from TDM careers, seasons and Weapon Meta.</p>`,'deathmatch-profile');}
+function renderDeathmatchProfile(){const c=SAVE.modeStats.deathmatch.player;showModal(`<div class="eyebrow">PLAYER PROFILE / DEATHMATCH</div><h2>Deathmatch record</h2>${profileTabsHtml('deathmatch')}${progressionProfileHtml()}${careerStatsHtml(c,true)}<h3>WEAPONS</h3>${careerWeaponTableHtml(c.weapons||{})}<h3>RECENT MATCHES</h3>${SAVE.modeStats.deathmatch.recentMatches.slice(-10).reverse().map(r=>{const p=r.rows.find(a=>a.isPlayer);return `<p>${p?'PLACE '+p.placement+' · '+p.kills+' / '+p.deaths+' / '+p.assists:'DEATHMATCH'} · ${r.reason==='time'?'TIME LIMIT':'KILL TARGET'}</p>`;}).join('')||'<p>No completed Deathmatches yet.</p>'}<p class="meta-note">Deathmatch records remain separate from TDM careers, seasons and Weapon Meta.</p>`,'deathmatch-profile');}
 
 
+function playerTdmSlot(modeId='tdm'){
+  const candidates=[getMatch(PLAYER_MATCH_SLOT_ID),...state.matches.slice(0,MATCH_COUNT)];
+  return candidates.find(match=>match&&BACKGROUND_SLOT_MODES[match.id]==='tdm'&&match.mode==='tdm'&&match.status==='active'&&!match.hasPlayer&&actorsInMatch(match.id).filter(a=>MATCH_MODES.botEligible(a,modeId)).length>=9)||null;
+}
+function modeEntryRosterReady(modeId){
+  return modeId==='custom'||(modeId==='deathmatch'?state.idleBots.filter(a=>MATCH_MODES.botEligible(a,modeId)).length>=9:!!playerTdmSlot(modeId));
+}
+function waitForModeRoster(modeId,signal,status){
+  return new Promise((resolve,reject)=>{
+    let timer;const cancel=()=>{clearTimeout(timer);reject(signal.reason||Error('Entry cancelled'));};
+    const check=()=>{
+      if(signal.aborted){cancel();return;}
+      if(modeEntryRosterReady(modeId)){signal.removeEventListener('abort',cancel);resolve();return;}
+      status('Waiting for available participants. Reserved bots remain in their official tournament.');timer=setTimeout(check,100);
+    };
+    signal.addEventListener('abort',cancel,{once:true});check();
+  });
+}
+function beginModeEntry(modeId,rawConfig){
+  const controller=window.SARModeEntry;if(!controller)throw Error('Match preparation is unavailable. Reopen the updated game.');
+  const policy=MATCH_MODES.get(modeId),config=modeId==='custom'?customConfiguration(rawConfig):null;
+  if(modeId!=='custom'&&!['tdm','ranked-tdm','deathmatch'].includes(modeId))throw Error('Unsupported player mode');
+  clearInput();releaseGameplayPointerLock();
+  return controller.begin({
+    key:modeId+':'+(config?JSON.stringify(rawConfig||{}):''),label:config?'Custom '+(config.mode==='deathmatch'?'Deathmatch':'Team Deathmatch'):policy.label,
+    async prepare({signal,stage}){
+      initializeLeague();if(state.playerMatchId!==null||state.localSessionId!=null||state.queued)throw Error('Finish your current session first.');
+      await stage('Preparing arena view',20000,async()=>{
+        const renderer=await ensure25d();if(signal.aborted)throw signal.reason;
+        if(!renderer?.diagnostics)throw Error('The arena view could not load. Retry, or reopen the updated game.');
+      });
+      await stage('Waiting for available participants',60000,(signal,status)=>waitForModeRoster(modeId,signal,status));
+      return config;
+    },
+    commit(prepared){
+      if(state.playerMatchId!==null||state.localSessionId!=null||state.queued)throw Error('Another session is already active. Return to the lobby.');
+      if(!modeEntryRosterReady(modeId))return false;
+      const match=modeId==='custom'?startCustomMatch(prepared):modeId==='deathmatch'?startDeathmatch():queueForMatch(modeId);
+      if(!match)throw Error('The prepared match could not be entered. Return to the lobby and retry.');
+      return true;
+    },
+    waitForRoster:(signal,status)=>waitForModeRoster(modeId,signal,status),
+    cancel:()=>config?renderCustomSetup(config):renderPlayMenu(),
+    diagnostic:error=>console.error('[Match preparation]',modeId,error.stack||error.message)
+  }).then(result=>{if(result.entered)requestGameplayPointerLock();return result;});
+}
 function queueForMatch(modeId='tdm'){
   const policy=MATCH_MODES.get(modeId);if(!policy||policy.mode!=='tdm'||!policy.humans||!policy.bots)throw Error('Unsupported player mode');
   initializeLeague();
@@ -1332,18 +1513,15 @@ function queueForMatch(modeId='tdm'){
   const qs=document.getElementById('queueStatus');if(qs)qs.classList.remove('hidden');
   const detail=document.getElementById('queueDetail');if(detail)detail.textContent='Instant player slot ready. Starting immediately…';
   updateLobbyUi();
-  // All four bot games remain true 5v5s. Joining instantly takes over the designated
-  // live slot, moves one bot into the waiting rotation, and restarts it as YOU + 9 bots.
-  let open=getMatch(PLAYER_MATCH_SLOT_ID);
-  if(!open||open.status!=='active'||open.hasPlayer){
-    open=state.matches.find(m=>m&&m.status==='active'&&!m.hasPlayer)||null;
-  }
+  // Joining takes over a configured TDM slot and moves one bot to the waiting pool.
+  const open=playerTdmSlot(modeId);
   if(open){
     const available=actorsInMatch(open.id).filter(a=>MATCH_MODES.botEligible(a,modeId));
-    if(available.length>=9)launchPlayerMatch(open.id,available,modeId);
+    if(available.length>=9)return launchPlayerMatch(open.id,available,modeId);
   }
 }
 function launchPlayerMatch(matchId, releasedBots,modeId=state.queuedMode||'tdm'){
+  if(BACKGROUND_SLOT_MODES[matchId]!=='tdm')throw Error('Player TDM requires a Team Deathmatch slot.');
   const policy=MATCH_MODES.get(modeId);if(!policy?.humans||!policy.bots||policy.mode!=='tdm')throw Error('Unsupported player mode');
   const available=releasedBots.filter(a=>MATCH_MODES.botEligible(a,modeId));if(available.length<9)throw Error('The eligible roster is currently reserved.');
   const chosen=available.slice(0,9), leftover=available.slice(9);
@@ -1352,9 +1530,9 @@ function launchPlayerMatch(matchId, releasedBots,modeId=state.queuedMode||'tdm')
   const player=makeActor('YOU',true,999);
   state.actors.push(player);
   const match=startMatch(matchId,[player,...chosen],true,policy.ranked?{mode:policy.mode,sessionType:policy.sessionType,shuffle:true}:null);
-  SAVE.matchSlots[matchId]={phase:'active',matchId:match.matchId,hasPlayer:true,generation:(SAVE.matchSlots[matchId]?.generation||0)+1,participants:chosen.map(a=>a.name)};saveTelemetry();
-  match.status='countdown';state.countdownUntil=gameNow()+3000;state.fightUntil=0;
-  state.playerMatchId=matchId;state.audioCountdown=3;audioEvent('countdown',player);state.queued=false;state.running=true;state.mode='play';state.paused=false;state.elapsed=0;state.startTime=gameNow();
+  SAVE.matchSlots[matchId]={phase:'active',matchId:match.matchId,balanceFingerprint:match.balanceFingerprint,hasPlayer:true,generation:(SAVE.matchSlots[matchId]?.generation||0)+1,participants:chosen.map(a=>a.name)};saveTelemetry();
+  beginMatchCountdown(match);
+  state.playerMatchId=matchId;state.queued=false;state.running=true;state.mode='play';state.paused=false;state.elapsed=0;state.startTime=gameNow();
   document.getElementById('menu').classList.remove('visible');
   document.getElementById('pause').classList.remove('visible');
   document.getElementById('modal').classList.remove('visible');
@@ -1363,23 +1541,25 @@ function launchPlayerMatch(matchId, releasedBots,modeId=state.queuedMode||'tdm')
   const focus=getPlayer(); if(focus){state.camera.x=focus.x;state.camera.y=focus.y;}
   input.aimX=cssW/2+Math.min(220,cssW*.22);input.aimY=cssH/2;input.fullMap=false;
   clearInput();positionCrosshair();requestGameplayPointerLock();
-  const countdown=document.getElementById('matchCountdown');if(countdown){countdown.classList.remove('hidden','fight');const label=countdown.querySelector('span'),number=countdown.querySelector('strong');if(label)label.textContent='MATCH STARTS IN';if(number)number.textContent='3';}
+  renderMatchCountdown();
+  return match;
 }
 function recordPlayerResult(a,winner){
   const career=a.career,s=a.stats;
   career.bestKills=Math.max(career.bestKills,s.kills);career.bestDamage=Math.max(career.bestDamage,s.damage);
   career.currentWinStreak=a.team===winner?career.currentWinStreak+1:0;career.bestWinStreak=Math.max(career.bestWinStreak,career.currentWinStreak);
   const old=career.bestKdGame,kd=s.kills/Math.max(1,s.deaths);if(!old||kd>old.kd||(kd===old.kd&&s.kills>old.kills))career.bestKdGame={kd,kills:s.kills,deaths:s.deaths,at:wallNow()};
-  career.recentMatches.push({at:wallNow(),patchId:SAVE.patchState.id,mode:getMatch(a.matchId)?.mode||'tdm',sessionType:getMatch(a.matchId)?.sessionType||'standard',eligible:officialTdm(a),matchId:getMatch(a.matchId)?.matchId,aiRevision:AI_REVISION,won:a.team===winner,primary:a.slots[0].name,sidearm:a.slots[1].name,kills:s.kills,deaths:s.deaths,assists:s.assists,damage:s.damage,headshots:s.headshots});
+  career.recentMatches.push({at:wallNow(),patchId:SAVE.patchState.id,mode:getMatch(a.matchId)?.mode||'tdm',sessionType:getMatch(a.matchId)?.sessionType||'standard',eligible:officialTdm(a),matchId:getMatch(a.matchId)?.matchId,aiRevision:AI_REVISION,won:a.team===winner,primary:a.slots[0].name,sidearm:a.slots[1].name,kills:s.kills,deaths:s.deaths,assists:s.assists,damage:s.damage,headshots:s.headshots,shots:s.shots,hits:s.hits});
   career.recentMatches=career.recentMatches.slice(-30);
 }
 function rotateBotMatch(matchId,releasedBots,targetSize=10){
   // Waiting bots enter first; recently released bots go to the back of the queue.
-  const pool=[...state.idleBots.splice(0),...releasedBots];
+  for(const a of releasedBots){restoreDeathmatchStats(a);a.matchId=null;a.team=null;a.target=null;a.vx=a.vy=0;}
+  const pool=[...new Set([...state.idleBots.splice(0),...releasedBots])].filter(a=>MATCH_MODES.botEligible(a,BACKGROUND_SLOT_MODES[matchId]));
   const next=pool.slice(0,targetSize),waiting=pool.slice(targetSize);
   for(const a of waiting){a.matchId=null;a.team=null;a.target=null;a.vx=a.vy=0;}
   state.idleBots.push(...waiting);
-  return startBotMatch(matchId,next);
+  return next.length===targetSize?startBotMatch(matchId,next):waitingBackgroundMatch(matchId,next,SAVE.matchSlots[matchId]);
 }
 function finishPlayerMatch(match){
   if(state.matches[match.id]!==match)return;
@@ -1413,14 +1593,15 @@ function matchReportHtml(match,playerTeam,report){
 function finishBotMatch(match){
   if(state.matches[match.id]!==match||match.status!=='cooldown'||slotCooldownRemaining(match)>0)return;
   const released=actorsInMatch(match.id).filter(a=>!a.isPlayer);
-  if(state.queued && state.playerMatchId===null && released.length>=9){
+  if(match.mode==='tdm'&&state.queued && state.playerMatchId===null && released.length>=9){
+    for(const a of released)restoreDeathmatchStats(a);
     launchPlayerMatch(match.id,released);
   } else {
     rotateBotMatch(match.id,released,10);
   }
 }
 function endMatch(match,winner,reason='score'){
-  if(!match||match.status!=='active')return;
+  if(!match||match.status!=='active'||!matchUsesCurrentBalance(match))return;
   if(match.context?.tournamentId){endTournamentGame(match,winner,reason);return;}
   if(match.result)return;
   ensureSeasonFresh(wallNow());
@@ -1432,7 +1613,11 @@ function endMatch(match,winner,reason='score'){
   const socialMatchId=match.matchId;
   if(match.sessionType==='custom'||match.mode==='deathmatch'){
     if(match.eligible){const dm=SAVE.modeStats.deathmatch;for(const a of participants){const won=match.result.winnerIds.length===1&&match.result.winnerIds.includes(a.id);a.career.games++;if(won)a.career.wins++;else if(!match.result.winnerIds.includes(a.id))a.career.losses++;else a.career.draws=(a.career.draws||0)+1;for(const [name,sample] of Object.entries(a.matchWeaponStats||{}))if(sample.picks||sample.equippedTime)a.weaponUsage[name].games++;if(a.isPlayer)recordPlayerResult(a,won?a.team:null);}dm.completedMatches++;dm.recentMatches.push(cloneData(match.result));dm.recentMatches=dm.recentMatches.slice(-30);saveTelemetry();window.SARCloud?.commitMatch?.(SAVE,socialMatchId);}
-    for(const a of participants){a.vx=a.vy=0;a.target=null;}queueMicrotask(()=>finishSession(match));return;
+    recordArenaCreditCompletion(match);
+    if(match.hasPlayer)refreshOpenPlayerProfile();
+    for(const a of participants){a.vx=a.vy=0;a.target=null;}
+    if(match.id<MATCH_COUNT){beginSlotCooldown(match);match.status='cooldown';saveTelemetry();}
+    else queueMicrotask(()=>finishSession(match));return;
   }
   for(const a of participants)a.completedSocialMatch={matchId:socialMatchId,team:a.team,teammates:participants.filter(other=>!other.isPlayer&&other!==a&&other.team===a.team).map(other=>other.name),opponents:participants.filter(other=>!other.isPlayer&&other.team!==a.team).map(other=>other.name)};
   if(match.hasPlayer){const p=participants.find(a=>a.isPlayer);match.playerReport={...(p?.stats||{}),mostUsed:Object.entries(p?.matchWeaponStats||{}).sort((a,b)=>(b[1].equippedTime||0)-(a[1].equippedTime||0))[0]?.[0]||p?.slots[0]?.name,mvp:participants.map(a=>({name:a.name,kills:a.stats.kills,damage:a.stats.damage})).sort((a,b)=>b.kills-a.kills||b.damage-a.damage)[0],rows:participants.map(a=>({name:a.name,isPlayer:a.isPlayer,team:a.team,...cloneData(a.stats)})).sort((a,b)=>a.team-b.team||b.kills-a.kills||b.damage-a.damage)};}
@@ -1440,7 +1625,7 @@ function endMatch(match,winner,reason='score'){
   SAVE.patchState.completedMatches++;if(revisionSample()!==SAVE.patchState)revisionSample().completedMatches++;diagnostics.completedMatches++;diagnostics.matchScoreKills+=match.score[0]+match.score[1];
   beginSlotCooldown(match);match.status='cooldown';
   saveTelemetry();
-  if(match.hasPlayer){window.SARCloud?.commitMatch?.(SAVE,socialMatchId);if(document.getElementById('modalContent')?.dataset.view==='player-profile')renderPlayerProfile();}
+  if(match.hasPlayer){window.SARCloud?.commitMatch?.(SAVE,socialMatchId);recordArenaCreditCompletion(match);refreshOpenPlayerProfile();}
   for(const a of actorsInMatch(match.id)){a.vx=a.vy=0;a.target=null;}
   // Only the local result screen advances immediately. Automated replacement
   // belongs to the persisted slot scheduler, independently for each slot.
@@ -1449,42 +1634,105 @@ function endMatch(match,winner,reason='score'){
 function reserveTournamentBots(context){
   if(context.tournamentKind!=='official')return [];
   const ids=new Set(context.teams.flatMap(t=>t.participants).filter(p=>p.kind!=='user').map(p=>p.id));
-  const originals=[...ids].map(id=>state.actors.find(a=>!a.isPlayer&&!a.sandbox&&a.profile?.id===id));
+  const originals=[...ids].map(id=>state.actors.find(a=>!a.isPlayer&&(!a.sandbox||a.standardBindings)&&a.profile?.id===id));
   if(originals.some(a=>!a))throw Error('A tournament participant is unavailable.');
-  for(const a of originals){const m=getMatch(a.matchId);if(a.officialReservation||m&&(m.hasPlayer||MATCH_MODES.ranked(m)||m.context?.tournamentKind==='official'))throw Error('A participant is already reserved for an official match.');}
-  const replacements=state.idleBots.filter(a=>!ids.has(a.profile?.id)&&MATCH_MODES.botEligible(a,'tdm')),playing=originals.filter(a=>a.matchId!==null);
-  if(replacements.length<playing.length)throw Error('The official roster is currently reserved.');
-  // Borrow canonical roster actors; tournament combat still uses isolated actors.
-  // Fill displaced casual slots without changing their score, timer or match ID.
-  const selected=replacements.slice(0,playing.length);state.idleBots=state.idleBots.filter(a=>!originals.includes(a)&&!selected.includes(a));
-  for(const [i,a] of playing.entries()){
-    const m=getMatch(a.matchId),replacement=selected[i],team=a.team,pose={x:a.x,y:a.y,angle:a.angle,dead:a.dead};
-    m.participants[m.participants.indexOf(a)]=replacement;prepareActorForMatch(replacement,m.id,team);
-    if(m.status==='active')respawnActor(replacement,true);else Object.assign(replacement,pose,{vx:0,vy:0});
-    if(SAVE.matchSlots[m.id]){SAVE.matchSlots[m.id].participants=m.participants.filter(p=>!p.isPlayer).map(p=>p.name);if(SAVE.matchSlots[m.id].poses)SAVE.matchSlots[m.id].poses=m.participants.map(p=>({name:p.name,x:p.x,y:p.y,angle:p.angle,team:p.team,dead:p.dead}));}
-  }
-  for(const a of originals){a.officialReservation=context.gameId;a.matchId=null;a.team=null;a.target=null;a.vx=a.vy=0;}
+  for(const a of originals){const m=getMatch(a.matchId),globalReservation=a.officialReservation==='tournament:'+context.tournamentId;if(a.officialReservation&&!globalReservation||m&&(m.hasPlayer||MATCH_MODES.ranked(m)||m.context?.tournamentKind==='official'))throw Error('A participant is already reserved for an official match.');}
+  // Canonical identities leave background participation before isolated tournament
+  // combat actors are created. A shortage pauses configured slots, never clones bots.
+  for(const a of originals)a.officialReservation=context.gameId;
+  detachTournamentBots(originals);
   return originals;
 }
-function releaseTournamentReservations(match){
-  for(const a of match.reservedBots||[]){if(a.officialReservation===match.context?.gameId){delete a.officialReservation;if(!state.idleBots.includes(a))state.idleBots.push(a);}}
-  match.reservedBots=[];
+function detachTournamentBots(originals){
+  const affected=new Set();state.idleBots=state.idleBots.filter(a=>!originals.includes(a));
+  for(const a of originals){const match=getMatch(a.matchId);if(match){match.participants=match.participants.filter(p=>p!==a);affected.add(match);}restoreDeathmatchStats(a);a.matchId=null;a.team=null;a.target=null;a.vx=a.vy=0;}
+  for(const match of affected){waitForTournamentPool(match);persistWaitingSlot(match);}
+  resumeWaitingSlots();
 }
-function startTournamentGame(context){
+function syncTournamentReservations(events){
+  const reservations=tournamentReservationMap(events),toDetach=[];let changed=false;
+  for(const a of state.actors.filter(a=>!a.isPlayer&&(!a.sandbox||a.standardBindings))){
+    const event=reservations.get(a.profile?.id);
+    if(event){if(a.officialTournamentReservation!==event)changed=true;a.officialTournamentReservation=event;if(!a.officialReservation||a.officialReservation.startsWith('tournament:'))a.officialReservation='tournament:'+event;if(a.matchId!==null){toDetach.push(a);changed=true;}state.idleBots=state.idleBots.filter(b=>b!==a);}
+    else if(a.officialTournamentReservation){changed=true;delete a.officialTournamentReservation;if(a.officialReservation?.startsWith('tournament:')){delete a.officialReservation;if(a.matchId===null&&!state.idleBots.includes(a))state.idleBots.push(a);}}
+  }
+  if(!changed)return;
+  if(toDetach.length)detachTournamentBots(toDetach);else resumeWaitingSlots();
+  updateOfficialSlots();saveTelemetry();
+}
+function releaseTournamentReservations(match){
+  for(const a of match.reservedBots||[]){if(a.officialReservation===match.context?.gameId){if(a.officialTournamentReservation)a.officialReservation='tournament:'+a.officialTournamentReservation;else{delete a.officialReservation;if(!state.idleBots.includes(a))state.idleBots.push(a);}}}
+  match.reservedBots=[];
+  resumeWaitingSlots();
+}
+function tournamentCheckpointBuild(){return window.SARBuild?.shellRevision||window.SARBuild?.version||'development';}
+function captureTournamentGame(gameId){
+  const match=state.matches.find(m=>m?.context?.gameId===gameId&&m.hasPlayer&&m.context.schedule);
+  if(!match||!['countdown','active'].includes(match.status))return null;
+  return structuredClone({format:'arena-refined-human-game-v1',owner:currentAccount()?.id||match.context.userId,build:tournamentCheckpointBuild(),balance:match.balanceFingerprint,aiRevision:AI_REVISION,at:wallNow(),simulationTime:gameNow(),nextShotId,match:{...match,reservedBots:[]},projectiles:state.projectiles.filter(p=>p.matchId===match.id)});
+}
+function restoreTournamentCheckpoint(context,saved){
+  const ids=context.teams.flatMap(t=>t.participants).map(p=>p.id),match=saved?.match;
+  if(saved?.format!=='arena-refined-human-game-v1'||saved.owner!==context.userId||saved.build!==tournamentCheckpointBuild()||saved.balance!==SAVE.patchState.fingerprint||saved.aiRevision!==AI_REVISION||match?.context?.gameId!==context.gameId||match.context.tournamentId!==context.tournamentId||match.context.seriesId!==context.seriesId||!Number.isFinite(saved.simulationTime)||!['active','countdown'].includes(match.status)||match.participants?.length!==10||new Set(match.participants.map(a=>a.participantId)).size!==10||match.participants.some(a=>!ids.includes(a.participantId))||match.participants.filter(a=>a.isPlayer&&a.participantId===context.userId).length!==1)throw Error('The saved tournament game does not match this game build or roster. Its recovery copy has been retained.');
+  if(match.participants.some(a=>state.actors.some(existing=>existing.id===a.id)))throw Error('The saved tournament actors cannot be restored into the current session. Return to the lobby and reopen the game.');
+  const restored=structuredClone(saved),delta=gameNow()-saved.simulationTime,seen=new Set(),keep=new Set(['context','career','profile','traits','tournamentBot','tournamentMeta','weaponUsage','stats','matchWeaponStats','rewardResult','xpAward']);
+  // Rebase simulation deadlines only. Account, career, telemetry and server
+  // epoch timestamps remain untouched; structured clone preserves graph edges.
+  function rebase(value,field=''){
+    if(!value||typeof value!=='object'||seen.has(value))return;seen.add(value);
+    if(value instanceof Map){for(const [key,item] of value){if(['blockedCells','failedExits'].includes(field)&&Number.isFinite(item))value.set(key,item+delta);else rebase(item);}return;}
+    if(value instanceof Set){for(const item of value)rebase(item);return;}
+    for(const key of Object.keys(value)){if(keep.has(key))continue;const item=value[key];if(Number.isFinite(item)&&(item!==0||['lastShot','lastBullet','at','time'].includes(key))&&(/(?:At|Until|End|Since)$/.test(key)||['nextThink','nextDecision','nextAim','lastShot','lastBullet','at','time','until'].includes(key)))value[key]=item+delta;else rebase(item,key);}
+  }
+  rebase(restored.match);rebase(restored.projectiles);const m=restored.match,id=nextSessionSlot();m.id=id;m.context=context;m.reservedBots=reserveTournamentBots(context);for(const a of m.participants)a.matchId=id;for(const p of restored.projectiles)p.matchId=id;
+  nextActorId=Math.max(nextActorId,...m.participants.map(a=>a.id+1));nextShotId=Math.max(nextShotId,restored.nextShotId||1);state.actors.push(...m.participants);state.matches[id]=m;state.projectiles.push(...restored.projectiles);return m;
+}
+function beginTournamentEntry(context,{ready=async()=>context,cancel=()=>{},checkpoint=null}={}){
+  const controller=window.SARModeEntry,preparedAt=performance.now();if(!controller)throw Error('Match preparation is unavailable. Reopen the updated game.');clearInput();releaseGameplayPointerLock();
+  return controller.begin({key:'tournament:'+context.gameId,label:'Tournament · '+(context.round||'match'),async prepare({signal,stage}){
+    initializeLeague();if(state.playerMatchId!==null||state.localSessionId!=null||state.queued)throw Error('Finish your current session before tournament entry.');
+    if(context.schedule&&window.SARStorage?.canTournamentCheckpoint?.()===false)throw Error('Local recovery storage is unavailable. Retry after local storage is available; your tournament check-in is retained.');
+    await stage('Preparing tournament arena',20000,async()=>{const renderer=await ensure25d();if(signal.aborted)throw signal.reason;if(!renderer?.diagnostics)throw Error('The tournament arena could not load.');});
+    await stage('Completing entry preparation',4000,signal=>new Promise((resolve,reject)=>{const stop=()=>{clearTimeout(timer);reject(signal.reason||Error('Tournament entry cancelled'));},timer=setTimeout(()=>{signal.removeEventListener('abort',stop);resolve();},Math.max(0,3000-(performance.now()-preparedAt)));signal.addEventListener('abort',stop,{once:true});}));
+    if(context.schedule&&!checkpoint&&wallNow()>=context.schedule.countdownAt)throw Error('Preparation missed the scheduled countdown. Your check-in is retained; this game needs schedule recovery.');
+    return stage('Confirming scheduled roster',15000,()=>ready(signal));
+  },commit(prepared){if(state.playerMatchId!==null||state.localSessionId!=null)throw Error('Another session is already active.');if(prepared.schedule&&!checkpoint&&wallNow()>=prepared.schedule.countdownAt)throw Error('Preparation missed the scheduled countdown. Your check-in is retained; this game needs schedule recovery.');startTournamentGame(prepared,{entryCommit:true,checkpoint});return true;},cancel,diagnostic:error=>console.error('[Tournament preparation]',context.gameId,error.stack||error.message)});
+}
+function startTournamentGame(context,{entryCommit=false,checkpoint=null}={}){
+  const existing=context?.gameId&&state.matches.find(m=>m?.context?.gameId===context.gameId&&m.context.tournamentId===context.tournamentId);if(existing)return existing;
+  if(!entryCommit)window.SARModeEntry?.cancel({restore:false});
   initializeLeague();if(state.playerMatchId!==null||state.localSessionId!=null)throw new Error('Finish your current game first.');
   const people=context.teams.flatMap(team=>team.participants);if(people.length!==10||new Set(people.map(p=>p.id)).size!==10)throw new Error('Two complete teams are required.');
-  const actors=people.map(p=>{const human=p.kind==='user'&&context.hasPlayer!==false,bot=BOT_NAMES.find(name=>profileFor(name).id===p.id);if(!human&&!bot)throw new Error('Unknown tournament participant');const a=makeActor(human?'YOU':bot,human,bot?BOT_NAMES.indexOf(bot):999,true);a.participantId=p.id;return a;});
-  const reservedBots=reserveTournamentBots(context),matchId=nextSessionSlot();state.actors.push(...actors);const match=startMatch(matchId,actors,actors.some(a=>a.isPlayer),context);match.reservedBots=reservedBots;if(match.hasPlayer){state.playerMatchId=matchId;state.running=true;state.mode='play';state.paused=false;state.elapsed=0;document.getElementById('menu').classList.remove('visible');document.getElementById('modal').classList.remove('visible');document.getElementById('hud').classList.remove('hidden');document.getElementById('crosshair').classList.remove('hidden');const p=getPlayer();state.camera.x=p.x;state.camera.y=p.y;input.aimX=cssW/2+220;input.aimY=cssH/2;clearInput();requestGameplayPointerLock();}return match;
+  let match;if(checkpoint)match=restoreTournamentCheckpoint(context,checkpoint);else{
+    const actors=people.map(p=>{const human=p.kind==='user'&&context.hasPlayer!==false,bot=BOT_NAMES.find(name=>profileFor(name).id===p.id);if(!human&&!bot)throw new Error('Unknown tournament participant');const a=makeActor(human?'YOU':bot,human,bot?BOT_NAMES.indexOf(bot):999,true);a.participantId=p.id;return a;});
+    const reservedBots=reserveTournamentBots(context),matchId=nextSessionSlot();state.actors.push(...actors);match=startMatch(matchId,actors,actors.some(a=>a.isPlayer),context);match.reservedBots=reservedBots;beginMatchCountdown(match);
+  }
+  if(match.hasPlayer){state.playerMatchId=match.id;state.running=true;state.mode='play';state.paused=false;state.elapsed=0;document.getElementById('menu').classList.remove('visible');document.getElementById('modal').classList.remove('visible');document.getElementById('pause').classList.remove('visible');document.getElementById('hud').classList.remove('hidden');document.getElementById('crosshair').classList.remove('hidden');const p=getPlayer();state.camera.x=p.x;state.camera.y=p.y;input.aimX=cssW/2+220;input.aimY=cssH/2;clearInput();renderMatchCountdown();requestGameplayPointerLock();}return match;
+}
+async function acceptTournamentXP(context,result,snapshot){
+  // Scheduled official results earn progression only after the service accepts
+  // the immutable game. Replayed acknowledgements reuse the existing receipt.
+  const owner=currentAccount()?.id,player=snapshot?.rows?.find(row=>row.type==='human'),official=context?.schedule&&context.tournamentKind==='official';
+  if(!official||!owner||context.userId!==owner||player?.participantId!==owner||snapshot.matchId!==context.gameId||snapshot.tournamentId!==context.tournamentId||snapshot.seriesId!==context.seriesId||result?.id!==context.gameId||result.seriesId!==context.seriesId||result.matchId!==snapshot.matchId||snapshot.sessionType!=='tournament'||snapshot.mode!==result.mode)throw Error('The saved tournament reward does not match the accepted game.');
+  if(snapshot.rows.length!==10||new Set(snapshot.rows.map(row=>row.participantId)).size!==10||result.stats?.length!==10)throw Error('The accepted tournament roster is incomplete.');
+  for(const row of snapshot.rows){const actual=result.stats.find(stat=>stat.participantId===row.participantId);if(!actual||Object.entries(row.stats).some(([key,value])=>value!==actual[key])||row.won!==(context.teamIds[row.team]===result.winnerTeamId))throw Error('The saved tournament performance does not match the accepted game.');}
+  const match={status:'ended',sessionType:'tournament',mode:snapshot.mode,eligible:false,context,rewardResult:frozen(cloneData(snapshot))},award=commitMatchXP(match);
+  if(!award?.receipt)throw Error('The accepted tournament reward could not be recorded.');
+  saveTelemetry();await window.SARStorage?.flush?.();
+  if(award.applied)window.SARCloud?.commitMatch?.(SAVE,snapshot.matchId);
+  return cloneData(award.receipt);
 }
 function endTournamentGame(match,winner,reason){
   if(match.status!=='active')return;
   match.status='ended';match.winner=winner;match.endReason=reason;match.endedAt=gameNow();
-  match.rewardResult=rewardSnapshot(match);commitMatchXP(match);if(match.xpAward){saveTelemetry();window.SARCloud?.commitMatch?.(SAVE,match.matchId);}
+  match.rewardResult=rewardSnapshot(match);const pendingOfficial=match.context.schedule&&match.context.tournamentKind==='official';if(!pendingOfficial){commitMatchXP(match);if(match.xpAward){saveTelemetry();window.SARCloud?.commitMatch?.(SAVE,match.matchId);}}
   const actors=actorsInMatch(match.id);match.tournamentResult={mode:match.mode,sessionType:'tournament',eligible:false,aiRevision:AI_REVISION,balanceVersion:match.balanceVersion,balanceFingerprint:match.balanceFingerprint,matchId:match.matchId,xp:cloneData(match.xpAward||null),id:match.context.gameId||('game:'+match.context.seriesId+':'+wallNow()),winnerTeamId:match.context.teamIds[winner],score:match.score.slice(),duration:(match.endedAt-match.startedAt)/1000,stats:actors.map(a=>({participantId:a.participantId,...cloneData(a.stats),weaponStats:cloneData(a.matchWeaponStats)}))};
+  Object.assign(match.tournamentResult,{mapId:MAP_CALIBRATION.mapId,calibrationId:MAP_CALIBRATION.calibrationId,distanceUnit:'world-unit'});
+  if(Number.isFinite(match.context.schedule?.matchStartAt))match.tournamentResult.duration=Math.max(0,(wallNow()-match.context.schedule.matchStartAt)/1000);
   releaseTournamentReservations(match);
-  if(match.hasPlayer){const p=actors.find(a=>a.isPlayer);match.playerReport={...cloneData(p.stats),rows:actors.map(a=>({name:a.name,isPlayer:a.isPlayer,team:a.team,...cloneData(a.stats)}))};audioEvent(p.team===winner?'victory':'defeat',p);releaseGameplayPointerLock();queueMicrotask(()=>{state.actors=state.actors.filter(a=>a.matchId!==match.id);state.matches[match.id]=null;state.playerMatchId=null;state.running=false;state.mode='menu';document.getElementById('hud').classList.add('hidden');document.getElementById('crosshair').classList.add('hidden');document.getElementById('menu').classList.add('visible');window.SARTournaments?.onResult?.(match.context,match.tournamentResult);});}
+  if(match.hasPlayer){const p=actors.find(a=>a.isPlayer);match.playerReport={...cloneData(p.stats),rows:actors.map(a=>({name:a.name,isPlayer:a.isPlayer,team:a.team,...cloneData(a.stats)}))};audioEvent(p.team===winner?'victory':'defeat',p);releaseGameplayPointerLock();queueMicrotask(()=>{state.actors=state.actors.filter(a=>a.matchId!==match.id);state.matches[match.id]=null;state.playerMatchId=null;state.running=false;state.mode='menu';document.getElementById('hud').classList.add('hidden');document.getElementById('crosshair').classList.add('hidden');document.getElementById('menu').classList.add('visible');window.SARTournaments?.onResult?.(match.context,match.tournamentResult,pendingOfficial?match.rewardResult:null);});}
 }
-function matchRemainingMs(match,now=gameNow()){return ['cooldown','ended'].includes(match.status)?0:match.status==='countdown'?match.durationMs:Math.max(0,match.durationMs-(now-match.startedAt));}
+function matchRemainingMs(match,now=gameNow()){const status=match.status==='waiting'?match.resumeStatus:match.status;return ['cooldown','ended'].includes(status)?0:status==='countdown'?match.durationMs:Math.max(0,match.durationMs-(Number.isFinite(match.context?.schedule?.matchStartAt)?wallNow()-match.context.schedule.matchStartAt:(match.status==='waiting'?match.waitStartedAt:now)-match.startedAt));}
 function updateMatchClocks(now){
   for(const match of state.matches){
     if(!match||match.status!=='active'||match.overtime)continue;
@@ -1497,6 +1745,7 @@ function updateMatchClocks(now){
   }
 }
 function exitGame(){
+  window.SARModeEntry?.cancel({restore:false});
   const returnToPhone=state.mode==='spectate';
   releaseGameplayPointerLock();clearInput();
   state.paused=false;state.queued=false;
@@ -1534,10 +1783,12 @@ function cycleSpectateMatch(dir=1){
   if(state.mode!=='spectate')return;state.spectateMatchId=(state.spectateMatchId+dir+MATCH_COUNT)%MATCH_COUNT;const a=actorsInMatch(state.spectateMatchId).find(x=>!x.dead);state.spectateActorId=a?.id??null;
 }
 function startSpectate(matchId=0){
+  window.SARModeEntry?.cancel({restore:false});
   releaseGameplayPointerLock();clearInput();
   initializeLeague();state.mode='spectate';state.running=true;state.paused=false;state.spectateMatchId=matchId;const a=actorsInMatch(matchId).find(x=>!x.dead);state.spectateActorId=a?.id??null;
   document.getElementById('menu').classList.remove('visible');document.getElementById('modal').classList.remove('visible');document.getElementById('pause').classList.remove('visible');
   document.getElementById('hud').classList.add('hidden');document.getElementById('crosshair').classList.add('hidden');document.getElementById('spectatorHud')?.classList.remove('hidden');updateSpectatorHud(gameNow());
+  renderMatchCountdown();
 }
 
 // -------------------- Combat --------------------
@@ -1567,6 +1818,7 @@ function finishReload(s,a=null){
   const w=WEAPONS[s.name],need=w.mag-s.ammo,take=Math.min(need,s.reserve);s.ammo+=take;s.reserve-=take;s.reloading=false;s.reloadEnd=0;
 }
 function recordEngagementRange(a,angle,weapon,now){
+  if(!matchUsesCurrentBalance(getMatch(a.matchId)))return;
   // Sample one actual trigger pull aimed toward a currently visible opponent.
   // Old shots have no range observation, so they are never reconstructed.
   let candidate=null,best=Infinity;
@@ -1586,6 +1838,7 @@ function recordEngagementRange(a,angle,weapon,now){
   recordPatchEvent(a,weapon,'engagementDistance',distance);recordPatchEvent(a,weapon,'engagementDistanceN');
 }
 function emitWeaponRound(a,s,w,angle,now,shotRecord,feedbackId){
+  if(!matchUsesCurrentBalance(getMatch(a.matchId)))return;
   s.ammo--;s.lastBullet=now;a.muzzleUntil=now+65;a.recoil=1;
   audioEvent('shot',a,{weapon:s.name,roundId:feedbackId,time:now});
   // Procedural weapon VFX: warm muzzle sparks and a tiny brass casing for non-shotgun firearms.
@@ -1611,7 +1864,7 @@ function emitWeaponRound(a,s,w,angle,now,shotRecord,feedbackId){
   if(s.ammo===0 && !a.isPlayer) startReload(a,now+30);
 }
 function fire(a, angle, now){
-  if(getMatch(a.matchId)?.status!=='active')return false;
+  if(getMatch(a.matchId)?.status!=='active'||!matchUsesCurrentBalance(getMatch(a.matchId)))return false;
   const s=currentWeaponState(a),w=WEAPONS[s.name];
   if(a.dead||s.reloading||s.pendingBurst||now-s.lastShot<w.hitSpeed*1000)return false;
   if(s.ammo<=0){audioEvent('dry-fire',a,{weapon:s.name});startReload(a,now);return false;}
@@ -1629,7 +1882,7 @@ function fire(a, angle, now){
 function updateBurst(a,now){
   for(const s of a.slots){
     const burst=s.pendingBurst;if(!burst)continue;
-    if(a.dead||s!==currentWeaponState(a)||s.reloading||getMatch(a.matchId)?.status!=='active'){s.pendingBurst=null;continue;}
+    if(a.dead||s!==currentWeaponState(a)||s.reloading||getMatch(a.matchId)?.status!=='active'||!matchUsesCurrentBalance(getMatch(a.matchId))){s.pendingBurst=null;continue;}
     const w=WEAPONS[s.name];
     while(s.pendingBurst&&burst.remaining>0&&now>=burst.nextAt){
       if(s.ammo<=0){s.pendingBurst=null;break;}
@@ -1645,7 +1898,7 @@ function damageAtRange(p, isHead){
   return (isHead?p.head:p.damage)*mult;
 }
 function killActor(victim,killer,weapon,isHead,killDistance,now){
-  if(victim.dead||getMatch(victim.matchId)?.status!=='active')return;
+  if(victim.dead||getMatch(victim.matchId)?.status!=='active'||!matchUsesCurrentBalance(getMatch(victim.matchId)))return;
   if(!victim.isPlayer){const range=victim.target?dist(victim,victim.target):0,w=currentWeapon(victim);TACTICS.remember(victim.tacticalMemory,{kind:'death',x:victim.x,y:victim.y,at:now,tactic:victim.tactic,approach:victim.moveGoal?{...victim.moveGoal}:null,door:victim.exitPlan?.exit,isolated:!victim.visibleAllies?.length,badRange:!!victim.target&&(range>w.preferred*1.7||(w.preferred>=1000&&range<w.preferred*.4))});}
   victim.dead=true;victim.deathAt=now;victim.respawnAt=now+RESPAWN_MS;victim.stats.deaths++;victim.killStreak=0;if(victim.career){victim.career.deaths++;if(victim.isPlayer)victim.career.currentStreak=0;}
   const equipped=currentWeaponState(victim)?.name; if(equipped){actorMeta(victim,equipped).deaths++;recordPatchEvent(victim,equipped,'deaths');victim.weaponUsage[equipped].d++;}
@@ -1680,7 +1933,7 @@ function killActor(victim,killer,weapon,isHead,killDistance,now){
   for(let i=0;i<15;i++) state.particles.push({matchId:victim.matchId,x:victim.x,y:victim.y,vx:rand(-120,120),vy:rand(-120,120),life:rand(.35,.75),age:0,size:rand(2,5),color:SKINS[victim.skinIndex].accent});
 }
 function applyDamage(victim,p,amount,isHead,now){
-  if(victim.dead||getMatch(victim.matchId)?.status!=='active'||!isEnemy(p.owner,victim))return;
+  if(victim.dead||getMatch(victim.matchId)?.status!=='active'||!matchUsesCurrentBalance(getMatch(victim.matchId))||!isEnemy(p.owner,victim))return;
   const actual=Math.min(victim.hp,amount);victim.hp-=actual;victim.stats.taken+=actual;recordSeasonEvent(victim,'taken',actual);p.owner.stats.damage+=actual;p.owner.weaponUsage[p.weapon].damage+=actual;actorMeta(p.owner,p.weapon).damage+=actual;recordPatchEvent(p.owner,p.weapon,'damage',actual);if(victim.career)victim.career.taken+=actual;if(p.owner.career)p.owner.career.damage+=actual;
   if(!victim.isPlayer)TACTICS.remember(victim.tacticalMemory,{kind:'damage',amount:actual,received:true,at:now});if(!p.owner.isPlayer){TACTICS.remember(p.owner.tacticalMemory,{kind:'damage',amount:actual,received:false,at:now});TACTICS.observeDamage(p.owner.tacticalMemory,victim.id,actual,now);}
   victim.damageByWeapon.set(p.weapon,(victim.damageByWeapon.get(p.weapon)||0)+actual);
@@ -1692,7 +1945,7 @@ function applyDamage(victim,p,amount,isHead,now){
 }
 function updateProjectiles(dt,now){
   for(const p of state.projectiles){
-    if(p.dead)continue;const match=getMatch(p.matchId);if(!match||match.status!=='active'){p.dead=true;continue;}p.px=p.x;p.py=p.y;const nx=p.x+p.vx*dt,ny=p.y+p.vy*dt;const segLen=Math.hypot(nx-p.x,ny-p.y);
+    if(p.dead)continue;const match=getMatch(p.matchId);if(!match||match.status!=='active'||!matchUsesCurrentBalance(match)){p.dead=true;continue;}p.px=p.x;p.py=p.y;const nx=p.x+p.vx*dt,ny=p.y+p.vy*dt;const segLen=Math.hypot(nx-p.x,ny-p.y);
     let bestT=1.01,best=null;
     const impact={};const ot=obstacleHitT(p.x,p.y,nx,ny,impact); if(ot!==null){bestT=ot;best='wall';}
     for(const a of actorsInMatch(p.matchId)){
@@ -2070,20 +2323,12 @@ function update(dt,now){
   initializeLeague();
   updateOfficialSlots();
   if(state.paused)return;
-  if(state.playerMatchId!==null){
-    const playerMatch=getMatch(state.playerMatchId);
-    if(playerMatch?.status==='countdown'){
-      const left=state.countdownUntil-now,overlay=document.getElementById('matchCountdown');
-      if(left<=0){audioEvent('fight',getPlayer());playerMatch.status='active';playerMatch.startedAt=now;state.fightUntil=now+650;if(overlay){overlay.classList.add('fight');const number=overlay.querySelector('strong'),label=overlay.querySelector('span');if(number)number.textContent='FIGHT';if(label)label.textContent='';}}
-      else {const count=Math.ceil(left/1000);if(state.audioCountdown!==count){state.audioCountdown=count;audioEvent('countdown',getPlayer());}if(overlay){const number=overlay.querySelector('strong');if(number)number.textContent=String(count);}}
-    }
-    if(state.fightUntil&&now>=state.fightUntil){document.getElementById('matchCountdown')?.classList.add('hidden');state.fightUntil=0;}
-  }
+  updateMatchCountdowns(now);
   updateMatchClocks(now);updateFinalCountdown(now);
   if(state.playerMatchId!==null&&getMatch(state.playerMatchId)?.status==='active') state.elapsed+=dt;
   for(const a of state.actors){
     if(a.matchId===null)continue;
-    const match=getMatch(a.matchId);if(!match||match.status!=='active'){a.vx=a.vy=0;continue;}
+    const match=getMatch(a.matchId);if(!match||match.status!=='active'||!matchUsesCurrentBalance(match)){a.vx=a.vy=0;continue;}
     if(a.career)a.career.timePlayed+=dt;
     if(a.dead){
       a.ads=false;a.adsBlend=lerp(a.adsBlend||0,0,1-Math.exp(-dt*12));a.motionStates=['DEAD'];a.vx=a.vy=0;
@@ -2093,7 +2338,7 @@ function update(dt,now){
     for(const slot of a.slots){updateHandlingAudio(a,slot,now);if(slot.reloading&&now>=slot.reloadEnd)finishReload(slot,a);}
     const oldX=a.x,oldY=a.y;if(a.isPlayer)updatePlayer(a,dt,now); else updateBot(a,dt,now);effectiveSpreadDeg(a);updateBurst(a,now);updatePresentation(a,dt,now,oldX,oldY);
   }
-  updateProjectiles(dt,now);window.SARAudio?.flush();if(state.matches.some(m=>m?.status==='active'&&m.eligible&&m.mode==='tdm')){SAVE.patchState.observedSeconds+=dt;const r=revisionSample();if(r!==SAVE.patchState)r.observedSeconds+=dt;}diagnostics.maxParticles=Math.max(diagnostics.maxParticles,state.particles.length);
+  updateProjectiles(dt,now);window.SARAudio?.flush();if(state.matches.some(m=>m?.status==='active'&&m.eligible&&m.mode==='tdm'&&matchUsesCurrentBalance(m))){SAVE.patchState.observedSeconds+=dt;const r=revisionSample();if(r!==SAVE.patchState)r.observedSeconds+=dt;}diagnostics.maxParticles=Math.max(diagnostics.maxParticles,state.particles.length);
   for(const p of state.particles){p.age+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.95;p.vy*=.95;}
   state.particles=state.particles.filter(p=>p.age<p.life&&p.matchId===visibleMatchId()).slice(-220);
   updateCamera(dt);
@@ -2282,9 +2527,9 @@ function drawWeaponModel(name,x,y,angle,recoil=0,g=ctx,motion=null){
   if(reload>.82){metal(0-bolt,-6,4,2,'#8f9b8f',.4);}g.restore();
 }
 
-function weaponKick(name,recoil){return recoil*(name==='LW Tundra'?8.5:name==='War Head LMG'?6.8:WEAPONS[name]?.type==='sidearm'?4:5.5);}
+function weaponKick(name,recoil){return recoil*(name==='FAL'?5.8:name==='LW Tundra'?8.5:name==='War Head LMG'?6.8:WEAPONS[name]?.type==='sidearm'?4:5.5);}
 function weaponLength(name){
-  return {'AR-15':62,AK47:62,'SMG-9':48,'Pump Shotgun':72,'SPAS-12':69,'Auto 12':66,'LR-762':75,'LW Tundra':84,'War Head LMG':77,P90:58,'9mm':38,X16:34,'X-16 Auto':43,'SR-Aug':62}[name]||62;
+  return {'AR-15':62,AK47:62,'SMG-9':48,'Pump Shotgun':72,'SPAS-12':69,'Auto 12':66,'LR-762':75,'LW Tundra':84,'War Head LMG':77,P90:58,'9mm':38,X16:34,'X-16 Auto':43,'SR-Aug':62,FAL:76}[name]||62;
 }
 function drawOperatorPortrait(g,w,h,index){
   const skin=SKINS[index],edge='#19282a',accent=skin.accent;
@@ -2467,17 +2712,18 @@ function drawTacticalMap(full=false){
   ctx.restore();
 }
 function render(now){
+  renderMatchCountdown(now);
   window.SARFullscreen?.setCombatActive(state.running&&!state.paused&&!document.getElementById('modal').classList.contains('visible'));
   if(window.SAR25D?.render){window.SAR25D.render(renderSnapshot());return;}
   ctx.fillStyle='#253b30';ctx.fillRect(0,0,cssW,cssH);ctx.fillStyle='#e5e4d8';ctx.textAlign='center';ctx.font='600 16px system-ui';ctx.fillText(loading25d?'Loading arena…':'Arena renderer unavailable. Open Settings → View to retry.',cssW/2,cssH/2);
 }
 function renderSnapshot(){
   const id=visibleMatchId(),focus=getFocusActor(),player=getPlayer(),now=gameNow(),match=getMatch(id),presentation=matchTeamPresentation(match);
-  return {world:WORLD,time:now,mode:state.mode,matchId:id,focus:{x:state.camera.x,y:state.camera.y},focusActorId:focus?.id??null,focusTeam:focus?.team??null,perspective:{mode:match?.mode,kind:presentation.kind,label:presentation.perspectiveLabel},zoom:state.camera.zoom||1,
-    tactical:state.mode==='spectate'&&CONFIG.spectatorCamera==='TACTICAL',fullMap:input.fullMap,
+  return {world:WORLD,time:now,mode:state.mode,matchId:id,countdown:matchCountdownSnapshot(match,now),focus:{x:state.camera.x,y:state.camera.y},focusActorId:focus?.id??null,focusTeam:focus?.team??null,perspective:{mode:match?.mode,kind:presentation.kind,label:presentation.perspectiveLabel},zoom:state.camera.zoom||1,
+    tactical:state.mode==='spectate'&&CONFIG.spectatorCamera==='TACTICAL',fullMap:input.fullMap,hudSize:CONFIG.hudSize,hudMinimapTop:HUD_LAYOUT.minimapTop,hudMinimapBottom:HUD_LAYOUT.minimapBottom,
     actors:actorsInMatch(id).map(a=>{
       const slot=currentWeaponState(a),weapon=WEAPONS[slot?.name]||WEAPONS['AR-15'],v=a.visual||{};
-      return {id:a.id,name:a.name,x:a.x,y:a.y,angle:a.angle,team:a.team,participantId:TEAM_PRESENTATION.identity(a),presentation:presentation.actor(a),dead:a.dead,skin:a.skinIndex,skinPalette:{...SKINS[a.skinIndex]},weapon:slot?.name||'AR-15',hp:a.hp,maxHP:MAX_HP,isPlayer:a.isPlayer,
+      return {id:a.id,name:a.name,x:a.x,y:a.y,angle:a.angle,team:a.team,participantId:TEAM_PRESENTATION.identity(a),presentation:presentation.actor(a),dead:a.dead,skin:a.skinIndex,skinPalette:{...SKINS[a.skinIndex]},cosmetic:a.isPlayer?equippedCosmetic(a.skinIndex):null,weapon:slot?.name||'AR-15',hp:a.hp,maxHP:MAX_HP,isPlayer:a.isPlayer,
         mapVisible:!a.dead&&(state.mode!=='play'||!player||playerSpotsEnemy(a,player)),
         vx:a.vx,vy:a.vy,moving:!a.dead&&(v.move||0)>.025,sprinting:!a.dead&&a.sprinting,dashing:!a.dead&&now<a.dashUntil,ads:!a.dead&&a.ads,adsBlend:a.adsBlend||0,
         reloading:!a.dead&&!!slot?.reloading,reloadProgress:slot?reloadPhase(slot,now):0,reloadDuration:weapon.reload,reloadRemaining:slot?.reloading?Math.max(0,slot.reloadEnd-now)/1000:0,
@@ -2491,18 +2737,21 @@ function renderSnapshot(){
     damageNumbers:damageNumberSnapshot(now),
     geometry:{roads,floors,solids,surfaces,decor,outerWorld}};
 }
-let loading25d=false;
-async function ensure25d(){
-  if(window.SAR25D||loading25d)return;
-  loading25d=true;
-  try{
-    const module=await import('./renderer-25d.mjs');
-    window.SAR25D=module.createRenderer(renderSnapshot());
-    window.SAR25D.resize(innerWidth,innerHeight);
-  }catch(error){
-    console.error('2.5D renderer unavailable:',error);
-    const status=document.getElementById('viewStatus');if(status)status.textContent='Arena renderer unavailable. Retry the view.';
-  }finally{loading25d=false;}
+let loading25d=null;
+function ensure25d(){
+  if(window.SAR25D)return Promise.resolve(window.SAR25D);
+  if(loading25d)return loading25d;
+  loading25d=(async()=>{
+    try{
+      const module=await import('./renderer-25d.mjs');
+      document.querySelectorAll('#game3d,#game3dLabels,#game3dMap').forEach(canvas=>canvas.remove());
+      window.SAR25D=module.createRenderer(renderSnapshot());window.SAR25D.resize(innerWidth,innerHeight);return window.SAR25D;
+    }catch(error){
+      console.error('2.5D renderer unavailable:',error);
+      const status=document.getElementById('viewStatus');if(status)status.textContent='Arena renderer unavailable. Retry the view.';
+      return null;
+    }finally{loading25d=null;}
+  })();return loading25d;
 }
 
 // -------------------- UI --------------------
@@ -2527,8 +2776,8 @@ function matchHudState(match,focus,now){
   const ffa=match.mode==='deathmatch',rows=ffa?standings(match):[],row=rows.find(r=>r.id===focus?.id),presentation=matchTeamPresentation(match);
   const placement=row?1+rows.filter(r=>r.kills>row.kills||(r.kills===row.kills&&(r.deaths<row.deaths||(r.deaths===row.deaths&&r.damage>row.damage)))).length:0;
   return {ffa,mode:ffa?'DEATHMATCH':match.sessionType==='custom'?'CUSTOM TDM':'5V5 TDM',target:match.limit+' KILLS',placement,total:rows.length,
-    clock:match.status==='cooldown'?'NEXT '+formatTime(Math.ceil(slotCooldownRemaining(match)/1000)):match.overtime?'OT':formatTime(Math.ceil(matchRemainingMs(match,now)/1000)),
-    score:match.status==='cooldown'?'MATCH COMPLETE':ffa?`<span>${focus?.stats.kills||0} KILLS</span> <small>LEADER ${rows[0]?.kills||0}</small>`:teamScoreHtml(match,presentation)};
+    clock:match.status==='waiting'?'WAITING':match.status==='cooldown'?'NEXT '+formatTime(Math.ceil(slotCooldownRemaining(match)/1000)):match.overtime?'OT':formatTime(Math.ceil(matchRemainingMs(match,now)/1000)),
+    score:match.status==='waiting'?'WAITING FOR PARTICIPANTS':match.status==='cooldown'?'MATCH COMPLETE':ffa?`<span>${focus?.stats.kills||0} KILLS</span> <small>LEADER ${rows[0]?.kills||0}</small>`:teamScoreHtml(match,presentation)};
 }
 function updateHud(now){
   const p=getPlayer();if(!p)return;
@@ -2558,15 +2807,18 @@ function updateHud(now){
   if(!document.getElementById('scoreboard').classList.contains('hidden'))renderScoreboard();
 }
 function updateSpectatorHud(now){
-  const a=spectatedActor(),m=getMatch(state.spectateMatchId);if(!a||!m)return;const hud=matchHudState(m,a,now),presentation=matchTeamPresentation(m);
+  const a=spectatedActor(),m=getMatch(state.spectateMatchId);if(!m)return;const hud=matchHudState(m,a,now),presentation=matchTeamPresentation(m);
   refreshKillfeed();
   const name=document.getElementById('spectateName'),power=document.getElementById('spectatePower'),game=document.getElementById('spectateGame'),score=document.getElementById('spectateScore'),clock=document.getElementById('spectateClock'),weapon=document.getElementById('spectateWeapon');
-  if(name){name.textContent=a.name;name.dataset.botProfile=a.name;}if(power)power.textContent=a.profile?`PWR ${a.profile.power} • ${m.mode==='deathmatch'?'FFA':presentation.actor(a).label} • ${strategicRole(a.profile.archetype)}${a.profile.feared?' • FEARED':''} • ${a.stats.kills}/${a.stats.deaths}/${a.stats.assists} K/D/A`:'';
-  if(game)game.textContent=`GAME ${state.spectateMatchId+1} · ${hud.mode} · ${presentation.perspectiveLabel}`;if(score)score.innerHTML=hud.score;if(clock)clock.textContent=hud.clock;if(weapon)weapon.textContent=currentWeaponState(a).name;
-  document.getElementById('spectateScoreHeading').textContent=hud.ffa?`PLACE ${hud.placement}/${hud.total} · TARGET ${m.limit}`:`TARGET ${m.limit}`;
+  if(name){name.textContent=a?.name||(m.status==='waiting'?'WAITING FOR PARTICIPANTS':'NO SELECTED BOT');if(a)name.dataset.botProfile=a.name;else delete name.dataset.botProfile;}
+  if(power)power.textContent=a?.profile?`PWR ${a.profile.power} • ${m.mode==='deathmatch'?'FFA':presentation.actor(a).label} • ${strategicRole(a.profile.archetype)}${a.profile.feared?' • FEARED':''} • ${a.stats.kills}/${a.stats.deaths}/${a.stats.assists} K/D/A`:'';
+  if(game)game.textContent=`GAME ${state.spectateMatchId+1} · ${hud.mode} · ${a?presentation.perspectiveLabel:'SLOT WAITING'}`;if(score)score.innerHTML=hud.score;if(clock)clock.textContent=hud.clock;if(weapon)weapon.textContent=a?currentWeaponState(a).name:'—';
+  document.getElementById('spectateScoreHeading').textContent=m.status==='waiting'?`${Math.min(m.requiredParticipants??10,m.availableParticipants??m.participants.length)}/${m.requiredParticipants??10} AVAILABLE · TARGET ${m.limit}`:hud.ffa?`PLACE ${hud.placement}/${hud.total} · TARGET ${m.limit}`:`TARGET ${m.limit}`;
   document.querySelectorAll('[data-spectator=blue],[data-spectator=red]').forEach(button=>button.classList.toggle('hidden',hud.ffa));
-  document.getElementById('spectatorHud').dataset.team=presentation.actor(a).side;
-  document.querySelectorAll('[data-spectator-match]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.spectatorMatch)===state.spectateMatchId)));
+  document.querySelectorAll('[data-spectator="previous-bot"],[data-spectator="next-bot"],[data-spectator="stats"],[data-spectator="loadout"]').forEach(button=>button.disabled=!a);
+  document.getElementById('spectatorHud').dataset.team=a?presentation.actor(a).side:'neutral';
+  document.getElementById('spectatorHud').dataset.mode=m.mode;
+  document.querySelectorAll('[data-spectator-match]').forEach(b=>{const id=Number(b.dataset.spectatorMatch),slot=getMatch(id),label=`Match ${id+1} · ${slot?.mode==='deathmatch'?'Deathmatch':'Team Deathmatch'} · ${slot?.status||'unavailable'}`;b.setAttribute('aria-pressed',String(id===state.spectateMatchId));b.setAttribute('aria-label',label);b.title=label;b.dataset.mode=slot?.mode||'';b.dataset.status=slot?.status||'unavailable';});
   document.querySelectorAll('[data-spectator="follow"],[data-spectator="25d"],[data-spectator="tactical"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.spectator==='tactical'?CONFIG.spectatorCamera==='TACTICAL':CONFIG.spectatorCamera!=='TACTICAL')));
 }
 
@@ -2602,6 +2854,7 @@ function renderScoreboard(){
 let modalReturnFocus=null;
 function showModal(html,view=''){
   if(settingsCapture){settingsCapture.html=html;return;}
+  window.SARModeEntry?.cancel({restore:false});
   html=window.SARPhone?.decoratePanel?.(html,view)??html;
   if(!document.getElementById('modal').classList.contains('visible'))modalReturnFocus=document.activeElement;
   const content=document.getElementById('modalContent'),active=document.activeElement;
@@ -2629,11 +2882,12 @@ async function paintModelPreview(c,options){if(!c)return;if(!c.closest?.('[data-
   catch(error){const g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);g.fillStyle='#35473c';g.font='14px system-ui';g.fillText('Model unavailable',14,28);console.warn('Model preview:',error.message);}
 }
 function drawWeaponPreview(c,name){void paintModelPreview(c,{kind:'weapon',weapon:name});}
-function drawOperatorPreview(c,skinIndex){void paintModelPreview(c,{kind:'operator',skin:skinIndex,palette:SKINS[skinIndex],unarmed:true});}
+function equippedCosmetic(skinIndex){return window.SARCommerce?.getEquipped?.(SKINS[skinIndex]?.id)||null;}
+function drawOperatorPreview(c,skinIndex,owned=true){void paintModelPreview(c,{kind:'operator',skin:skinIndex,palette:SKINS[skinIndex],unarmed:true,cosmetic:owned?equippedCosmetic(skinIndex):null,lobbyIdle:owned});}
 function paintRankPreviews(root=document){root.querySelectorAll?.('[data-rank-preview]').forEach(c=>{void paintModelPreview(c,{kind:'rank',rankIndex:Number(c.dataset.rankPreview)});});}
 function paintLobbyKit(){
-  void paintModelPreview(document.getElementById('lobbyOperator'),{kind:'operator',skin:CONFIG.skin,palette:SKINS[CONFIG.skin],unarmed:true});
-  drawWeaponPreview(document.getElementById('lobbyWeapon'),CONFIG.primary);
+  void paintModelPreview(document.getElementById('lobbyOperator'),{kind:'operator',skin:CONFIG.skin,palette:SKINS[CONFIG.skin],unarmed:true,cosmetic:equippedCosmetic(CONFIG.skin),lobbyIdle:true,motion:'operator-breathe'});
+  void paintModelPreview(document.getElementById('lobbyWeapon'),{kind:'weapon',weapon:CONFIG.primary,motion:'weapon-turntable'});
   document.getElementById('lobbyOperatorName').textContent=SKINS[CONFIG.skin].name.toUpperCase();
   document.getElementById('lobbyWeaponName').textContent=CONFIG.primary;
 }
@@ -2641,6 +2895,7 @@ function weaponShotTime(w,index){const count=w.burstCount||1;return Math.floor(i
 function weaponSheet(name){const w=WEAPONS[name],shots=damage=>Math.ceil(MAX_HP/damage),ttk=n=>{const i=n-1,reloads=Math.floor(i/w.mag);return reloads*(weaponShotTime(w,w.mag-1)+w.reload)+weaponShotTime(w,i%w.mag);};return {w,rpm:60*(w.burstCount||1)/w.hitSpeed,bodyShots:shots(w.damage),headShots:shots(w.head),bodyTtk:ttk(shots(w.damage)),headTtk:ttk(shots(w.head))};}
 function weaponDescription(name){const w=WEAPONS[name],cadence=60*(w.burstCount||1)/w.hitSpeed;
   if(w.burstCount)return `Three independently resolved rounds per burst, ${w.burstSpacing*1000} ms apart. Hold fire to repeat every ${w.hitSpeed*1000} ms; use ADS for controlled mid-range fire.`;
+  if(name==='FAL')return `Semi-automatic rifle with ${w.damage} body / ${w.head} head damage, a ${w.mag}-round magazine and measured ${(w.hitSpeed*1000).toFixed(0)} ms follow-ups. Each press fires one independently resolved round.`;
   if(name==='SPAS-12')return 'Three-shell shotgun with twelve independently resolved pellets per shell, moderate reach and a measured one-second follow-up.';
   if(w.pellets>1)return w.auto?'Automatic close-range shotgun for repeated bursts; steep falloff rewards closing distance.':'High-damage close-range burst with powerful headshots; a slow follow-up and steep falloff demand timing.';
   if(w.preferred>=1400)return 'Long-range rifle with high single-shot damage and slow follow-ups. Use ADS and measured shots.';
@@ -2654,20 +2909,21 @@ function weaponDescription(name){const w=WEAPONS[name],cadence=60*(w.burstCount|
 // zero-to-maximum scale. TTK/reload reverse that scale (shorter is better).
 function weaponDisplayMetrics(name){
   const sheets=Object.keys(WEAPONS).map(weaponSheet),d=weaponSheet(name);
-  const definitions=[['body','Body damage',s=>s.w.damage,v=>formatXP(v)+(d.w.pellets>1?' / shell':''),false],['head','Headshot damage',s=>s.w.head,v=>formatXP(v)+(d.w.pellets>1?' / shell':''),false],['bodyTtk','Body TTK',s=>s.bodyTtk,v=>v.toFixed(2)+' s',true],['headTtk','Headshot TTK',s=>s.headTtk,v=>v.toFixed(2)+' s',true],['magazine','Magazine',s=>s.w.mag,v=>v+' rounds',false],['reserve','Reserve',s=>s.w.reserve,v=>v+' rounds',false],['reload','Reload',s=>s.w.reload,v=>v.toFixed(2)+' s',true],['range','Preferred range',s=>s.w.preferred,v=>formatXP(v)+' wu / '+(v/TILE).toFixed(2)+' tiles',false]];
+  const definitions=[['body','Body damage',s=>s.w.damage,v=>formatXP(v)+(d.w.pellets>1?' / shell':''),false],['head','Headshot damage',s=>s.w.head,v=>formatXP(v)+(d.w.pellets>1?' / shell':''),false],['bodyTtk','Body TTK',s=>s.bodyTtk,v=>v.toFixed(2)+' s',true],['headTtk','Headshot TTK',s=>s.headTtk,v=>v.toFixed(2)+' s',true],['magazine','Magazine',s=>s.w.mag,v=>v+' rounds',false],['reserve','Reserve',s=>s.w.reserve,v=>v+' rounds',false],['reload','Reload',s=>s.w.reload,v=>v.toFixed(2)+' s',true],['range','Preferred range',s=>s.w.preferred,metersText,false]];
   return definitions.map(([key,label,get,format,shorter])=>{const value=get(d),maximum=Math.max(...sheets.map(get));return {key,label,value,text:format(value),maximum,shorter,ratio:maximum>0?clamp(shorter?1-value/maximum:value/maximum,0,1):1};});
 }
 function cardModelHtml(kind,value,label){const operator=kind==='operator';return `<div class="card-model-viewer" data-model-card><canvas class="${operator?'operator':'weapon'}-preview" data-${operator?'operator':'weapon'}-preview="${escapeHtml(String(value))}" width="360" height="${operator?260:170}" tabindex="0" role="img" aria-label="${escapeHtml(label)}. Drag or use left and right arrows to rotate. Home resets." aria-keyshortcuts="ArrowLeft ArrowRight Home + -"></canvas><div class="card-model-controls" role="group" aria-label="${escapeHtml(label)} view"><button type="button" data-preview-action="left" aria-label="Rotate ${escapeHtml(label)} left">←</button><button type="button" data-preview-action="right" aria-label="Rotate ${escapeHtml(label)} right">→</button><button type="button" data-preview-action="reset">Reset</button><button type="button" data-preview-action="zoom-out" aria-label="Zoom out ${escapeHtml(label)}">−</button><button type="button" data-preview-action="zoom-in" aria-label="Zoom in ${escapeHtml(label)}">+</button></div><small class="card-model-hint">Drag to rotate · scroll to browse</small></div>`;}
 function loadoutMetaHtml(name,rows=currentMetaRows()){const category=rows.filter(r=>WEAPONS[r.name].type===WEAPONS[name].type),rank=category.findIndex(r=>r.name===name),r=category[rank];if(!r)return 'Waiting for combat samples';return `<span>${WEAPONS[name].type==='sidearm'?'SIDEARM':'PRIMARY'} META ${r.engagements>=5?'#'+(rank+1):'—'}</span><strong>Score ${r.engagements>=5?r.score.toFixed(1):'LOW SAMPLE'}</strong><span>Sample ${(r.confidence*100).toFixed(0)}%${r.confidence<.6?' · provisional':''}</span>`;}
 function loadoutCard(name,rows,readOnly=false){const d=weaponSheet(name),w=d.w,primary=w.type==='primary',equipped=CONFIG[primary?'primary':'sidearm']===name;
   const stats=weaponDisplayMetrics(name);
-  const advanced=[['Calculated RPM',d.rpm.toFixed(0)],['Hip Fire Spread',w.spread.toFixed(2)+'°'],['Hip Walk Spread',w.walkSpread.toFixed(2)+'°'],['Sprint Hip Spread',w.sprintSpread.toFixed(2)+'°'],['ADS Spread',w.adsSpread.toFixed(2)+'°'],['Falloff Start',w.falloffStart+' tiles'],['Falloff / Tile',(w.falloff*100).toFixed(2)+'%'],['Projectile Speed',w.speed+' tiles/s'],['Body Hits To Kill',d.bodyShots+(w.pellets>1?' blasts':'')],['Head Hits To Kill',d.headShots+(w.pellets>1?' blasts':'')],[w.burstCount?'Rounds / burst':'Pellets / shot',w.burstCount||w.pellets],['Cycle',w.hitSpeed.toFixed(2)+'s'],...(w.burstCount?[['Intra-burst spacing',w.burstSpacing.toFixed(3)+'s']]:[])];
+  const spreadText=value=>value.toFixed(3).replace(/0$/,'')+'°';
+  const advanced=[['Calculated RPM',d.rpm.toFixed(0)],['Hip Fire Spread',spreadText(w.spread)],['Hip Walk Spread',spreadText(w.walkSpread)],['Sprint Hip Spread',spreadText(w.sprintSpread)],['ADS Spread',spreadText(w.adsSpread)],['Falloff Start',DISTANCE_UNITS.legacyWeaponDistanceToMeters(w.falloffStart,MAP_CALIBRATION).toFixed(2)+' m'],['Falloff / Meter',DISTANCE_UNITS.legacyFalloffFractionToPercentPerMeter(w.falloff,MAP_CALIBRATION).toFixed(2)+'%'],['Projectile Speed',DISTANCE_UNITS.legacyWeaponSpeedToMetersPerSecond(w.speed,MAP_CALIBRATION).toFixed(2)+' m/s'],['Body Hits To Kill',d.bodyShots+(w.pellets>1?' blasts':'')],['Head Hits To Kill',d.headShots+(w.pellets>1?' blasts':'')],[w.burstCount?'Rounds / burst':'Pellets / shot',w.burstCount||w.pellets],['Cycle',w.hitSpeed.toFixed(2)+'s'],...(w.burstCount?[['Intra-burst spacing',w.burstSpacing.toFixed(3)+'s']]:[])];
   const sheet=values=>'<dl class="weapon-sheet">'+values.map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+value+'</dd></div>').join('')+'</dl>';
-  const metricSheet='<dl class="weapon-stat-bars">'+stats.map(row=>`<div data-stat="${row.key}" data-value="${row.value}" data-maximum="${row.maximum}"><dt>${row.label}${row.shorter?' <span class="stat-direction" title="Shorter is better">↓</span>':''}</dt><dd>${row.text}</dd><span class="stat-track" aria-hidden="true"><i style="width:${(row.ratio*100).toFixed(2)}%"></i></span></div>`).join('')+'</dl>';
+  const metricSheet='<dl class="weapon-stat-bars">'+stats.map(row=>`<div data-stat="${row.key}" data-value="${row.value}" data-maximum="${row.maximum}"><dt>${row.label}${row.shorter?' <span class="stat-direction" title="Shorter is better">↓</span>':''}</dt><dd>${row.text}</dd><span class="stat-track" style="--stat-fill:hsl(${(row.ratio*120).toFixed(1)} 58% 38%)" aria-hidden="true"><i style="width:${(row.ratio*100).toFixed(2)}%"></i></span></div>`).join('')+'</dl>';
   return '<article class="option-card loadout-card '+(equipped?'selected':'')+'" data-weapon-card="'+name+'"><span class="kit-state">'+(equipped?'EQUIPPED':primary?'PRIMARY':'SIDEARM')+'</span>'+cardModelHtml('weapon',name,name)+'<div class="eyebrow">'+(primary?'PRIMARY':'SIDEARM')+' · '+(w.burstCount?'BURST':w.auto?'AUTOMATIC':'SEMI-AUTO')+'</div><h3>'+name+'</h3><strong class="weapon-role">'+escapeHtml(w.role)+'</strong><p class="weapon-description">'+weaponDescription(name)+'</p>'+metricSheet+'<div class="loadout-live-meta" data-loadout-meta="'+name+'">'+loadoutMetaHtml(name,rows)+'</div><details class="advanced-stats"><summary>ADVANCED STATS</summary>'+sheet(advanced)+'</details>'+(readOnly?'':'<button data-set-'+(primary?'primary':'sidearm')+'="'+name+'">'+(equipped?'EQUIPPED':'EQUIP')+'</button>')+'</article>';
 }
 document.addEventListener('change',e=>{if(e.target.id==='metaMobileSort'){TABLE_SORT.meta={key:e.target.value,dir:e.target.value==='name'?1:-1};updateMetaTable();}});
-function renderLoadoutModal(){const rows=currentMetaRows();showModal(`<div class="eyebrow">ARMORY / EQUIPMENT</div><h2>Loadout</h2><p class="page-intro">Inspect each weapon, then equip your kit.</p><details class="stat-guide"><summary>READING THE STATS</summary><p>Bars compare all current weapons on a shared zero-to-maximum scale for each stat. Longer means more damage, ammunition or range; for TTK and reload, longer means less time. Exact values remain authoritative. Shotgun damage is combined per shell. TTK assumes ideal hits on 250 HP and includes the real firing cadence; actual fights vary. Range uses 70 world units per tile.</p></details><h3>Primary</h3><div class="option-grid loadout-grid">${PRIMARYS.map(n=>loadoutCard(n,rows)).join('')}</div><h3 class="loadout-section-heading">Sidearm</h3><div class="option-grid loadout-grid">${SIDEARMS.map(n=>loadoutCard(n,rows)).join('')}</div>`,'loadout');paintLobbyKit();requestAnimationFrame(()=>document.querySelectorAll('[data-weapon-preview]').forEach(c=>drawWeaponPreview(c,c.dataset.weaponPreview)));}
+function renderLoadoutModal(){const rows=currentMetaRows();showModal(`<div class="eyebrow">ARMORY / EQUIPMENT</div><h2>Loadout</h2><p class="page-intro">Inspect each weapon, then equip your kit.</p><details class="stat-guide"><summary>READING THE STATS</summary><p>Bars compare all current weapons on a shared zero-to-maximum scale for each stat. Longer means more damage, ammunition or range; for TTK and reload, longer means less time. Color follows the same scale: red through orange and yellow to green. Exact values remain authoritative. Shotgun damage is combined per shell. TTK assumes ideal hits on 250 HP and includes the real firing cadence; actual fights vary. Ranges use meters; projectile speed uses meters per second. These displays keep the same physical distances at every camera zoom.</p></details><h3>Primary</h3><div class="option-grid loadout-grid">${PRIMARYS.map(n=>loadoutCard(n,rows)).join('')}</div><h3 class="loadout-section-heading">Sidearm</h3><div class="option-grid loadout-grid">${SIDEARMS.map(n=>loadoutCard(n,rows)).join('')}</div>`,'loadout');paintLobbyKit();requestAnimationFrame(()=>document.querySelectorAll('[data-weapon-preview]').forEach(c=>drawWeaponPreview(c,c.dataset.weaponPreview)));}
 function updateLoadoutMeta(){if(document.getElementById('modalContent').dataset.view!=='loadout')return;const rows=currentMetaRows();document.querySelectorAll('[data-loadout-meta]').forEach(el=>{el.innerHTML=loadoutMetaHtml(el.dataset.loadoutMeta,rows);});}
 
 function renderOperatorModal(){
@@ -2677,6 +2933,7 @@ function renderOperatorModal(){
   paintLobbyKit();requestAnimationFrame(()=>document.querySelectorAll('[data-operator-preview]').forEach(c=>drawOperatorPreview(c,Number(c.dataset.operatorPreview))));
 }
 const TABLE_SORT={meta:{key:'score',dir:-1},bots:{key:'kd',dir:-1}};
+let BOT_LEADERBOARD_MODE='tdm';
 function ratio(n,d){return d>0?n/d:(n>0?n:0);}
 function kdDisplay(k,d){return d>0?(k/d).toFixed(2):(k>0?'∞':'0.00');}
 function kdSortValue(k,d){return d>0?k/d:(k>0?Infinity:0);}
@@ -2713,6 +2970,7 @@ function patchRecord(a,weapon){
   return [patch.skillStrata[band][weapon],patch.perBot[identity][weapon]];
 }
 function recordPatchEvent(a,weapon,key,value=1){
+  if(!matchUsesCurrentBalance(getMatch(a.matchId)))return;
   recordParticipantEvent(a,weapon,key,value);
   if(!officialTdm(a)){const alias=key==='kills'?'k':key==='deaths'?'d':key;a.matchWeaponStats??={};a.matchWeaponStats[weapon]??={k:0,d:0,picks:0,damage:0,shots:0,hits:0,headshots:0,equippedTime:0};a.matchWeaponStats[weapon][alias]=(a.matchWeaponStats[weapon][alias]||0)+value;return;}
   const [s,b]=patchRecord(a,weapon);s[key]=(s[key]||0)+value;
@@ -2723,6 +2981,7 @@ function recordPatchEvent(a,weapon,key,value=1){
   if(key==='equippedTime')recordSeasonEvent(a,'timeAlive',value);
 }
 function recordEquipped(a,dt){
+  if(!matchUsesCurrentBalance(getMatch(a.matchId)))return;
   const w=currentWeaponState(a).name;actorMeta(a,w).equippedTime+=dt;a.weaponUsage[w].equippedTime+=dt;recordPatchEvent(a,w,'equippedTime',dt);
   if(!a.isPlayer){const b=botData(a),f=b.familiarity[w];b.familiarity[w]=Math.min(100,f+(100-f)*dt/36000);}
 }
@@ -2756,8 +3015,8 @@ function weaponMetrics(sample=revisionSample()){
   }));
   for(const r of rows){
     const m=r.m,type=WEAPONS[m.name].type,{total,league,bandWeights}=cohorts[type];
-    r.kd=ratio(m.kills,m.deaths);r.accuracy=m.hits/Math.max(1,m.shots);r.hs=m.headshots/Math.max(1,m.kills);r.killPerPick=m.kills/Math.max(1,m.picks);r.avgDamage=m.damage/Math.max(1,m.picks);r.kpm=m.kills/Math.max(.001,r.minutes);r.dpm=m.damage/Math.max(.001,r.minutes);r.usage=m.equippedTime/Math.max(.001,total.equippedTime);r.usageSampled=total.equippedTime>0;r.range=m.killDistanceN?m.killDistance/m.killDistanceN/TILE:null;
-    r.engRange=m.engagementDistanceN?m.engagementDistance/m.engagementDistanceN/TILE:null;
+    r.kd=ratio(m.kills,m.deaths);r.accuracy=m.hits/Math.max(1,m.shots);r.hs=m.headshots/Math.max(1,m.kills);r.killPerPick=m.kills/Math.max(1,m.picks);r.avgDamage=m.damage/Math.max(1,m.picks);r.kpm=m.kills/Math.max(.001,r.minutes);r.dpm=m.damage/Math.max(.001,r.minutes);r.usage=m.equippedTime/Math.max(.001,total.equippedTime);r.usageSampled=total.equippedTime>0;r.range=DISTANCE_UNITS.averageDistanceMeters(m.killDistance,m.killDistanceN,sample.distanceProvenance);
+    r.engRange=DISTANCE_UNITS.averageDistanceMeters(m.engagementDistance,m.engagementDistanceN,sample.distanceProvenance);
     r.soloPct=m.classifiedKills?m.soloKills/m.classifiedKills:null;r.finisherPct=m.classifiedKills?m.finisherKills/m.classifiedKills:null;
     const priorShare=league.kd/(1+league.kd),share=(m.kills+20*priorShare)/(r.engagements+20);r.adjKd=share/Math.max(.00001,1-share);
     let kdLog=0,kpmLog=0,dpmLog=0,weight=0;
@@ -2836,7 +3095,7 @@ function metaScore(r){return r.engagements>=5?r.score.toFixed(1):r.engagements?'
 function metaKd(r){return r.engagements>=5?kdDisplay(r.kills,r.deaths):r.engagements?'LOW SAMPLE':'—';}
 function metaAccuracy(r){return metaMeasured(r.accuracy*100,r.shots,1,'%');}
 function metaPercent(value,count){return metaMeasured(value===null?0:value*100,count,1,'%');}
-function metaRange(value,count){return metaMeasured(value===null?0:value,count,1,' tiles');}
+function metaRange(value,count){return value===null?'—':metaMeasured(value,count,1,' m');}
 const META_LABELS=['Rank','Weapon','Gun Score','K/D','Kills','Deaths','Usage','Accuracy','K/min','Dmg/min','Avg Engagement Range','Avg Kill Range','Solo Kill %','Finisher Kill %','Sample'];
 const compactNumber=n=>new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n);
 function metaRowsHtml(rows=visibleMetaRows()){
@@ -2863,7 +3122,7 @@ function metaDetailHtml(rows=visibleMetaRows()){
   const stats=[
     ['Body TTK',sheet.bodyTtk.toFixed(2)+'s'],['Headshot TTK',sheet.headTtk.toFixed(2)+'s'],
     ['Accuracy',metaAccuracy(row)],['Kills / Min',metaRate(row.kpm,row.minutes)],['Damage / Min',metaRate(row.dpm,row.minutes,0)],
-    ...(row.name==='P90'?[['Designed Range','7–12 tiles']]:[]),
+    ...(row.name==='P90'?[['Designed Range',metersText(7*TILE)+'–'+metersText(12*TILE)]]:[]),
     ['Avg Engagement Range',metaRange(row.engRange,row.m.engagementDistanceN)],
     ['Avg Kill Range',metaRange(row.range,row.m.killDistanceN)],
     ['Solo Kill %',metaPercent(row.soloPct,row.m.classifiedKills),META_SOLO_HELP],
@@ -2899,13 +3158,13 @@ function renderMetaModal(options={}){
   requestAnimationFrame(paintMetaPreview);updateMetaTable();
 }
 
-function botRows(){
+function botRows(mode=BOT_LEADERBOARD_MODE){
   return BOT_NAMES.slice(0,BOT_COUNT).map(name=>{
-    const c=careerFor(name),profile=profileFor(name),kd=kdSortValue(c.kills,c.deaths),accuracy=c.hits/Math.max(1,c.shots),wl=ratio(c.wins,c.losses),winPct=c.wins/Math.max(1,c.games);
+    const c=mode==='deathmatch'?(SAVE.modeStats.deathmatch.bots[name]||blankBotCareer(name)):careerFor(name),profile=profileFor(name),kd=kdSortValue(c.kills,c.deaths),accuracy=c.hits/Math.max(1,c.shots),wl=ratio(c.wins,c.losses),winPct=c.wins/Math.max(1,c.games);
     return {name,...c,kd,accuracy,wl,winPct,power:profile.power,powerRank:profile.rank,archetype:strategicRole(profile.archetype),recentForm:SAVE.bots[name].recentForm,personality:`${Math.round((profile.personality?.unpredictability||0)*100)}% volatile`,favorite:profile.personality?.favoriteWeapon||'—',metaDrive:profile.personality?.metaDrive||0,feared:profile.feared};
   });
 }
-function botRowsHtml(){const rows=botRows();sortRows(rows,'bots');return rows.map(r=>'<tr><td><button class="bot-profile-link" data-bot-profile="'+escapeHtml(r.name)+'">'+(r.feared?'◆ ':'')+escapeHtml(r.name)+'</button></td><td><strong>'+r.power+'</strong></td><td>'+formLabel(r.recentForm)+' '+(r.recentForm>=0?'+':'')+r.recentForm.toFixed(1)+'</td><td>'+escapeHtml(r.archetype)+'</td><td>'+escapeHtml(r.favorite)+'</td><td>'+r.games+'</td><td>'+r.wins+'</td><td>'+r.losses+'</td><td>'+(r.winPct*100).toFixed(1)+'%</td><td>'+r.kills+'</td><td>'+r.deaths+'</td><td><strong>'+kdDisplay(r.kills,r.deaths)+'</strong></td><td>'+r.assists+'</td><td>'+Math.round(r.damage).toLocaleString()+'</td><td>'+(r.accuracy*100).toFixed(1)+'%</td><td>'+r.headshots+'</td></tr>').join('');}
+function botRowsHtml(mode=BOT_LEADERBOARD_MODE){const rows=botRows(mode);sortRows(rows,'bots');return rows.map(r=>'<tr><td><button class="bot-profile-link" data-bot-profile="'+escapeHtml(r.name)+'">'+(r.feared?'◆ ':'')+escapeHtml(r.name)+'</button></td><td><strong>'+r.power+'</strong></td><td>'+formLabel(r.recentForm)+' '+(r.recentForm>=0?'+':'')+r.recentForm.toFixed(1)+'</td><td>'+escapeHtml(r.archetype)+'</td><td>'+escapeHtml(r.favorite)+'</td><td>'+r.games+'</td><td>'+r.wins+'</td><td>'+r.losses+'</td><td>'+(r.winPct*100).toFixed(1)+'%</td><td>'+r.kills+'</td><td>'+r.deaths+'</td><td><strong>'+kdDisplay(r.kills,r.deaths)+'</strong></td><td>'+r.assists+'</td><td>'+Math.round(r.damage).toLocaleString()+'</td><td>'+(r.accuracy*100).toFixed(1)+'%</td><td>'+r.headshots+'</td></tr>').join('');}
 function botHeadHtml(){const cols=[['name','Bot'],['power','Power'],['recentForm','Form'],['archetype','Playstyle'],['favorite','Favorite Weapon'],['games','Games'],['wins','Wins'],['losses','Losses'],['winPct','Win %'],['kills','Kills'],['deaths','Deaths'],['kd','K/D'],['assists','Assists'],['damage','Damage'],['accuracy','Accuracy'],['headshots','Headshot Kills']];return cols.map(([k,l])=>'<th aria-sort="'+(TABLE_SORT.bots.key===k?(TABLE_SORT.bots.dir===1?'ascending':'descending'):'none')+'"><button class="table-sort" data-sort-view="bots" data-sort-key="'+k+'">'+l+sortIndicator('bots',k)+'</button></th>').join('');}
 function updateBotLeaderboard(){
   const restoreFocus=rememberTableFocus(document.getElementById('modalContent'));
@@ -2915,8 +3174,9 @@ function updateBotLeaderboard(){
 }
 function renderBotProfile(name){renderBotRecord(name);}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-bot-profile]');if(b)renderBotProfile(b.dataset.botProfile);});
+document.addEventListener('click',e=>{const mode=e.target.closest('[data-bot-mode]')?.dataset.botMode;if(mode){BOT_LEADERBOARD_MODE=mode==='deathmatch'?'deathmatch':'tdm';renderBotLeaderboard();}});
 function renderBotLeaderboard(){
-  showModal(`<div class="eyebrow">THE CIRCUIT / 50 COMPETITORS</div><div class="meta-heading"><h2>Bot Leaderboard</h2><span id="botStamp">LIVE</span></div><details class="leaderboard-guide"><summary>CAREER RECORDS <span>Sort any column · Select a competitor for their profile</span></summary><div class="analytics-note">Career combat totals persist across versions. Power is a fixed skill rating, not calculated from stats. Every bot keeps the same tactical navigation/cover brain, while Power changes execution quality. There are only five tactical playstyles: Long-Range Marksman, Aggressive Rusher, Flanker, Defensive Anchor and Adaptive Flex. Bots re-evaluate weapons each match, generally gravitate toward stronger live-meta guns, and still make occasional unpredictable choices. ◆ marks feared bots. Click any header to sort.</div></details><div class="bot-table-scroll"><table class="meta-table sortable-table bot-leaderboard"><thead><tr id="botHead">${botHeadHtml()}</tr></thead><tbody id="botRows">${botRowsHtml()}</tbody></table></div>`,'bots');
+  showModal(`<div class="eyebrow">THE CIRCUIT / 50 COMPETITORS</div><div class="meta-heading"><h2>Bot Leaderboard</h2><span id="botStamp">LIVE</span></div><div class="meta-tabs" role="tablist" aria-label="Bot career mode">${["tdm","deathmatch"].map(mode=>`<button data-bot-mode="${mode}" role="tab" aria-selected="${BOT_LEADERBOARD_MODE===mode}">${mode==="tdm"?"TEAM DEATHMATCH":"DEATHMATCH"}</button>`).join("")}</div><details class="leaderboard-guide"><summary>${BOT_LEADERBOARD_MODE==='deathmatch'?'DEATHMATCH':'TDM'} CAREER RECORDS <span>Sort any column · Select a competitor for their profile</span></summary><div class="analytics-note">Combat totals follow the selected mode and persist across versions. Power, Form and playstyle describe the permanent competitor. Power is a fixed skill rating, not calculated from stats. Every bot keeps the same tactical navigation/cover brain, while Power changes execution quality. There are only five tactical playstyles: Long-Range Marksman, Aggressive Rusher, Flanker, Defensive Anchor and Adaptive Flex. Bots re-evaluate weapons each match, generally gravitate toward stronger live-meta guns, and still make occasional unpredictable choices. ◆ marks feared bots. Click any header to sort.</div></details><div class="bot-table-scroll"><table class="meta-table sortable-table bot-leaderboard"><thead><tr id="botHead">${botHeadHtml()}</tr></thead><tbody id="botRows">${botRowsHtml()}</tbody></table></div>`,'bots');
   updateBotLeaderboard();
 }
 function careerStatsHtml(c,isPlayer=false){
@@ -2931,11 +3191,70 @@ function careerWeaponTableHtml(weapons,familiarity=null){
 function seasonRecordTableHtml(seasons,name=null){
   return `<div class="meta-table-scroll"><table class="meta-table"><thead><tr><th>SEASON</th><th>GAMES</th><th>W / L</th><th>K / D / A</th><th>K/D</th><th>DAMAGE</th><th>STATUS</th></tr></thead><tbody>${seasons.map(s=>{const c=name?s.stats?.[name]:s.stats;if(!c)return '';return `<tr><td>${s.number}</td><td>${c.games||0}</td><td>${c.wins||0} / ${c.losses||0}</td><td>${c.kills||0} / ${c.deaths||0} / ${c.assists||0}</td><td>${kdDisplay(c.kills||0,c.deaths||0)}</td><td>${Math.round(c.damage||0).toLocaleString()}</td><td>${s.finalizedAt?'COMPLETE':s.endAt<=wallNow()?'COMPLETE':'ACTIVE'}</td></tr>`;}).join('')}</tbody></table></div>`;
 }
+let profileStatsScope='lifetime',profileStatsSeason=null,rankInspectionReturn=null;
+function profileTabsHtml(selected){
+  const tabs=[['tdm','player-profile','TEAM DEATHMATCH'],['deathmatch','deathmatch-profile','DEATHMATCH'],['ranked','ranked-profile','RANKED STATS'],['combined','combined-profile','COMBINED STATS']];
+  return '<nav class="account-actions profile-stat-tabs" aria-label="Player statistics">'+tabs.map(([key,action,label])=>'<button data-action="'+action+'"'+(key===selected?' class="selected" aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav>';
+}
+function profileScopeHtml(){
+  const seasons=[SAVE.playerSeasons.current,...SAVE.playerSeasons.history];
+  return '<label class="profile-stat-scope" for="profileStatsScope">STATISTICS SCOPE <select id="profileStatsScope"><option value="lifetime"'+(profileStatsScope==='lifetime'?' selected':'')+'>Lifetime records</option>'+seasons.map(s=>'<option value="season:'+s.number+'"'+(profileStatsScope==='season'&&s.number===(profileStatsSeason??SAVE.playerSeasons.current.number)?' selected':'')+'>Season '+s.number+(s.number===SAVE.playerSeasons.current.number?' · current':'')+'</option>').join('')+'</select></label>';
+}
+function projectedStatsHtml(result){
+  const t=result.totals,r=result.ratios,number=value=>value===null?'—':formatXP(value),percent=value=>value===null?'—':(100*value).toFixed(1)+'%',kd=t.kills===0&&t.deaths===0?'—':result.zeroDeaths?'∞':r.kd===null?'—':r.kd.toFixed(2);
+  const cells=[['games','RECORDED GAMES',number(t.games)],['outcomes','W / L / D',t.wins+' / '+t.losses+' / '+t.draws],['winRate','WIN %',percent(r.winRate)],['kills','KILLS',number(t.kills)],['deaths','DEATHS',number(t.deaths)],['kd','K/D',kd],['assists','ASSISTS',number(t.assists)],['damage','DAMAGE',t.damage===null?'—':Math.round(t.damage).toLocaleString()],['shots','SHOTS / HITS',number(t.shots)+' / '+number(t.hits)],['accuracy','ACCURACY',percent(r.accuracy)],['headshots','HEADSHOT KILLS',number(t.headshots)]];
+  return '<div class="match-report-grid career-summary profile-stat-sheet">'+cells.map(([key,label,value])=>'<div data-profile-metric="'+key+'"><span>'+label+'</span><strong>'+value+'</strong></div>').join('')+'</div><p class="meta-note">Win rate uses '+result.outcomes+' recorded completed outcomes. K/D and accuracy use raw kills/deaths and hits/shots.</p>';
+}
+function profileCoverageHtml(result){
+  const c=result.coverage,notes=[];
+  if(!c.authorized)notes.push('These records are unavailable for the signed-in account.');
+  if(!c.seasonAvailable)notes.push('The selected season has no usable saved date range.');
+  if(c.missingGames)notes.push(c.recordedGames+' of '+c.expectedGames+' completed games have usable participation records. Earlier match details are unavailable; the original mode careers remain intact.');
+  if(c.missingIdentity||c.unclassified)notes.push('Some older match records lack an identity or mode/queue classification and are excluded from this sheet.');
+  if(c.conflictingRecords)notes.push(c.conflictingRecords+' conflicting match '+(c.conflictingRecords===1?'record is':'records are')+' excluded.');
+  if(c.unknownSeason)notes.push(c.unknownSeason+' recorded '+(c.unknownSeason===1?'match has':'matches have')+' no known completion date and cannot be assigned to this season.');
+  if(c.unknownOutcomes)notes.push(c.unknownOutcomes+' unknown '+(c.unknownOutcomes===1?'outcome is':'outcomes are')+' excluded from win rate.');
+  if(c.accuracyGames<result.totals.games)notes.push('Shots and hits are recorded for '+c.accuracyGames+' of '+result.totals.games+' games. Overall accuracy is unavailable for this selection.');
+  if(!result.totals.games)notes.push('No eligible completed match records are available in this scope.');
+  if(result.scope==='season')notes.push('Season statistics use recorded completion dates within the saved season window; older undated history cannot be reconstructed.');
+  return notes.length?'<div class="profile-stat-coverage" role="status">'+notes.map(text=>'<p>'+escapeHtml(text)+'</p>').join('')+'</div>':'';
+}
+function currentRankLadderHtml(rank){
+  return '<section class="profile-rank-ladder"><h3>CURRENT RANKED LADDER</h3><p class="meta-note">Competitive ELO thresholds. Your current rank is highlighted.</p><ol>'+XP.ranks.map((entry,index)=>'<li'+(index===rank.rankIndex?' class="current-rank" aria-current="step"':'')+'>'+rankBadgeHtml({rankIndex:index,rankName:entry.name})+'<div><strong>'+escapeHtml(entry.name)+'</strong><span>'+formatXP(entry.threshold)+' ELO'+(index===rank.rankIndex?' · CURRENT':'')+'</span></div></li>').join('')+'</ol></section>';
+}
+function renderRecordProfile(kind='ranked',inspection=false){
+  const account=currentAccount(),participantId=account?.id||'local-player',result=window.SARProfileStats.project(SAVE,{participantId,accountId:participantId,kind,scope:profileStatsScope,seasonNumber:profileStatsSeason??SAVE.playerSeasons.current.number}),rank=XP.summary(SAVE.progression,SAVE.ranked,participantId).ranked;
+  const ranked=kind==='ranked',labels=result.policy.included.map(escapeHtml).join(' · '),queueRows=result.policy.included.map(label=>{const row=result.included.find(item=>item.label===label);return '<tr><td>'+escapeHtml(label)+'</td><td>'+formatXP(row?.games||0)+'</td></tr>';}).join('');
+  showModal((inspection?'<button data-action="rank-inspection-back" class="profile-rank-back">← BACK</button>':'')+'<div class="eyebrow">PLAYER PROFILE / '+(ranked?'RANKED STATS':'COMBINED STATS')+'</div><h2>'+escapeHtml(account?.username||'YOU')+'</h2>'+profileTabsHtml(kind)+profileScopeHtml()+(ranked?'<section class="profile-current-rank">'+rankInspectionButtonHtml(rank)+'<div class="ranked-progress-copy"><span class="progression-label">CURRENT LIFETIME ELO</span>'+rankProgressHtml(rank)+'</div></section>':progressionProfileHtml())+'<h3>'+(ranked?'RANKED':'COMBINED')+' MATCH RECORD</h3><p class="meta-note">Includes '+labels+'. Official tournaments, custom matches and practice remain separate and excluded. A Ranked TDM match counts once.</p>'+profileCoverageHtml(result)+projectedStatsHtml(result)+'<h3>INCLUDED MODES / QUEUES</h3><table class="meta-table profile-mode-counts"><thead><tr><th>Mode / queue</th><th>Recorded games</th></tr></thead><tbody>'+queueRows+'</tbody></table>'+(ranked?currentRankLadderHtml(rank):''),inspection?'rank-inspection':kind+'-profile');
+}
+function openRankInspection(){
+  const content=document.getElementById('modalContent'),visible=document.getElementById('modal')?.classList.contains('visible');if(visible&&content?.dataset.view==='rank-inspection')return;
+  rankInspectionReturn={view:visible?content?.dataset.view||'':'',html:visible?content?.innerHTML:null,scope:profileStatsScope,season:profileStatsSeason};renderRecordProfile('ranked',true);
+  document.querySelector('[data-action="rank-inspection-back"]')?.focus?.({preventScroll:true});
+}
+function backFromRankInspection(){
+  const previous=rankInspectionReturn;rankInspectionReturn=null;
+  if(previous){profileStatsScope=previous.scope;profileStatsSeason=previous.season;}
+  if(previous?.view==='player-profile')renderPlayerProfile();
+  else if(previous?.view==='deathmatch-profile')renderDeathmatchProfile();
+  else if(previous?.view==='ranked-profile')renderRecordProfile('ranked');
+  else if(previous?.view==='combined-profile')renderRecordProfile('combined');
+  else if(previous?.view&&previous.html)showModal(previous.html,previous.view);
+  else{closeModal();return;}
+  document.querySelector('#modalContent [data-action="rank-inspect"]')?.focus?.({preventScroll:true});
+}
+function refreshOpenPlayerProfile(){
+  const content=document.getElementById('modalContent'),view=content?.dataset.view;if(!['player-profile','deathmatch-profile','ranked-profile','combined-profile','rank-inspection'].includes(view))return;
+  const shell=document.querySelector('#modal .modal'),scroll=shell?.scrollTop||0,active=document.activeElement,action=content.contains?.(active)?active.dataset?.action:null,scopeFocus=active?.id==='profileStatsScope';
+  if(view==='player-profile')renderPlayerProfile();else if(view==='deathmatch-profile')renderDeathmatchProfile();else renderRecordProfile(view==='combined-profile'?'combined':'ranked',view==='rank-inspection');
+  if(shell)shell.scrollTop=scroll;
+  const focus=scopeFocus?document.getElementById('profileStatsScope'):action?[...content.querySelectorAll('[data-action]')].find(node=>node.dataset.action===action):null;focus?.focus?.({preventScroll:true});
+}
 function renderPlayerProfile(){
   const c=SAVE.playerCareer,account=currentAccount(),rows=Object.entries(c.weapons).sort((a,b)=>b[1].equippedTime-a[1].equippedTime);
   const qualified=rows.filter(([,w])=>w.k>=10&&w.shots>=50).sort((a,b)=>b[1].k/Math.max(1,b[1].d)-a[1].k/Math.max(1,a[1].d));
   const seasons=[SAVE.playerSeasons.current,...SAVE.playerSeasons.history];
-  showModal(`<div class="eyebrow">PLAYER PROFILE / ${window.SARCloud?.state?.account?'CLOUD ACCOUNT':'LOCAL CACHE'}</div><div class="profile-heading"><div><h2>${escapeHtml(account?.username||'YOU')}</h2><p class="page-intro">Your competitive record. Every match counts.</p><div class="profile-identity"><span>SEASON ${SAVE.playerSeasons.current.number}</span><span>${c.games} GAMES</span><strong>${kdDisplay(c.kills,c.deaths)} K/D</strong></div></div><canvas class="profile-operator" data-operator-preview="${CONFIG.skin}" width="300" height="200" aria-label="Your selected operator"></canvas></div><div class="account-actions"><button class="selected" data-action="player-profile">TEAM DEATHMATCH</button><button data-action="deathmatch-profile">DEATHMATCH</button></div>${progressionProfileHtml()}<h3>CAREER</h3>${careerStatsHtml(c,true)}<h3>RECORDS & KIT</h3><div class="match-report-grid profile-records"><div><span>MOST KILLS IN GAME</span><strong>${c.bestKills}</strong></div><div><span>MOST DAMAGE IN GAME</span><strong>${Math.round(c.bestDamage).toLocaleString()}</strong></div><div><span>BEST K/D GAME</span><strong>${c.bestKdGame?kdDisplay(c.bestKdGame.kills,c.bestKdGame.deaths):'No record yet'}</strong></div><div><span>LONGEST WIN STREAK</span><strong>${c.bestWinStreak}</strong><small>Current: ${c.currentWinStreak}</small></div><div><span>MOST-USED WEAPON</span><strong>${escapeHtml(rows[0]?.[1].equippedTime?rows[0][0]:'No playtime yet')}</strong></div><div><span>BEST-PERFORMING WEAPON</span><strong>${escapeHtml(qualified[0]?.[0]||'Still sampling')}</strong>${qualified.length?'':'<small>10 kills and 50 shots required</small>'}</div><div><span>SELECTED OPERATOR</span><strong>${escapeHtml(SKINS[CONFIG.skin].name)}</strong></div><div><span>SELECTED LOADOUT</span><strong>${escapeHtml(CONFIG.primary)}</strong><small>${escapeHtml(CONFIG.sidearm)}</small></div></div><h3>WEAPONS</h3>${careerWeaponTableHtml(c.weapons)}<h3>SEASONS</h3>${seasonRecordTableHtml(seasons)}<h3>RECENT MATCHES</h3><div class="profile-recent">${c.recentMatches.length?c.recentMatches.slice(-10).reverse().map(m=>`<div><strong>${m.won?'WIN':'LOSS'}</strong><span>${m.kills} / ${m.deaths} / ${m.assists} · ${Math.round(m.damage)} DMG · ${escapeHtml(m.primary)}</span><small>${new Date(m.at).toLocaleString()}</small></div>`).join(''):'<p class="meta-note">Complete your first match to start this record.</p>'}</div>`,'player-profile');
+  showModal(`<div class="eyebrow">PLAYER PROFILE / ${window.SARCloud?.state?.account?'CLOUD ACCOUNT':'LOCAL CACHE'}</div><div class="profile-heading"><div><h2>${escapeHtml(account?.username||'YOU')}</h2><p class="page-intro">Your competitive record. Every match counts.</p><div class="profile-identity"><span>SEASON ${SAVE.playerSeasons.current.number}</span><span>${c.games} GAMES</span><strong>${kdDisplay(c.kills,c.deaths)} K/D</strong></div></div><canvas class="profile-operator" data-operator-preview="${CONFIG.skin}" width="300" height="200" aria-label="Your selected operator"></canvas></div>${profileTabsHtml('tdm')}${progressionProfileHtml()}<h3>CAREER</h3>${careerStatsHtml(c,true)}<h3>RECORDS & KIT</h3><div class="match-report-grid profile-records"><div><span>MOST KILLS IN GAME</span><strong>${c.bestKills}</strong></div><div><span>MOST DAMAGE IN GAME</span><strong>${Math.round(c.bestDamage).toLocaleString()}</strong></div><div><span>BEST K/D GAME</span><strong>${c.bestKdGame?kdDisplay(c.bestKdGame.kills,c.bestKdGame.deaths):'No record yet'}</strong></div><div><span>LONGEST WIN STREAK</span><strong>${c.bestWinStreak}</strong><small>Current: ${c.currentWinStreak}</small></div><div><span>MOST-USED WEAPON</span><strong>${escapeHtml(rows[0]?.[1].equippedTime?rows[0][0]:'No playtime yet')}</strong></div><div><span>BEST-PERFORMING WEAPON</span><strong>${escapeHtml(qualified[0]?.[0]||'Still sampling')}</strong>${qualified.length?'':'<small>10 kills and 50 shots required</small>'}</div><div><span>SELECTED OPERATOR</span><strong>${escapeHtml(SKINS[CONFIG.skin].name)}</strong></div><div><span>SELECTED LOADOUT</span><strong>${escapeHtml(CONFIG.primary)}</strong><small>${escapeHtml(CONFIG.sidearm)}</small></div></div><h3>WEAPONS</h3>${careerWeaponTableHtml(c.weapons)}<h3>SEASONS</h3>${seasonRecordTableHtml(seasons)}<h3>RECENT MATCHES</h3><div class="profile-recent">${c.recentMatches.length?c.recentMatches.slice(-10).reverse().map(m=>`<div><strong>${m.won?'WIN':'LOSS'}</strong><span>${m.kills} / ${m.deaths} / ${m.assists} · ${Math.round(m.damage)} DMG · ${escapeHtml(m.primary)}</span><small>${new Date(m.at).toLocaleString()}</small></div>`).join(''):'<p class="meta-note">Complete your first match to start this record.</p>'}</div>`,'player-profile');
   requestAnimationFrame(()=>document.querySelectorAll('.profile-operator').forEach(c=>drawOperatorPreview(c,Number(c.dataset.operatorPreview))));
 }
 function renderBotRecord(name){
@@ -2943,7 +3262,7 @@ function renderBotRecord(name){
   const seasons=[SAVE.seasons.current,...SAVE.seasons.history],champions=SAVE.seasons.history.filter(s=>s.winner?.name===name);
   const played=SAVE.seasons.history.filter(s=>(s.stats?.[name]?.games||0)>=10).sort((a,b)=>seasonKd(b.stats[name])-seasonKd(a.stats[name]));
   const best=played[0],weapons=Object.entries(c.weaponUsage).sort((a,b)=>b[1].equippedTime-a[1].equippedTime);
-  showModal(`<div class="eyebrow">BOT PROFILE / ${escapeHtml(p.id)}</div><h2>${escapeHtml(name)}</h2><div class="profile-identity"><strong>${p.power} POWER</strong><span>#${p.rank} POWER RANK</span><span>${escapeHtml(strategicRole(p.archetype))}</span><span>${formLabel(b.recentForm)} · ${b.recentForm.toFixed(1)} FORM</span></div><p class="meta-note">${escapeHtml(a?.decisionReason||'Waiting for the next match')}</p><h3>CAREER</h3>${careerStatsHtml(c)}<div class="match-report-grid"><div><span>CHAMPIONSHIPS</span><strong>${champions.length}</strong></div><div><span>BEST QUALIFIED SEASON</span><strong>${best?'SEASON '+best.number:'LOW SAMPLE'}</strong><small>${best?kdDisplay(best.stats[name].kills,best.stats[name].deaths)+' K/D · '+best.stats[name].games+' games':'10 completed games required'}</small></div><div><span>MOST-USED WEAPON</span><strong>${escapeHtml(weapons[0]?.[1].equippedTime?weapons[0][0]:'—')}</strong></div><div><span>PERSONAL FAVORITE</span><strong>${escapeHtml(p.personality.favoriteWeapon||'—')}</strong></div></div><h3>SEASONS</h3>${seasonRecordTableHtml(seasons,name)}<h3>WEAPONS & FAMILIARITY</h3>${careerWeaponTableHtml(c.weaponUsage,b.familiarity)}<h3>RECENT PERFORMANCE</h3><div class="profile-recent">${b.recentMatches.slice().reverse().map(m=>`<div><strong>${m.won?'WIN':'LOSS'}</strong><span>${m.kills} / ${m.deaths} · ${Math.round(m.damage)} DMG · ${escapeHtml(m.primary)}</span><small>${new Date(m.at).toLocaleString()}</small></div>`).join('')||'<p class="meta-note">No completed matches recorded yet.</p>'}</div><details class="profile-personality"><summary>STABLE PERSONALITY</summary><p>${escapeHtml(p.personality.description||'')}</p><p>${Object.entries(p.personality).filter(([,v])=>typeof v==='number').map(([k,v])=>escapeHtml(k)+': '+v.toFixed(2)).join(' · ')}</p></details><div class="account-actions"><button data-action="bots">BACK TO LEADERBOARD</button><button data-message-thread="${escapeHtml(p.id)}">MESSAGE ${escapeHtml(name)}</button></div>`,'profile');
+  showModal(`<div class="eyebrow">BOT PROFILE / ${escapeHtml(p.id)}</div><h2>${escapeHtml(name)}</h2><div class="profile-identity"><strong>${p.power} POWER</strong><span>#${p.rank} POWER RANK</span><span>${escapeHtml(strategicRole(p.archetype))}</span><span>${formLabel(b.recentForm)} · ${b.recentForm.toFixed(1)} FORM</span></div><p class="meta-note">${escapeHtml(a?.decisionReason||'Waiting for the next match')}</p><h3>TEAM DEATHMATCH CAREER</h3>${careerStatsHtml(c)}<h3>DEATHMATCH CAREER</h3>${careerStatsHtml(SAVE.modeStats.deathmatch.bots[name]||blankBotCareer(name))}<div class="match-report-grid"><div><span>CHAMPIONSHIPS</span><strong>${champions.length}</strong></div><div><span>BEST QUALIFIED SEASON</span><strong>${best?'SEASON '+best.number:'LOW SAMPLE'}</strong><small>${best?kdDisplay(best.stats[name].kills,best.stats[name].deaths)+' K/D · '+best.stats[name].games+' games':'10 completed games required'}</small></div><div><span>MOST-USED WEAPON</span><strong>${escapeHtml(weapons[0]?.[1].equippedTime?weapons[0][0]:'—')}</strong></div><div><span>PERSONAL FAVORITE</span><strong>${escapeHtml(p.personality.favoriteWeapon||'—')}</strong></div></div><h3>SEASONS</h3>${seasonRecordTableHtml(seasons,name)}<h3>WEAPONS & FAMILIARITY</h3>${careerWeaponTableHtml(c.weaponUsage,b.familiarity)}<h3>RECENT PERFORMANCE</h3><div class="profile-recent">${b.recentMatches.slice().reverse().map(m=>`<div><strong>${m.won?'WIN':'LOSS'}</strong><span>${m.kills} / ${m.deaths} · ${Math.round(m.damage)} DMG · ${escapeHtml(m.primary)}</span><small>${new Date(m.at).toLocaleString()}</small></div>`).join('')||'<p class="meta-note">No completed matches recorded yet.</p>'}</div><details class="profile-personality"><summary>STABLE PERSONALITY</summary><p>${escapeHtml(p.personality.description||'')}</p><p>${Object.entries(p.personality).filter(([,v])=>typeof v==='number').map(([k,v])=>escapeHtml(k)+': '+v.toFixed(2)).join(' · ')}</p></details><div class="account-actions"><button data-action="bots">BACK TO LEADERBOARD</button></div>`,'profile');
 }
 setInterval(()=>{
   const view=document.getElementById('modalContent')?.dataset.view;
@@ -2989,7 +3308,6 @@ function updateDebugPanel(now){
 }
 function renderSettingsSection(tab='controls'){
   if(tab==='audio'){showModal('<div class="eyebrow">GAME SETTINGS</div><h2>Settings</h2>'+settingsTabs(tab)+(window.SARAudio?.settingsHtml()||'<p>Audio is unavailable.</p>'),'settings');return;}
-  if(tab==='ai'){window.SARSocialUI?.showSettings(settingsTabs('ai'));return;}
   if(tab==='updates'){
     const updater=window.SARUpdater;
     const installed=updater?.isInstalled?.()||false;
@@ -3008,7 +3326,15 @@ function renderSettingsSection(tab='controls'){
   }
   if(tab==='readme'){
     showModal(`<div class="eyebrow">GAME SETTINGS</div><h2>Settings</h2>${settingsTabs(tab)}
-      <div class="settings-section readme-panel"><h3>SKIRMISH ARENA</h3><p>Join a match, inspect your loadout and follow the circuit.</p><h4>Play</h4><p>Play joins your current world. Settings → Game lists your bindings. Aim sensitivity, audio and display preferences stay saved.</p><h4>Records</h4><p>Your username menu opens Player Profile. Weapon Meta shows human-participant performance; Phone contains Bot Leaderboard and Bot Weapon Meta. Tournament results and fictional earnings have their own history.</p><h4>Phone</h4><p>Phone contains Messages, Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta. Open Messages for contacts, conversations and replies. Settings → Game → Messaging controls messages and connection status.</p><h4>Live Circuit</h4><p>The Calendar shows official events and custom tournaments. Register a team, invite bots and play each game of your series. Official prizes are per player; custom events award no earnings.</p><h4>Saves and Updates</h4><p>Previously authenticated accounts can play locally during a connection outage. Settings → Account → Data Management offers complete export and recovery. Update Game verifies the new release and preserves your world.</p><h4>Patch Notes</h4><p>Release history records new features, improvements, balance and fixes.</p></div>`,'settings');
+      <div class="settings-section readme-panel"><h3>SKIRMISH ARENA</h3><p>Join a match, inspect your loadout and follow the circuit.</p>
+      <h4>Play and Loading</h4><p>Choose Ranked TDM, Team Deathmatch, Deathmatch or Custom. Mode entry shows a separate loading screen for at least three seconds while the match prepares; longer preparation keeps loading visible. The pre-match countdown follows preparation. Loading does not place you into vulnerable combat. Settings → Game lists your saved controls and sensitivity.</p>
+      <h4>Live Matches</h4><p>Four background slots run two 5v5 Team Deathmatches and two ten-player Deathmatches. TDM plays to 60 kills or five minutes; Deathmatch plays to 30 kills or four minutes. Each slot waits 15 seconds between games. The 50 persistent bots rotate through the waiting pool; tournament reservations can leave a slot waiting for eligible participants.</p>
+      <h4>Profile and Ranked</h4><p>Your username menu opens Player Profile with TDM, Deathmatch, Ranked Stats and Combined Stats. Click your 3D ranked emblem to inspect ranked performance and the complete current ladder. Lifetime and saved-season views use available match records. Combined includes casual TDM, casual Deathmatch and Ranked TDM once each; official tournaments, custom and practice stay separate. Ratios use total kills, deaths, hits, shots and completed outcomes. Missing historical coverage is labeled.</p>
+      <h4>Loadout and Ranges</h4><p>Balance 9.0 has 15 weapons, including the semi-automatic FAL. Range is shown in meters, projectile speed in meters per second and falloff rate per meter. These display units do not change arena size or physical travel. Exact numbers accompany performance-colored bars. Historical measurements without a known scale stay unavailable.</p>
+      <h4>Phone and Weapon Meta</h4><p>Phone contains Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta. Use Home to switch apps and Back to return. Main-menu Weapon Meta shows human-participant performance; bot statistics remain in Phone. Spectate switches matches and follows individual bots.</p>
+      <h4>Skirmish Challenge Tournament</h4><p>Open a real event from the Calendar or Official Tournament History. Overview / Schedule, Bracket, Team Leaderboard and Player Stats show its saved records. New-format quarterfinals and semifinals play all three games; finals play all five. The higher aggregate team kills advances after the complete series. Each game keeps its 50-kill target and five-minute limit. Equal aggregate kills use total team damage; an exact damage tie awaits an explicit ruling. Official events recur every three calendar days at 7:30 PM Eastern with daylight saving. Check in within the first 90 seconds of each two-minute preparation block; the countdown ends at the fixed combat start. Quarterfinals end at 7:53 PM, semifinals at 8:18 PM and the final at 8:59 PM. Teams finishing early wait. Absent humans are replaced for the rest of the event and the replacement receives that slot’s payout. Missed offline events are cancelled without invented rewards. Historical formats and custom event names remain unchanged. Official prizes are per player; custom events award no earnings.</p>
+      <h4>Saves and Updates</h4><p>Previously authenticated accounts can play their cached world during a connection outage; first-time login requires the account service. Settings → Account → Data Management offers export and recovery. Updates preserve accounts, XP, levels, careers, seasons and saves. Retry reports a failed loading stage without replacing your saved world.</p>
+      <h4>Patch Notes</h4><p>Release history records completed features, improvements, fixes and removals. Weapon balance has its own version and numeric change history.</p></div>`,'settings');
     return;
   }
   if(tab==='patchnotes'){
@@ -3042,7 +3368,7 @@ function renderSettingsSection(tab='controls'){
     return;
   }
   if(tab==='gameplay'){
-    showModal(`<div class="eyebrow">GAME SETTINGS</div><h2>Settings</h2>${settingsTabs(tab)}<div class="settings-section"><h3>Gameplay</h3><label class="camera-setting"><input id="damageNumbers" type="checkbox" ${CONFIG.damageNumbers?'checked':''}> Damage Numbers</label><p class="meta-note">Show the health removed by your hits. Shotgun pellets combine into one number per enemy. Bot damage stays hidden while spectating.</p></div>`,'settings');
+    showModal(`<div class="eyebrow">GAME SETTINGS</div><h2>Settings</h2>${settingsTabs(tab)}<div class="settings-section"><h3>Gameplay</h3><label class="camera-setting"><input id="damageNumbers" type="checkbox" ${CONFIG.damageNumbers?'checked':''}> Damage Numbers</label><p class="meta-note">Show the health removed by your hits. Shotgun pellets combine into one number per enemy. Bot damage stays hidden while spectating.</p><div class="slider-row hud-size-setting"><div><label for="hudSize"><strong>HUD Size</strong></label><span>Match information and spectator controls. Aim and reticle stay unchanged.</span></div><div class="slider-control"><input id="hudSize" type="range" min="75" max="140" step="1" value="${CONFIG.hudSize}"><output id="hudSizeValue" for="hudSize">${CONFIG.hudSize}%</output><button id="resetHudSize" type="button">Reset</button></div></div><div class="hud-size-preview" aria-label="Live HUD size preview"><span class="label">LIVE PREVIEW</span><div class="hud-preview-panel"><div class="hp-line"><span class="label">HEALTH</span><strong>250</strong></div><div class="hp-track"><div></div></div><div class="weapon-line"><strong>AR-15</strong><div class="ammo"><strong>40</strong><span>/ 120</span></div></div></div></div></div>`,'settings');
     return;
   }
   if(tab==='aim'){
@@ -3056,7 +3382,7 @@ function renderSettingsSection(tab='controls'){
     return;
   }
   if(tab==='view'){
-    showModal(`<div class="eyebrow">GAME SETTINGS</div><h2>Settings</h2>${settingsTabs(tab)}<div class="settings-section"><h3>View</h3><button data-action="view-25d">RETRY ARENA VIEW</button><p id="viewStatus" class="meta-note"></p><h3>Spectator Camera</h3><div class="account-actions"><button class="${CONFIG.spectatorCamera==='FOLLOW'?'primary':''}" data-action="camera-follow">FOLLOW OPERATOR</button><button class="${CONFIG.spectatorCamera==='TACTICAL'?'primary':''}" data-action="camera-tactical">TACTICAL OVERVIEW</button></div><p class="meta-note">Tactical overview frames the complete arena while spectating. Use the existing player and match switches to change who you follow.</p></div>`,'settings');
+    showModal(`<div class="eyebrow">GAME SETTINGS</div><h2>Settings</h2>${settingsTabs(tab)}<div class="settings-section"><h3>View</h3><label class="slider-row"><span><strong>Maximum FPS</strong><span>Applies immediately to arena rendering. Simulation timing stays unchanged.</span></span><select id="maximumFPS">${[60,120,144,165,200,240,300,360,0].map(value=>`<option value="${value}" ${CONFIG.maximumFPS===value?'selected':''}>${value||'Unlimited'}</option>`).join('')}</select></label><p class="meta-note">Unlimited adds no application cap. Your display and desktop host still determine the available frame rate.</p><button data-action="view-25d">RETRY ARENA VIEW</button><p id="viewStatus" class="meta-note"></p><h3>Spectator Camera</h3><div class="account-actions"><button class="${CONFIG.spectatorCamera==='FOLLOW'?'primary':''}" data-action="camera-follow">FOLLOW OPERATOR</button><button class="${CONFIG.spectatorCamera==='TACTICAL'?'primary':''}" data-action="camera-tactical">TACTICAL OVERVIEW</button></div><p class="meta-note">Tactical overview frames the complete arena while spectating. Use the existing player and match switches to change who you follow.</p></div>`,'settings');
     const section=!settingsCapture&&document.querySelector('.settings-section');if(section){const fullscreen=window.SARFullscreen;section.insertAdjacentHTML('beforeend',`<h3>Fullscreen</h3><div class="account-actions"><button data-action="fullscreen">${fullscreen?.getStatus().fullscreen?'EXIT FULLSCREEN':'FULLSCREEN'}</button></div><label class="camera-setting"><input id="fullscreenAutoEnter" type="checkbox" ${fullscreen?.getAutoEnter()!==false?'checked':''}> Enter fullscreen when I press Play or Watch</label><label class="camera-setting"><input id="fullscreenKeepEscape" type="checkbox" ${fullscreen?.getStatus().keyboardLockPreferred?'checked':''}> Keep Escape inside fullscreen during combat, when supported</label><p class="meta-note" data-fullscreen-status>${escapeHtml(fullscreen?.getStatus().message||'')}</p><p class="meta-note">Tab stays inside the game during combat. F11 or Exit Fullscreen returns to a window.</p>`);}
     return;
   }
@@ -3073,16 +3399,14 @@ function captureSettingsSection(tab){const capture={};settingsCapture=capture;tr
 function fullscreenSettingsHtml(){const full=window.SARFullscreen;return '<h3>Fullscreen</h3><button data-action="fullscreen">'+(full?.getStatus().fullscreen?'EXIT FULLSCREEN':'FULLSCREEN')+'</button><label class="camera-setting"><input id="fullscreenAutoEnter" type="checkbox" '+(full?.getAutoEnter()!==false?'checked':'')+'> Enter fullscreen when I press Play or Watch</label><label class="camera-setting"><input id="fullscreenKeepEscape" type="checkbox" '+(full?.getStatus().keyboardLockPreferred?'checked':'')+'> Keep Escape inside fullscreen during combat, when supported</label><p class="meta-note" data-fullscreen-status>'+escapeHtml(full?.getStatus().message||'F11 toggles fullscreen.')+'</p>';}
 function saveDataSectionHtml(){return '<section class="settings-section"><h3>Data Management</h3><p>Export a complete backup of this account, or safely import an existing save. Newer permanent records cannot be replaced by older ones.</p><div class="account-actions"><button data-action="export-save">EXPORT SAVE FILE</button><button data-action="import-save">IMPORT SAVE FILE</button></div><input id="saveImport" type="file" accept="application/json,.json" class="hidden"></section>';}
 function renderSettingsModal(tab='game'){
- const requested=tab;tab=['controls','gameplay','view','aim','ai','developer'].includes(tab)?'game':['updates','patchnotes','readme'].includes(tab)?'about':tab;if(!['game','audio','account','about'].includes(tab))tab='game';
+ const requested=tab;tab=['controls','gameplay','view','aim','developer'].includes(tab)?'game':['updates','patchnotes','readme'].includes(tab)?'about':tab;if(!['game','audio','account','about'].includes(tab))tab='game';
  const old=document.querySelector('#modalContent[data-view="settings"]'),scroll=old?document.querySelector('#modal .modal')?.scrollTop||0:0,opened=new Set([...document.querySelectorAll('[data-settings-section][open]')].map(el=>el.dataset.settingsSection));
  let body='';if(tab==='game'){
   body=['controls','aim','gameplay','view'].map((key,index)=>'<details class="settings-group" data-settings-section="'+key+'" '+((opened.size?opened.has(key):key===requested||index===0)?'open':'')+'><summary>'+({controls:'Controls',aim:'Aim',gameplay:'Gameplay',view:'View & display'}[key])+'</summary>'+captureSettingsSection(key)+(key==='view'?fullscreenSettingsHtml():'')+'</details>').join('');
-  body+='<details class="settings-group" data-settings-section="messaging" '+(requested==='ai'||opened.has('messaging')?'open':'')+'><summary>Messaging</summary><div id="messagingSettings">'+(window.SARSocialUI?.settingsSectionHtml?.()||'<p>Messaging is loading.</p>')+'</div></details>';
  }else if(tab==='audio')body=window.SARAudio?.settingsHtml()||'<p>Audio is unavailable.</p>';
  else if(tab==='account')body=captureSettingsSection('account')+saveDataSectionHtml();
  else {const build=window.SARBuild||{};body='<div class="about-brand"><img src="assets/branding/wordmark-mono.svg" alt="Skirmish Arena"><span>BETA</span></div><div class="about-versions"><p>GAME <strong>'+escapeHtml(build.applicationVersion)+'</strong></p><p>INSTALLED BUILD <strong>'+escapeHtml(window.SARUpdater?.version||build.version)+'</strong></p><p>WEAPON BALANCE <strong>'+escapeHtml(build.weaponBalance)+'</strong></p></div>'+captureSettingsSection('updates')+'<details class="settings-group" open><summary>Patch Notes</summary>'+renderPatchNotesHtml()+'</details><details class="settings-group"><summary>Player Guide</summary>'+captureSettingsSection('readme')+'</details>';}
  showModal('<div class="eyebrow">SKIRMISH ARENA</div><h2>Settings</h2>'+settingsTabs(tab)+'<div class="settings-body" data-settings-page="'+tab+'">'+body+'</div>','settings');if(old)document.querySelector('#modal .modal').scrollTop=scroll;
- if(tab==='game')void window.SARSocialUI?.refresh?.();
 }
 
 function renderControlsModal(){renderSettingsModal('controls');}
@@ -3091,6 +3415,7 @@ function clearInput(){input.keys.clear();input.mouseDown=false;input.justPressed
 let gameplayFocused=true,pointerLockPending=false,wasPointerLocked=false,intentionalPointerRelease=false,lockLostAt=-Infinity;
 function gameplayViewportActive(){
   return state.mode==='play'&&state.running&&!state.paused&&gameplayFocused&&!document.hidden&&
+    !window.SARModeEntry?.isVisible()&&
     !['modal','menu','pause'].some(id=>document.getElementById(id)?.classList.contains('visible'))&&
     !['accountGate','cloudAccountMenu'].some(id=>{const el=document.getElementById(id);return el&&!el.classList.contains('hidden');});
 }
@@ -3210,21 +3535,27 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('click',async e=>{
   const action=e.target.closest('[data-action]')?.dataset.action;
   if(action==='play')renderPlayMenu();
-  else if(action==='play-tdm'){window.SARFullscreen?.onPlay();queueForMatch();}
-  else if(action==='play-ranked'){window.SARFullscreen?.onPlay();queueForMatch('ranked-tdm');}
-  else if(action==='play-deathmatch'){window.SARFullscreen?.onPlay();startDeathmatch();}
+  else if(action==='play-tdm'){window.SARFullscreen?.onPlay();beginModeEntry('tdm');}
+  else if(action==='play-ranked'){window.SARFullscreen?.onPlay();beginModeEntry('ranked-tdm');}
+  else if(action==='play-deathmatch'){window.SARFullscreen?.onPlay();beginModeEntry('deathmatch');}
   else if(action==='play-custom')renderCustomSetup();
   else if(action==='deathmatch-profile')renderDeathmatchProfile();
-  else if(action==='start-custom'){try{const config=readCustomSetup();window.SARFullscreen?.onPlay();startCustomMatch(config);}catch(error){document.getElementById('customError').textContent=error.message;}}
-  else if(action==='play-again'){window.SARFullscreen?.onPlay();const r=state.lastResult;if(r?.sessionType==='custom')startCustomMatch(r.config);else if(r?.mode==='deathmatch')startDeathmatch();else queueForMatch(r?.sessionType==='ranked'?'ranked-tdm':'tdm');}
+  else if(action==='ranked-profile')renderRecordProfile('ranked');
+  else if(action==='combined-profile')renderRecordProfile('combined');
+  else if(action==='rank-inspect')openRankInspection();
+  else if(action==='rank-inspection-back')backFromRankInspection();
+  else if(action==='start-custom'){try{const config=readCustomSetup();window.SARFullscreen?.onPlay();beginModeEntry('custom',config);}catch(error){document.getElementById('customError').textContent=error.message;}}
+  else if(action==='play-again'){window.SARFullscreen?.onPlay();const r=state.lastResult;if(r?.sessionType==='custom')beginModeEntry('custom',r.config);else beginModeEntry(r?.mode==='deathmatch'?'deathmatch':r?.sessionType==='ranked'?'ranked-tdm':'tdm');}
   else if(action==='spectate')window.SARPhone?.openSpectate?.();
   else if(action==='fullscreen')window.SARFullscreen?.toggle();
   else if(action==='loadout')renderLoadoutModal();
   else if(action==='operator')renderOperatorModal();
+  else if(action==='store')window.SARCommerce?.openStore?.();
+  else if(action==='shop')window.SARCommerce?.openShop?.();
   else if(action==='meta')renderMetaModal();
   else if(action==='bots')window.SARPhone?.open?.('bots');
   else if(action==='player-profile')renderPlayerProfile();
-  else if(action==='messages'){clearInput();releaseGameplayPointerLock();window.SARSocialUI?.showPhone?.();}
+  else if(action==='phone'){clearInput();releaseGameplayPointerLock();window.SARPhoneUI?.showPhone?.();}
   else if(action==='tournaments')window.SARCloud?.showTournaments?.();
   else if(action==='controls'||action==='settings')renderSettingsModal('controls');
   else if(action==='save')renderSaveModal();
@@ -3266,9 +3597,18 @@ document.addEventListener('click',async e=>{
 });
 document.getElementById('closeModal').addEventListener('click',()=>{awaitingBindAction=null;closeModal();});
 document.addEventListener('change',e=>{if(e.target?.id==='saveImport')importSaveFile(e.target.files?.[0]);});
+document.addEventListener('change',e=>{
+  if(e.target?.id!=='profileStatsScope')return;const view=document.getElementById('modalContent')?.dataset.view;if(!['ranked-profile','combined-profile','rank-inspection'].includes(view))return;
+  const value=e.target.value,season=Number(value.split(':')[1]);if(value==='lifetime')profileStatsScope='lifetime';else if(value.startsWith('season:')&&[SAVE.playerSeasons.current,...SAVE.playerSeasons.history].some(s=>s.number===season)){profileStatsScope='season';profileStatsSeason=season;}else return;
+  renderRecordProfile(view==='combined-profile'?'combined':'ranked',view==='rank-inspection');document.getElementById('profileStatsScope')?.focus?.({preventScroll:true});
+});
 document.addEventListener('change',e=>{if(e.target?.id==='cameraAimBias'){CONFIG.cameraAimBias=!!e.target.checked;saveTelemetry();}});
 document.addEventListener('change',e=>{if(e.target?.id==='damageNumbers'){CONFIG.damageNumbers=!!e.target.checked;damageNumbers.length=0;saveTelemetry();}});
+document.addEventListener('change',e=>{if(e.target?.id==='hudSize')saveTelemetry();});
+document.addEventListener('click',e=>{if(e.target?.closest?.('#resetHudSize')){CONFIG.hudSize=100;applyHudSize();saveTelemetry();}});
+document.addEventListener('change',e=>{if(e.target?.id==='maximumFPS'){const value=Number(e.target.value);if([0,60,120,144,165,200,240,300,360].includes(value)){CONFIG.maximumFPS=value;saveTelemetry();}}});
 document.addEventListener('input',e=>{
+  if(e.target?.id==='hudSize'){CONFIG.hudSize=clamp(Math.round(Number(e.target.value)||100),75,140);applyHudSize();}
   if(e.target?.id==='adsSensitivity'){CONFIG.adsSensitivity=clamp(Number(e.target.value)||.65,.30,1);const out=document.getElementById('adsSensValue');if(out)out.textContent=CONFIG.adsSensitivity.toFixed(2)+'×';saveTelemetry();}
   if(e.target?.id==='mouseSensitivity'){
     CONFIG.mouseSensitivity=clamp(Number(e.target.value)||1,.25,2.5);
@@ -3283,6 +3623,18 @@ updateLobbyUi();
 paintLobbyKit();
 addEventListener('resize',()=>{paintLobbyKit();window.SAR25D?.resize?.(innerWidth,innerHeight);document.querySelectorAll('[data-weapon-preview]').forEach(c=>drawWeaponPreview(c,c.dataset.weaponPreview));document.querySelectorAll('[data-operator-preview]').forEach(c=>drawOperatorPreview(c,Number(c.dataset.operatorPreview)));paintMetaPreview();});
 let last=performance.now();
+let nextRenderAt=null,renderLimit=CONFIG.maximumFPS;
+// A render deadline on the existing rAF chain. Never gate simulation or audio.
+function renderFrameDue(frameTime){
+  if(renderLimit!==CONFIG.maximumFPS){renderLimit=CONFIG.maximumFPS;nextRenderAt=null;}
+  if(!renderLimit){nextRenderAt=null;return true;}
+  const interval=1000/renderLimit;
+  if(nextRenderAt===null){nextRenderAt=frameTime+interval;return true;}
+  if(frameTime+.01<nextRenderAt)return false;
+  nextRenderAt+=interval*Math.max(1,Math.floor((frameTime-nextRenderAt)/interval)+1);
+  return true;
+}
+for(const event of ['focus','resize','visibilitychange'])addEventListener(event,()=>{nextRenderAt=null;});
 function loop(frameTime){
   const elapsed=Math.max(0,Math.min(.25,(frameTime-last)/1000));last=frameTime;
   window.SARAudio?.setView({active:['play','spectate'].includes(state.mode)&&!state.paused&&!document.hidden&&document.hasFocus(),matchId:visibleMatchId(),x:state.camera.x,y:state.camera.y});
@@ -3290,20 +3642,21 @@ function loop(frameTime){
     let remaining=elapsed;
     while(remaining>1e-6){const dt=Math.min(.035,remaining);simulationTime+=dt*1000;update(dt,simulationTime);remaining-=dt;}
   }
-  render(simulationTime);updateDebugPanel(simulationTime);requestAnimationFrame(loop);
+  if(renderFrameDue(frameTime)){render(simulationTime);updateDebugPanel(simulationTime);}requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
 
 // Expose a tiny read-only debugging surface for verification/dev tools.
 window.SAR = {
   showWeaponMeta:renderMetaModal,metaRowsForCohort:options=>cloneData(metaRowsForCohort(options)),compactMetaHtml,
-  botLeaderboardRows:({sort={key:'kd',dir:-1}}={})=>cloneData(sortRows(botRows(),'bots',sort)),
+  botLeaderboardRows:({mode='tdm',sort={key:'kd',dir:-1}}={})=>cloneData(sortRows(botRows(mode),'bots',sort)),
   getBalanceNotes:()=>cloneData(WEAPON_PATCH_NOTES),
   getMetaSelection:(cohort='human')=>({...META_SELECTIONS[cohort==='bot'?'bot':'human']}),
   getTeamPresentation:matchId=>matchTeamPresentation(getMatch(matchId)),
   getProgression:()=>({...XP.view(SAVE.progression.totalXPUnits),usedWeapons:SAVE.progression.usedWeapons.slice()}),xpSummaryHtml,
-  getState:()=>({mode:state.mode,running:state.running,paused:state.paused,queued:state.queued,playerMatchId:state.playerMatchId,spectateMatchId:state.spectateMatchId,actors:state.actors.length,bots:state.actors.filter(a=>!a.isPlayer).length,projectiles:state.projectiles.length,elapsed:state.elapsed,world:{...WORLD},matches:state.matches.map(m=>m?{id:m.id,matchId:m.matchId,mode:m.mode,sessionType:m.sessionType,eligible:m.eligible,participants:m.participants.length,aiRevision:m.aiRevision,score:[...m.score],hasPlayer:m.hasPlayer,status:m.status,overtime:m.overtime,timeLeftMs:matchRemainingMs(m),endReason:m.endReason,tournamentId:m.context?.tournamentId||null,slotCooldownMs:slotCooldownRemaining(m)}:null),idleBots:state.idleBots.length}),
+  getState:()=>({mode:state.mode,running:state.running,paused:state.paused,queued:state.queued,playerMatchId:state.playerMatchId,spectateMatchId:state.spectateMatchId,actors:state.actors.length,bots:BOT_COUNT,projectiles:state.projectiles.length,elapsed:state.elapsed,world:{...WORLD},matches:state.matches.map(m=>m?{id:m.id,matchId:m.matchId,mode:m.mode,sessionType:m.sessionType,eligible:m.eligible,participants:m.participants.length,requiredParticipants:m.requiredParticipants||10,availableParticipants:m.participants.length,waitReason:m.waitReason||null,limit:m.limit,durationMs:m.durationMs,aiRevision:m.aiRevision,score:[...m.score],hasPlayer:m.hasPlayer,status:m.status,countdown:matchCountdownSnapshot(m),overtime:m.overtime,timeLeftMs:matchRemainingMs(m),endReason:m.endReason,tournamentId:m.context?.tournamentId||null,slotCooldownMs:slotCooldownRemaining(m)}:null),idleBots:state.idleBots.length,reservedBots:state.actors.filter(a=>!a.sandbox&&!a.isPlayer&&a.officialReservation).length}),
   getWeapons:()=>JSON.parse(JSON.stringify(WEAPONS)),
+  getMapCalibration:()=>cloneData(MAP_CALIBRATION),
   getWeaponDisplayMetrics:name=>weaponDisplayMetrics(name),
   getPreviewDiagnostics:()=>inspectionApi?.previewDiagnostics()||null,
   getMeta:()=>JSON.parse(JSON.stringify(meta)),
@@ -3320,27 +3673,50 @@ window.SAR = {
   getPatch:()=>cloneData(SAVE.patchState),
   getUniverse:()=>cloneData(SAVE)
 };
-window.SAR.getVersion=()=>({version:'1.11.0',name:'BLUE CIRCUIT',code:'blue-circuit-1'});
+window.SAR.getVersion=()=>({version:'1.13.0',name:'ARENA REFINED',code:'arena-refined-2'});
 window.SAR.openPlayerProfile=renderPlayerProfile;
+window.SAR.openRankedProfile=()=>renderRecordProfile('ranked');
+window.SAR.openCombinedProfile=()=>renderRecordProfile('combined');
+window.SAR.getProfileStats=(options={})=>{const participantId=currentAccount()?.id||'local-player';return window.SARProfileStats.project(SAVE,{kind:options.kind,scope:options.scope,seasonNumber:options.seasonNumber,participantId,accountId:participantId});};
 window.SAR.startTournamentGame=startTournamentGame;
+window.SAR.beginTournamentEntry=beginTournamentEntry;
+window.SAR.captureTournamentGame=captureTournamentGame;
+window.SAR.acceptTournamentXP=acceptTournamentXP;
+window.SAR.syncTournamentReservations=syncTournamentReservations;
 window.SAR.getMatchStandings=(id)=>{const match=getMatch(Number(id));return match?standings(match).map(row=>({...row})):[];};
 window.SAR.showPanel=showModal;
+window.SAR.getOperators=()=>SKINS.map(({id,name},index)=>({id,name,index}));
+window.SAR.paintCosmeticPreview=(canvas,{operatorId,cosmeticId,styleId='main',lobbyPose=false})=>{
+  const skin=SKINS.findIndex(operator=>operator.id===operatorId);if(skin<0)throw Error('Unknown base operator');
+  return paintModelPreview(canvas,{kind:'operator',skin,palette:SKINS[skin],unarmed:true,cosmetic:cosmeticId?{id:cosmeticId,operatorId,styleId}:null,lobbyIdle:!!lobbyPose});
+};
+window.SAR.equipCosmeticOperator=operatorId=>{
+  const index=SKINS.findIndex(operator=>operator.id===operatorId);if(index<0)return false;
+  CONFIG.skin=index;STORE.set('sar-v1-skin',String(index));saveTelemetry();paintLobbyKit();return true;
+};
+window.addEventListener('sar:cosmetics-changed',()=>{
+  paintLobbyKit();
+  document.querySelectorAll('[data-operator-card] [data-operator-preview], .profile-operator[data-operator-preview]').forEach(c=>drawOperatorPreview(c,Number(c.dataset.operatorPreview)));
+});
 window.SAR.showSettings=renderSettingsModal;
 window.SAR.showBotLeaderboard=renderBotLeaderboard;
-window.SAR.getBotTable=()=>({head:botHeadHtml(),body:botRowsHtml(),sort:{...TABLE_SORT.bots}});
+window.SAR.getBotTable=(mode=BOT_LEADERBOARD_MODE)=>({mode,head:botHeadHtml(),body:botRowsHtml(mode),sort:{...TABLE_SORT.bots}});
+window.SAR.getBotMode=()=>BOT_LEADERBOARD_MODE;
+window.SAR.setBotMode=mode=>{BOT_LEADERBOARD_MODE=mode==='deathmatch'?'deathmatch':'tdm';};
 window.SAR.setBotSort=(key)=>{const c=TABLE_SORT.bots;if(c.key===key)c.dir*=-1;else{c.key=key;c.dir=-1;}};
 window.SAR.watchMatch=(id)=>{const match=getMatch(Number(id));if(!match||!['active','countdown'].includes(match.status))return false;startSpectate(Number(id));return true;};
-window.SAR.preparePanel=()=>{clearInput();releaseGameplayPointerLock();};
+window.SAR.preparePanel=()=>{window.SARModeEntry?.cancel({restore:false});clearInput();releaseGameplayPointerLock();};
 window.SAR.startRanked=()=>queueForMatch('ranked-tdm');
+window.SAR.beginModeEntry=beginModeEntry;
 window.SAR.getModes=()=>MATCH_MODES.list();
 window.SAR.getProgressionSummary=(id=currentAccount()?.id||'local-player')=>XP.summary(SAVE.progression,SAVE.ranked,id);
 window.SAR.getRanked=(id=currentAccount()?.id||'local-player')=>XP.summary(SAVE.progression,SAVE.ranked,id).ranked;
 window.SAR.getRewardBreakdown=(matchId,id=currentAccount()?.id||'local-player')=>XP.rewardBreakdown(SAVE.progression.awards[matchId]?.participantId===id?SAVE.progression.awards[matchId]:null,SAVE.ranked.participants[id]?.awards[matchId]);
 window.SAR.startDeathmatch=startDeathmatch;window.SAR.startCustomMatch=startCustomMatch;
 window.SAR.getLastResult=()=>cloneData(state.lastResult||null);
-window.SAR.getActiveTournament=()=>state.matches.find(m=>m?.context?.tournamentId&&m.status==='active')?.context?.tournamentId||null;
+window.SAR.getActiveTournament=()=>state.matches.find(m=>m?.context?.tournamentId&&['countdown','active'].includes(m.status))?.context?.tournamentId||null;
 window.SAR.cancelTournament=(id)=>{const m=state.matches.find(m=>m?.context?.tournamentId===id);if(!m)return false;m.status='cancelled';releaseSession(m);return true;};
-window.SAR.prepareReload=()=>{const wasPaused=state.paused;state.paused=true;clearInput();releaseGameplayPointerLock();saveTelemetry();return ()=>{state.paused=window.SARCloud?.state?.authExpired?true:wasPaused;syncGameplayPointerLock();requestGameplayPointerLock();};};
+window.SAR.prepareReload=()=>{window.SARModeEntry?.cancel({restore:false});const wasPaused=state.paused;state.paused=true;clearInput();releaseGameplayPointerLock();saveTelemetry();return ()=>{state.paused=window.SARCloud?.state?.authExpired?true:wasPaused;syncGameplayPointerLock();requestGameplayPointerLock();};};
 if(CONFIG.viewMode==='2.5D')ensure25d();
 })();
 

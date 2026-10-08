@@ -1,10 +1,12 @@
 # Skirmish Arena
 
-**VERSION 1.11 — BLUE CIRCUIT · 2026-10-03**
+**1.13.0 — ARENA REFINED · Weapon Balance 9.0**
+
+Application updates and weapon balance have separate version numbers. Arena Refined brings together all ten audits while retaining existing accounts and progress.
 
 Skirmish Arena has 5v5 Team Deathmatch, ten-player Deathmatch and custom sessions, with a persistent league of 50 bots. Play a match, follow the four active bot matches, choose an operator and loadout, and track careers, seasons and the current weapon meta. Operators and weapons use 2.5D models throughout the game.
 
-Account progression adds persistent XP and Levels 1–50, a compact lobby/profile display and an expandable match breakdown. Standard TDM and Deathmatch earn XP; official tournaments multiply the final match award by 1.3. Custom and practice games do not earn XP or consume first-use rewards. Level 50 is the current cap; lifetime XP continues accumulating. A clean startup screen remains visible for at least three seconds while the game prepares. The installed update build is 1.11.0; the application version is 1.11 and the active weapon rules remain **Balance 8.0 — Core Tuning**.
+Account progression adds persistent XP and Levels 1–50, a compact lobby/profile display and an expandable match breakdown. Standard TDM and Deathmatch earn XP; official tournaments multiply the final match award by 1.3. Custom and practice games do not earn XP or consume first-use rewards. Level 50 is the current cap; lifetime XP continues accumulating.
 
 ## Install and update
 
@@ -12,11 +14,15 @@ Run the Windows installer, then open your existing **Skirmish Arena** desktop sh
 
 Create an account on first use and keep the recovery code. Previously authenticated accounts can continue with their cached world under **CLOUD OFFLINE — LOCAL MODE** when the account service cannot be reached. Progress saves locally and synchronizes after reconnection. First-time login and account creation require a connection.
 
-Use **Settings → About → Check for Updates** to install a release published to the configured server. Allow the game to finish saving and restart when the updater requests it. Updates retain accounts, careers, seasons, conversations and save data.
+Use **Settings → About → Check for Updates** to install a published release. Allow the game to finish saving and restart when the updater requests it. Updates retain accounts, XP, levels, careers, seasons, earnings, settings and save data.
+
+The application startup screen stays visible for at least three seconds and until essential initialization completes. Longer preparation keeps an honest loading status. If a required stage fails, read the error and use **Retry**; a failed load does not create a replacement blank world.
 
 ## Play and controls
 
-Choose **Play** for Ranked TDM, Team Deathmatch, Deathmatch or Custom, or **Phone → Spectate** to watch. Deathmatch ends at 30 kills or four minutes. Custom matches support solo practice, selected roster bots and four difficulties; they award no official progress. A player match begins with the countdown; results show the team score and the ten participants. **Play Again**, **Lobby** and **Spectate** are available afterward.
+Choose **Play** for Ranked TDM, Team Deathmatch, Deathmatch or Custom, or **Phone → Spectate** to watch. Team Deathmatch is 5v5, ending at 60 team kills or five minutes under its existing tie rules. Deathmatch has ten individual competitors and ends at 30 kills or four minutes. Custom matches support solo practice, selected roster bots and four difficulties; they award no official progress. Results show the actual team score or Deathmatch standings. **Play Again**, **Lobby** and **Spectate** are available afterward.
+
+Selecting a mode opens a separate match-preparation screen for at least three seconds while the arena and roster prepare. Three seconds is a minimum, not a failure deadline; preparation must also finish before entry. **Return to Modes** or Escape cancels, and **Retry** starts a clean attempt after a reported error. Your player enters only when preparation is ready and the game has focus. The existing pre-match countdown is separate and appears before combat begins.
 
 Move with the keyboard and aim with the mouse. Gameplay captures the mouse; opening menus releases it. Use the game's **Game → Controls** settings for the current bindings, mouse sensitivity and ADS sensitivity. F11 toggles fullscreen, Tab shows the scoreboard during combat, and Windows Alt+Tab remains available.
 
@@ -26,9 +32,11 @@ Ranked TDM uses the same combat rules, a 60-kill target and a five-minute clock.
 
 ## Operators and loadouts
 
-Operators are cosmetic choices with the same gameplay statistics. Drag any card’s 2.5D model to rotate it, use its keyboard or zoom controls, and Reset to restore the starting view. Choose a primary weapon and sidearm in Loadout.
+Operators are cosmetic choices with the same gameplay statistics. Drag any card’s 2.5D model to rotate it, use its keyboard or zoom controls, and Reset to restore the starting view. Choose a primary weapon and sidearm in Loadout. The lobby operator has a subtle breathing motion; the separately displayed weapon slowly makes a full turn.
 
-Weapon cards show role, damage, body/headshot TTK, ammunition, reload time, preferred range and current meta measurements. Advanced statistics provide deeper mechanical values. The armory contains 14 weapons, including the ranged-SMG P90, the three-round-burst SR-Aug and the SPAS-12. Audio settings control Master, Weapons, SFX, UI and Ambience volumes.
+Weapon cards show role, damage, body/headshot TTK, ammunition, reload time, preferred range and current meta measurements. Stat bars retain exact numbers: stronger performance is greener, with yellow, orange and red for lower performance. Shorter reloads receive the stronger bar. Advanced statistics provide deeper mechanical values. The armory contains 15 weapons, including the semi-automatic FAL, ranged-SMG P90, three-round-burst SR-Aug and SPAS-12. The FAL fires individual rounds at a 0.26-second interval and has a preferred engagement range of 48.61 m. Audio settings control Master, Weapons, SFX, UI and Ambience volumes.
+
+Preferred range, falloff start, engagement range and kill range use meters. Projectile speed uses meters per second; a displayed falloff rate is per meter. These units preserve the arena's physical size and weapon behavior at fixed positions. Camera zoom does not change distance or spread. Historical measurements without a known scale remain unavailable rather than receiving an invented conversion.
 
 ## Careers, seasons and Weapon Meta
 
@@ -36,27 +44,45 @@ Main-menu Weapon Meta reports human participants, including eligible play agains
 
 Open your username menu for **Profile**, **Settings**, **Account** and **Logout**. Standard match results contribute to your career, weapon records and season progress. Bot profiles retain their careers, Power, Form, playstyle and weapon familiarity across sessions.
 
+Click your 3D ranked emblem in the lobby, profile or ranked result to inspect your actual ranked statistics, current ELO progress and complete ranked ladder. **Back** returns to the screen you opened it from. Profiles retain Team Deathmatch and Deathmatch and add **Ranked Stats** and **Combined Stats**. Choose lifetime records or a saved season; the displayed current ELO remains your lifetime competitive rating.
+
+Ranked Stats includes eligible Ranked TDM only. Combined Stats includes casual TDM, casual Deathmatch and Ranked TDM, counting each completed match once. Official tournaments, custom matches and practice are excluded. K/D, accuracy and win rate use raw totals. Older missing match details or shot measurements are marked unavailable; existing mode careers remain intact. Eligible results refresh the relevant tabs immediately and persist through offline play and reconnection.
+
 Season pages show the current competition and previous results. **Weapon Meta** separates primary weapons and sidearms and supports sorting. Select a weapon to inspect its model, detailed measurements and leading bot users.
 
 Current meta measurements belong to one balance patch. Historical patch measurements and lifetime records remain available. Small samples display **LOW SAMPLE** or **—** until enough observations exist. Solo-kill and finisher measurements use actual damage contributions.
 
 ## Spectate
 
-Open **Phone → Spectate**, select a live match and choose **Watch Match**. Escape returns to the same Phone app. **Live Scores** shows live timers and honest between-match cooldowns.
+Open **Phone → Spectate**, select a live match and choose **Watch Match**. Escape returns to the same Phone app. **Live Scores** shows live timers, scores, waiting state and between-match cooldowns.
 
-Select any of the four active bot matches directly and cycle bots or either team. Use the follow and tactical camera controls, inspect the selected bot's loadout or statistics, and follow its score, timer and K/D/A. Spectating uses the same live match state as normal play.
+The background league has **two Team Deathmatch slots and two Deathmatch slots**. A full allocation uses 40 of the 50 persistent bots, with ten waiting. Slots restart after a 15-second cooldown and rotate the waiting pool fairly. Official tournament reservations take priority; affected background slots wait for available bots.
+
+Select any of the four matches directly and cycle individual bots. Team cycling is available in TDM; Deathmatch uses individual places and has no teammates. Use the follow and tactical camera controls, inspect the selected bot's loadout or statistics, and follow its score, timer and K/D/A. Spectating uses the same live match state as normal play. Neutral combat panels keep team and status colors readable.
 
 ## Phone
 
-Open **Phone**, then **Messages**, to reach all 50 bot contacts. Contacts show unread state and conversation previews. Open a contact to read its history, inspect its profile or send a reply. **Back** and **Home** navigate within the phone.
-
-Conversations persist with your account. Replies arrive asynchronously while the game continues. Bot contacts speak about their own results, weapon opinions, rivalries and tournament feelings. Direct questions about leaderboards and ranked use separate current records; unavailable facts are not filled in with invented results. **Settings → Game → Messaging** controls conversation preferences. Messaging availability is separate from the account connection.
+Open **Phone** for **Live Scores**, **Spectate**, **Bot Leaderboard** and **Bot Weapon Meta**. **Back** and **Home** navigate within the phone. Open a bot's profile from its current records to inspect career and performance information.
 
 ## Tournaments and Calendar
 
-The tournament Calendar lists official and custom events with local start times, registration state and results. Open an event for its teams, bracket and series status.
+The tournament Calendar lists real official and custom events with local start times, registration state and results. Official events use the **SKIRMISH CHALLENGE TOURNAMENT** name; custom events keep their creator's name. Open an event for **Overview / Schedule**, **Bracket**, **Team Leaderboard** and **Player Stats Leaderboard**. The bracket connects quarterfinals to semifinals and the final using saved results. Both leaderboards can be sorted and show tournament records separately from normal careers.
 
-Official tournaments are scheduled every 72 hours during an active season. Each tournament has eight teams of five participants. Quarterfinals and semifinals are best of three; the final is best of five. Register a team and invite eligible bots, who may accept or decline. Custom tournaments use the same format and can be created with a name, start time and roster.
+Official events recur every **three calendar days at 7:30 PM Eastern (America/New_York)**, following daylight saving. Calendar dates follow the existing event sequence. The local account service owns the persistent schedule; it cannot run while Windows is off. Events whose playable windows were missed are cancelled without invented scores or rewards. Custom tournaments retain their creator's date and time.
+
+Each tournament has eight teams of five participants. Quarterfinals and semifinals use **3-game aggregate kills**; finals use **5-game aggregate kills**. Every game is played, and the higher total team kills advances. Individual game wins do not determine advancement. Games retain their 50-kill target, five-minute limit and existing in-game tie rule. Equal aggregate kills use total team damage; an exact damage tie holds advancement for an explicit ruling. Historical tournaments retain their recorded format. Register a team and invite eligible bots, who may accept or decline.
+
+| Round | Preparation/check-in opens for each game (Eastern) | Latest round finish |
+| --- | --- | --- |
+| Quarterfinals | 7:30, 7:38, 7:46 PM | 7:53 PM |
+| Semifinals | 7:55, 8:03, 8:11 PM | 8:18 PM |
+| Final | 8:20, 8:28, 8:36, 8:44, 8:52 PM | 8:59 PM |
+
+Check in during the first **90 seconds** of each **two-minute preparation block**. The remaining 30 seconds lock and prepare the roster, with the existing three-second countdown ending at combat start. For the first quarterfinal game: check-in opens at 7:30, closes at 7:31:30, and combat starts at 7:32. Event details show queue opening, check-in closing and combat start separately. The mode-entry loading screen fits preparation and never shifts the global clock. Teams finishing early wait for the next fixed game time.
+
+At the check-in deadline, absent humans are replaced by eligible bots from the same persistent roster for the **remainder of that tournament**. The replacement receives that slot's eventual payout; a returning player cannot take it back mid-event or receive a duplicate payout. A checked-in player is not replaced merely because the interface is slow. Roster conflicts are shown rather than filled with cloned bots. Closing and reopening can restore a compatible saved game checkpoint; it does not extend deadlines or create results.
+
+**Official Tournament History** lists completed official events and opens their saved details, placements and winning roster. Historical names and champions remain as recorded. Missing older records are marked unavailable. Offline calendars show their cached status; loading, empty schedules and connection errors have separate states.
 
 Tournament performance has separate records. It does not contribute to standard player combat totals, normal bot careers, Weapon Meta or Gun Score. Official tournament earnings persist as fictional in-game amounts, awarded to **each participant**:
 
@@ -85,6 +111,6 @@ Open **Settings → About → Patch Notes** for the current version, update name
 
 ## Settings and exit
 
-Open your username menu for Profile, Settings, Account and sign-out. Settings has exactly Game, Audio, Account and About. Game groups controls, aim, gameplay, view and messaging without resetting saved preferences. Account includes Data Management; About includes updates, Patch Notes and this guide.
+Open your username menu for Profile, Settings, Account and sign-out. Settings has exactly Game, Audio, Account and About. Game groups controls, aim, gameplay and view without resetting saved preferences. Account includes Data Management; About includes updates, Patch Notes and this guide.
 
 Exit Game on the lobby saves locally before closing the desktop app. Pending online synchronization remains on the device when offline. A browser that cannot close itself shows a saved-state message so you can close the window. Exiting does not sign you out.

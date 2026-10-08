@@ -4,7 +4,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto');
 const {chromium}=require(process.env.SAR_PLAYWRIGHT||path.join(os.homedir(),'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
 const out=path.resolve(process.env.SAR_TEST_OUTPUT||path.join(os.tmpdir(),'sar-blue-circuit-ui'));
-fs.mkdirSync(out,{recursive:true});process.env.SAR_OLLAMA_URL='http://127.0.0.1:1';
+fs.mkdirSync(out,{recursive:true});
 const source=fs.readFileSync(path.join(__dirname,'../game.js'),'utf8');
 assert.equal(source.split('if(!state.paused&&!document.hidden){').length,2);
 const instrumented=source.replace('if(!state.paused&&!document.hidden){','if(false&&!state.paused&&!document.hidden){').replace('window.SAR = {','window.__BLUE_UI_TEST={state,fire,tryDash,respawnActor,applyDamage,endMatch};window.SAR = {');

@@ -1,13 +1,13 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),net=require('node:net'),vm=require('node:vm'),{spawn,spawnSync}=require('node:child_process');
-const {createDatabase}=require('../server/db.cjs');
+const {createDatabase,LATEST_DB_SCHEMA}=require('../server/db.cjs');
 const RELEASE=require('../version.json'),CURRENT=RELEASE.version;
 const project=path.resolve(__dirname,'..'),temporary=fs.mkdtempSync(path.join(os.tmpdir(),'sar-lifecycle-'));
 const backend=path.join(temporary,'backend'),service=path.join(temporary,'service'),database=path.join(service,'skirmish.sqlite');
 fs.mkdirSync(path.join(backend,'server'),{recursive:true});fs.mkdirSync(service,{recursive:true});
 const node=path.join(backend,process.platform==='win32'?'node.exe':'node');fs.copyFileSync(process.execPath,node);if(process.platform!=='win32')fs.chmodSync(node,0o755);
 const source=fs.readFileSync(path.join(project,'server/desktop-service.cjs'),'utf8').replace("require('./index.cjs')",`require(${JSON.stringify(path.join(project,'server/index.cjs'))})`);
-const entry=path.join(backend,'server/desktop-service.cjs');fs.writeFileSync(entry,source);fs.copyFileSync(path.join(project,'version.json'),path.join(backend,'version.json'));
+const entry=path.join(backend,'server/desktop-service.cjs');fs.writeFileSync(entry,source);fs.copyFileSync(path.join(project,'version.json'),path.join(backend,'version.json'));fs.copyFileSync(path.join(project,'server/startup-status.cjs'),path.join(backend,'server/startup-status.cjs'));
 const initial=createDatabase(database);initial.exec('CREATE TABLE preserved_fixture(id TEXT PRIMARY KEY,value TEXT NOT NULL)');initial.prepare('INSERT INTO preserved_fixture VALUES(?,?)').run('original','account/world fixture retained');initial.close();
 const checks=[],children=[];
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -22,7 +22,7 @@ function control(record,action,token=record.controlToken){return new Promise((re
   const socket=net.connect(record.controlPipe);let input='';socket.setTimeout(5000,()=>{socket.destroy();reject(Error('Private pipe timed out'));});socket.on('error',reject);
   socket.on('connect',()=>socket.write(JSON.stringify({action,token})+'\n'));socket.on('data',data=>{input+=data;if(input.includes('\n')){socket.destroy();try{resolve(JSON.parse(input));}catch(error){reject(error);}}});
 });}
-async function preflight({native=CURRENT,backendVersion=native,runningVersion=backendVersion,localShell=false,activeVersion=native,waitingVersion=null,activeCache=null,waitingCache=null,holdUpdateUntilActivated=false,installDelayMs=0,activateDuringVersionRead=false,staleRegistration=false,entryHtml=null}={}){
+async function preflight({native=CURRENT,backendVersion=native,runningVersion=backendVersion,databaseSchema=LATEST_DB_SCHEMA,localShell=false,activeVersion=native,waitingVersion=null,activeCache=null,waitingCache=null,holdUpdateUntilActivated=false,installDelayMs=0,activateDuringVersionRead=false,staleRegistration=false,entryHtml=null}={}){
   const html=entryHtml||fs.readFileSync(path.join(project,'desktop-entry.html'),'utf8');
   const external=html.match(/<script\s+src="\.\/(desktop-launch\.js)"[^>]*><\/script>/);
   assert.ok(external,'Native startup must execute the installed external bootstrap');
@@ -36,7 +36,7 @@ async function preflight({native=CURRENT,backendVersion=native,runningVersion=ba
   navigator.serviceWorker.getRegistration=async()=>registration;
   let elapsed=0,downloaded=false;
   const schedule=(fn,ms)=>{if(installDelayMs&&ms===100){elapsed+=ms;if(elapsed>=installDelayMs&&!downloaded){downloaded=true;registration.waiting=worker(native,expectedCache);}return setTimeout(fn,0);}return setTimeout(fn,ms);};
-  const context={window:{__SAR_EXPECTED_VERSION__:native,location:{replace(value){destination=value;}}},document:{getElementById:id=>elements[id]},navigator,caches:{keys:async()=>['sar-shell-1.5.4-old','sar-shell-'+native+'-obsolete',expectedCache,'unrelated-user-cache'],delete:async name=>{deleted.push(name);return true;}},fetch:async(url,options)=>{requests.push({url,options});return url.startsWith('./api/')?{ok:!localShell,json:async()=>localShell?{localShell:true}:{ok:true,version:runningVersion,databaseSchema:5}}:{ok:true,json:async()=>({...release,version:backendVersion})};},AbortSignal,setTimeout:schedule,clearTimeout,Date:installDelayMs?{now:()=>elapsed}:Date,Promise,encodeURIComponent};
+  const context={window:{__SAR_EXPECTED_VERSION__:native,location:{replace(value){destination=value;}}},document:{getElementById:id=>elements[id]},navigator,caches:{keys:async()=>['sar-shell-1.5.4-old','sar-shell-'+native+'-obsolete',expectedCache,'unrelated-user-cache'],delete:async name=>{deleted.push(name);return true;}},fetch:async(url,options)=>{requests.push({url,options});return url.startsWith('./api/')?{ok:!localShell,json:async()=>localShell?{localShell:true}:{ok:true,version:runningVersion,databaseSchema}}:{ok:true,json:async()=>({...release,version:backendVersion})};},AbortSignal,setTimeout:schedule,clearTimeout,Date:installDelayMs?{now:()=>elapsed}:Date,Promise,encodeURIComponent};
   vm.runInNewContext(script,context);
   await until(()=>destination||context.window.__SAR_DESKTOP_LAUNCH_ERROR__,installDelayMs?15000:6000);
   assert.equal(requests[0].options.cache,'no-store');
@@ -120,6 +120,7 @@ async function run(){
   pass('Same-build balance shell finishing after45seconds activates automatically, retaining account caches and requiring no Retry');
   const bad=await preflight({backendVersion:'1.5.4'});assert(bad.error.includes('Version mismatch'));assert.equal(bad.registered,0);assert.deepEqual(bad.deleted,[]);
   const staleProcess=await preflight({runningVersion:'1.5.4'});assert(staleProcess.error.includes('active backend'));assert.equal(staleProcess.registered,0);assert.deepEqual(staleProcess.deleted,[]);
+  for(const databaseSchema of [LATEST_DB_SCHEMA-1,LATEST_DB_SCHEMA+1]){const wrongSchema=await preflight({databaseSchema});assert.ok(wrongSchema.error.includes('account schema '+databaseSchema));assert.equal(wrongSchema.registered,0);assert.deepEqual(wrongSchema.deleted,[]);}
   const cached=await preflight({localShell:true});assert(cached.destination,'Cached authenticated mode retains the exact-version local shell when HTTP account health is offline');
   const wrongWorker=await preflight({activeVersion:'1.5.4',waitingVersion:'1.5.6'});assert(wrongWorker.error.includes('Version mismatch'));assert.deepEqual(wrongWorker.deleted,[]);
   const wrongRevision=await preflight({waitingVersion:CURRENT,waitingCache:'sar-shell-'+CURRENT+'-obsolete'});assert(wrongRevision.error.includes('Version mismatch'));assert.equal(wrongRevision.activations,0);assert.deepEqual(wrongRevision.deleted,[]);

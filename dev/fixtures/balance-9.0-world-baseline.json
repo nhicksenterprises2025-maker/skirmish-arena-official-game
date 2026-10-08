@@ -1,0 +1,2615 @@
+{
+  "description": "Actual Balance9/FAL1100 capture before meter integration; world-space behavior must remain unchanged.",
+  "patch": {
+    "label": "WEAPON BALANCE UPDATE 9.0",
+    "fingerprint": "b-59670f2d",
+    "weaponCount": 15
+  },
+  "world": {
+    "w": 4320,
+    "h": 2880
+  },
+  "geometry": {
+    "counts": {
+      "floors": 12,
+      "walls": 130,
+      "solids": 164,
+      "trees": 21,
+      "decor": 156,
+      "roads": 6,
+      "surfaces": 24,
+      "props": 26,
+      "outerWorld": 480,
+      "doorZones": 24,
+      "navigationCorridors": 30,
+      "SPAWNS": 34
+    },
+    "hashes": {
+      "floors": "96253fc4fd3a0a83db8717c073c14e6173e5d7518959f81cfebb3bb3dc0a6f16",
+      "walls": "c18a0cabdd86077a4e7697e267f00e44f028d20b557ae70735f7333feda4c7c3",
+      "solids": "675d7c6847686f746156d44e23a2bea7e40284c07d85d078578521b9c6c47082",
+      "trees": "3cbab74a50fa3336608180fa7b28fd87d89fc505d0171bfacf5f01653ebde4d0",
+      "decor": "ec98b6de37d17df2b0381c89a7a000d7c726d1727af592f972ea97fff8e72073",
+      "roads": "4f614f0fa2d80c39e0f6fc81258941d684c614a000443a2e17a2e4985a2dbc0b",
+      "surfaces": "4c8ce65a03f5ce4c700520886a4dcb8d0617633c3345f8ec01be9af25fecd89f",
+      "props": "eb542fdbc7df5f25381a788a7bd69d4413704b2ad4b8866497fa12a624089bfa",
+      "outerWorld": "75729f23590527ec1ae170fccf2f8442050372969683c9a2fbe9c464ba50f1c9",
+      "doorZones": "3352195aedb1ee41fad8f9a328b4a186c22357b889d015cd9dcbbfac61215b4a",
+      "navigationCorridors": "1c6857a89f3fb646e194a22d99e3ec9479a6694457bc39aef7cc7ad028ef6b62",
+      "SPAWNS": "8ce0dfd8de5322e54c4feb0054a6ad781c2626ea2a4defd542d2e81db8118732"
+    },
+    "allGeometryHash": "d309d94568cfd7fde10635939bd903095e046ca20a2d8887b77869c785c56032",
+    "mapReport": {
+      "rejected": {
+        "doorway": 688,
+        "prop": 558,
+        "perimeter": 110,
+        "road": 2406,
+        "spawn": 272,
+        "building": 506,
+        "corridor": 379
+      },
+      "placed": 88,
+      "buildings": 12,
+      "version": "brightfield-district-2",
+      "disconnectedNavigationCells": 1
+    }
+  },
+  "navigation": {
+    "stepWorld": 40,
+    "columns": 108,
+    "rows": 72,
+    "walkableCells": 6195,
+    "totalCells": 7776,
+    "connectedCells": 6195,
+    "walkableHash": "a897183357c83cbfe2e57068109674128b3abf802cd1aad00cf4831fa037a374",
+    "edgesHash": "e02af04b063fd38ed6ceeb5db986254751dbe7a9a4771d656ca33eca3e3f7452",
+    "spawnPathsHash": "e67ddbd7809cd6f9a361e9901a2f14adb96b8cc012e404aa4fad80c792d6efab",
+    "doorPathsHash": "25b20a3a0fb075ad815ed5fd4da4d05a38708cee43012484401620e5ad10a8b9",
+    "spawnPathCount": 34,
+    "doorPathCount": 24
+  },
+  "movement": {
+    "actorRadiusWorld": 21,
+    "playerSpeedWorldPerSecond": 285,
+    "botSpeedWorldPerSecond": 255,
+    "dashDistanceWorld": 260,
+    "dashDurationMs": 150,
+    "dashSpeedWorldPerSecond": 1733.3333333333335
+  },
+  "damageSamples": [
+    {
+      "name": "AR-15",
+      "preferredWorld": 900,
+      "legacyFalloffTiles": 22,
+      "falloffStartWorld": 1540,
+      "falloffFractionPerLegacyTile": 0.025,
+      "projectileSpeedWorldPerSecond": 5600,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 42,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 42,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 42,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 42,
+          "theoreticalStraightLineTravelSeconds": 0.0125
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 42,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 42,
+          "theoreticalStraightLineTravelSeconds": 0.05
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 42,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 42,
+          "theoreticalStraightLineTravelSeconds": 0.075
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 42,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 42,
+          "theoreticalStraightLineTravelSeconds": 0.1375
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 42,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 42,
+          "theoreticalStraightLineTravelSeconds": 0.175
+        },
+        {
+          "worldTravel": 1539,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 42,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 42,
+          "theoreticalStraightLineTravelSeconds": 0.27482142857142855
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 42,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 42,
+          "theoreticalStraightLineTravelSeconds": 0.275
+        },
+        {
+          "worldTravel": 1541,
+          "pelletBodyDamage": 27.99,
+          "pelletHeadDamage": 41.985,
+          "allPelletsBodyDamage": 27.99,
+          "allPelletsHeadDamage": 41.985,
+          "theoreticalStraightLineTravelSeconds": 0.27517857142857144
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 21,
+          "pelletHeadDamage": 31.5,
+          "allPelletsBodyDamage": 21,
+          "allPelletsHeadDamage": 31.5,
+          "theoreticalStraightLineTravelSeconds": 0.4
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 12.6,
+          "pelletHeadDamage": 18.900000000000002,
+          "allPelletsBodyDamage": 12.6,
+          "allPelletsHeadDamage": 18.900000000000002,
+          "theoreticalStraightLineTravelSeconds": 0.5625
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 12.6,
+          "pelletHeadDamage": 18.900000000000002,
+          "allPelletsBodyDamage": 12.6,
+          "allPelletsHeadDamage": 18.900000000000002,
+          "theoreticalStraightLineTravelSeconds": 0.7714285714285715
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 12.6,
+          "pelletHeadDamage": 18.900000000000002,
+          "allPelletsBodyDamage": 12.6,
+          "allPelletsHeadDamage": 18.900000000000002,
+          "theoreticalStraightLineTravelSeconds": 0.8928571428571429
+        }
+      ]
+    },
+    {
+      "name": "AK47",
+      "preferredWorld": 820,
+      "legacyFalloffTiles": 25,
+      "falloffStartWorld": 1750,
+      "falloffFractionPerLegacyTile": 0.028,
+      "projectileSpeedWorldPerSecond": 5180,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 34,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 34,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 34,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 34,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.013513513513513514
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 34,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 34,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.05405405405405406
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 34,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 34,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.08108108108108109
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 34,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 34,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.14864864864864866
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 34,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 34,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.1891891891891892
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 34,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 34,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.2972972972972973
+        },
+        {
+          "worldTravel": 1749,
+          "pelletBodyDamage": 34,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 34,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.33764478764478767
+        },
+        {
+          "worldTravel": 1750,
+          "pelletBodyDamage": 34,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 34,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.33783783783783783
+        },
+        {
+          "worldTravel": 1751,
+          "pelletBodyDamage": 33.986399999999996,
+          "pelletHeadDamage": 49.98,
+          "allPelletsBodyDamage": 33.986399999999996,
+          "allPelletsHeadDamage": 49.98,
+          "theoreticalStraightLineTravelSeconds": 0.33803088803088804
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 27.336000000000002,
+          "pelletHeadDamage": 40.2,
+          "allPelletsBodyDamage": 27.336000000000002,
+          "allPelletsHeadDamage": 40.2,
+          "theoreticalStraightLineTravelSeconds": 0.43243243243243246
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 15.3,
+          "pelletHeadDamage": 22.5,
+          "allPelletsBodyDamage": 15.3,
+          "allPelletsHeadDamage": 22.5,
+          "theoreticalStraightLineTravelSeconds": 0.6081081081081081
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 15.3,
+          "pelletHeadDamage": 22.5,
+          "allPelletsBodyDamage": 15.3,
+          "allPelletsHeadDamage": 22.5,
+          "theoreticalStraightLineTravelSeconds": 0.833976833976834
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 15.3,
+          "pelletHeadDamage": 22.5,
+          "allPelletsBodyDamage": 15.3,
+          "allPelletsHeadDamage": 22.5,
+          "theoreticalStraightLineTravelSeconds": 0.9652509652509652
+        }
+      ]
+    },
+    {
+      "name": "SMG-9",
+      "preferredWorld": 520,
+      "legacyFalloffTiles": 11,
+      "falloffStartWorld": 770,
+      "falloffFractionPerLegacyTile": 0.043,
+      "projectileSpeedWorldPerSecond": 4340,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 19,
+          "pelletHeadDamage": 29,
+          "allPelletsBodyDamage": 19,
+          "allPelletsHeadDamage": 29,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 19,
+          "pelletHeadDamage": 29,
+          "allPelletsBodyDamage": 19,
+          "allPelletsHeadDamage": 29,
+          "theoreticalStraightLineTravelSeconds": 0.016129032258064516
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 19,
+          "pelletHeadDamage": 29,
+          "allPelletsBodyDamage": 19,
+          "allPelletsHeadDamage": 29,
+          "theoreticalStraightLineTravelSeconds": 0.06451612903225806
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 19,
+          "pelletHeadDamage": 29,
+          "allPelletsBodyDamage": 19,
+          "allPelletsHeadDamage": 29,
+          "theoreticalStraightLineTravelSeconds": 0.0967741935483871
+        },
+        {
+          "worldTravel": 769,
+          "pelletBodyDamage": 19,
+          "pelletHeadDamage": 29,
+          "allPelletsBodyDamage": 19,
+          "allPelletsHeadDamage": 29,
+          "theoreticalStraightLineTravelSeconds": 0.1771889400921659
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 19,
+          "pelletHeadDamage": 29,
+          "allPelletsBodyDamage": 19,
+          "allPelletsHeadDamage": 29,
+          "theoreticalStraightLineTravelSeconds": 0.1774193548387097
+        },
+        {
+          "worldTravel": 771,
+          "pelletBodyDamage": 18.98832857142857,
+          "pelletHeadDamage": 28.982185714285716,
+          "allPelletsBodyDamage": 18.98832857142857,
+          "allPelletsHeadDamage": 28.982185714285716,
+          "theoreticalStraightLineTravelSeconds": 0.17764976958525347
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 16.549,
+          "pelletHeadDamage": 25.259,
+          "allPelletsBodyDamage": 16.549,
+          "allPelletsHeadDamage": 25.259,
+          "theoreticalStraightLineTravelSeconds": 0.22580645161290322
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 10.013,
+          "pelletHeadDamage": 15.283000000000001,
+          "allPelletsBodyDamage": 10.013,
+          "allPelletsHeadDamage": 15.283000000000001,
+          "theoreticalStraightLineTravelSeconds": 0.3548387096774194
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 8.55,
+          "pelletHeadDamage": 13.05,
+          "allPelletsBodyDamage": 8.55,
+          "allPelletsHeadDamage": 13.05,
+          "theoreticalStraightLineTravelSeconds": 0.5161290322580645
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 8.55,
+          "pelletHeadDamage": 13.05,
+          "allPelletsBodyDamage": 8.55,
+          "allPelletsHeadDamage": 13.05,
+          "theoreticalStraightLineTravelSeconds": 0.7258064516129032
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 8.55,
+          "pelletHeadDamage": 13.05,
+          "allPelletsBodyDamage": 8.55,
+          "allPelletsHeadDamage": 13.05,
+          "theoreticalStraightLineTravelSeconds": 0.9953917050691244
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 8.55,
+          "pelletHeadDamage": 13.05,
+          "allPelletsBodyDamage": 8.55,
+          "allPelletsHeadDamage": 13.05,
+          "theoreticalStraightLineTravelSeconds": 1.152073732718894
+        }
+      ]
+    },
+    {
+      "name": "Pump Shotgun",
+      "preferredWorld": 330,
+      "legacyFalloffTiles": 4,
+      "falloffStartWorld": 280,
+      "falloffFractionPerLegacyTile": 0.1,
+      "projectileSpeedWorldPerSecond": 3360,
+      "pellets": 8,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 15.5,
+          "pelletHeadDamage": 31,
+          "allPelletsBodyDamage": 124,
+          "allPelletsHeadDamage": 248,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 15.5,
+          "pelletHeadDamage": 31,
+          "allPelletsBodyDamage": 124,
+          "allPelletsHeadDamage": 248,
+          "theoreticalStraightLineTravelSeconds": 0.020833333333333332
+        },
+        {
+          "worldTravel": 279,
+          "pelletBodyDamage": 15.5,
+          "pelletHeadDamage": 31,
+          "allPelletsBodyDamage": 124,
+          "allPelletsHeadDamage": 248,
+          "theoreticalStraightLineTravelSeconds": 0.08303571428571428
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 15.5,
+          "pelletHeadDamage": 31,
+          "allPelletsBodyDamage": 124,
+          "allPelletsHeadDamage": 248,
+          "theoreticalStraightLineTravelSeconds": 0.08333333333333333
+        },
+        {
+          "worldTravel": 281,
+          "pelletBodyDamage": 15.477857142857143,
+          "pelletHeadDamage": 30.955714285714286,
+          "allPelletsBodyDamage": 123.82285714285715,
+          "allPelletsHeadDamage": 247.6457142857143,
+          "theoreticalStraightLineTravelSeconds": 0.08363095238095238
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 12.4,
+          "pelletHeadDamage": 24.8,
+          "allPelletsBodyDamage": 99.2,
+          "allPelletsHeadDamage": 198.4,
+          "theoreticalStraightLineTravelSeconds": 0.125
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 6.9750000000000005,
+          "pelletHeadDamage": 13.950000000000001,
+          "allPelletsBodyDamage": 55.800000000000004,
+          "allPelletsHeadDamage": 111.60000000000001,
+          "theoreticalStraightLineTravelSeconds": 0.22916666666666666
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 6.9750000000000005,
+          "pelletHeadDamage": 13.950000000000001,
+          "allPelletsBodyDamage": 55.800000000000004,
+          "allPelletsHeadDamage": 111.60000000000001,
+          "theoreticalStraightLineTravelSeconds": 0.2916666666666667
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 6.9750000000000005,
+          "pelletHeadDamage": 13.950000000000001,
+          "allPelletsBodyDamage": 55.800000000000004,
+          "allPelletsHeadDamage": 111.60000000000001,
+          "theoreticalStraightLineTravelSeconds": 0.4583333333333333
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 6.9750000000000005,
+          "pelletHeadDamage": 13.950000000000001,
+          "allPelletsBodyDamage": 55.800000000000004,
+          "allPelletsHeadDamage": 111.60000000000001,
+          "theoreticalStraightLineTravelSeconds": 0.6666666666666666
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 6.9750000000000005,
+          "pelletHeadDamage": 13.950000000000001,
+          "allPelletsBodyDamage": 55.800000000000004,
+          "allPelletsHeadDamage": 111.60000000000001,
+          "theoreticalStraightLineTravelSeconds": 0.9375
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 6.9750000000000005,
+          "pelletHeadDamage": 13.950000000000001,
+          "allPelletsBodyDamage": 55.800000000000004,
+          "allPelletsHeadDamage": 111.60000000000001,
+          "theoreticalStraightLineTravelSeconds": 1.2857142857142858
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 6.9750000000000005,
+          "pelletHeadDamage": 13.950000000000001,
+          "allPelletsBodyDamage": 55.800000000000004,
+          "allPelletsHeadDamage": 111.60000000000001,
+          "theoreticalStraightLineTravelSeconds": 1.4880952380952381
+        }
+      ]
+    },
+    {
+      "name": "Auto 12",
+      "preferredWorld": 300,
+      "legacyFalloffTiles": 5,
+      "falloffStartWorld": 350,
+      "falloffFractionPerLegacyTile": 0.08,
+      "projectileSpeedWorldPerSecond": 3500,
+      "pellets": 6,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 8.166666666666666,
+          "pelletHeadDamage": 16.5,
+          "allPelletsBodyDamage": 49,
+          "allPelletsHeadDamage": 99,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 8.166666666666666,
+          "pelletHeadDamage": 16.5,
+          "allPelletsBodyDamage": 49,
+          "allPelletsHeadDamage": 99,
+          "theoreticalStraightLineTravelSeconds": 0.02
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 8.166666666666666,
+          "pelletHeadDamage": 16.5,
+          "allPelletsBodyDamage": 49,
+          "allPelletsHeadDamage": 99,
+          "theoreticalStraightLineTravelSeconds": 0.08
+        },
+        {
+          "worldTravel": 349,
+          "pelletBodyDamage": 8.166666666666666,
+          "pelletHeadDamage": 16.5,
+          "allPelletsBodyDamage": 49,
+          "allPelletsHeadDamage": 99,
+          "theoreticalStraightLineTravelSeconds": 0.09971428571428571
+        },
+        {
+          "worldTravel": 350,
+          "pelletBodyDamage": 8.166666666666666,
+          "pelletHeadDamage": 16.5,
+          "allPelletsBodyDamage": 49,
+          "allPelletsHeadDamage": 99,
+          "theoreticalStraightLineTravelSeconds": 0.1
+        },
+        {
+          "worldTravel": 351,
+          "pelletBodyDamage": 8.157333333333334,
+          "pelletHeadDamage": 16.481142857142856,
+          "allPelletsBodyDamage": 48.944,
+          "allPelletsHeadDamage": 98.88685714285714,
+          "theoreticalStraightLineTravelSeconds": 0.10028571428571428
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 7.513333333333333,
+          "pelletHeadDamage": 15.180000000000001,
+          "allPelletsBodyDamage": 45.08,
+          "allPelletsHeadDamage": 91.08000000000001,
+          "theoreticalStraightLineTravelSeconds": 0.12
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 4.246666666666666,
+          "pelletHeadDamage": 8.58,
+          "allPelletsBodyDamage": 25.479999999999997,
+          "allPelletsHeadDamage": 51.480000000000004,
+          "theoreticalStraightLineTravelSeconds": 0.22
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 3.675,
+          "pelletHeadDamage": 7.425,
+          "allPelletsBodyDamage": 22.049999999999997,
+          "allPelletsHeadDamage": 44.55,
+          "theoreticalStraightLineTravelSeconds": 0.28
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 3.675,
+          "pelletHeadDamage": 7.425,
+          "allPelletsBodyDamage": 22.049999999999997,
+          "allPelletsHeadDamage": 44.55,
+          "theoreticalStraightLineTravelSeconds": 0.44
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 3.675,
+          "pelletHeadDamage": 7.425,
+          "allPelletsBodyDamage": 22.049999999999997,
+          "allPelletsHeadDamage": 44.55,
+          "theoreticalStraightLineTravelSeconds": 0.64
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 3.675,
+          "pelletHeadDamage": 7.425,
+          "allPelletsBodyDamage": 22.049999999999997,
+          "allPelletsHeadDamage": 44.55,
+          "theoreticalStraightLineTravelSeconds": 0.9
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 3.675,
+          "pelletHeadDamage": 7.425,
+          "allPelletsBodyDamage": 22.049999999999997,
+          "allPelletsHeadDamage": 44.55,
+          "theoreticalStraightLineTravelSeconds": 1.2342857142857142
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 3.675,
+          "pelletHeadDamage": 7.425,
+          "allPelletsBodyDamage": 22.049999999999997,
+          "allPelletsHeadDamage": 44.55,
+          "theoreticalStraightLineTravelSeconds": 1.4285714285714286
+        }
+      ]
+    },
+    {
+      "name": "LR-762",
+      "preferredWorld": 1250,
+      "legacyFalloffTiles": 32,
+      "falloffStartWorld": 2240,
+      "falloffFractionPerLegacyTile": 0.015,
+      "projectileSpeedWorldPerSecond": 7350,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 63,
+          "pelletHeadDamage": 124,
+          "allPelletsBodyDamage": 63,
+          "allPelletsHeadDamage": 124,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 63,
+          "pelletHeadDamage": 124,
+          "allPelletsBodyDamage": 63,
+          "allPelletsHeadDamage": 124,
+          "theoreticalStraightLineTravelSeconds": 0.009523809523809525
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 63,
+          "pelletHeadDamage": 124,
+          "allPelletsBodyDamage": 63,
+          "allPelletsHeadDamage": 124,
+          "theoreticalStraightLineTravelSeconds": 0.0380952380952381
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 63,
+          "pelletHeadDamage": 124,
+          "allPelletsBodyDamage": 63,
+          "allPelletsHeadDamage": 124,
+          "theoreticalStraightLineTravelSeconds": 0.05714285714285714
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 63,
+          "pelletHeadDamage": 124,
+          "allPelletsBodyDamage": 63,
+          "allPelletsHeadDamage": 124,
+          "theoreticalStraightLineTravelSeconds": 0.10476190476190476
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 63,
+          "pelletHeadDamage": 124,
+          "allPelletsBodyDamage": 63,
+          "allPelletsHeadDamage": 124,
+          "theoreticalStraightLineTravelSeconds": 0.13333333333333333
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 63,
+          "pelletHeadDamage": 124,
+          "allPelletsBodyDamage": 63,
+          "allPelletsHeadDamage": 124,
+          "theoreticalStraightLineTravelSeconds": 0.20952380952380953
+        },
+        {
+          "worldTravel": 2239,
+          "pelletBodyDamage": 63,
+          "pelletHeadDamage": 124,
+          "allPelletsBodyDamage": 63,
+          "allPelletsHeadDamage": 124,
+          "theoreticalStraightLineTravelSeconds": 0.30462585034013606
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 63,
+          "pelletHeadDamage": 124,
+          "allPelletsBodyDamage": 63,
+          "allPelletsHeadDamage": 124,
+          "theoreticalStraightLineTravelSeconds": 0.3047619047619048
+        },
+        {
+          "worldTravel": 2241,
+          "pelletBodyDamage": 62.9865,
+          "pelletHeadDamage": 123.97342857142857,
+          "allPelletsBodyDamage": 62.9865,
+          "allPelletsHeadDamage": 123.97342857142857,
+          "theoreticalStraightLineTravelSeconds": 0.30489795918367346
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 50.714999999999996,
+          "pelletHeadDamage": 99.82,
+          "allPelletsBodyDamage": 50.714999999999996,
+          "allPelletsHeadDamage": 99.82,
+          "theoreticalStraightLineTravelSeconds": 0.42857142857142855
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 34.92,
+          "pelletHeadDamage": 68.73142857142857,
+          "allPelletsBodyDamage": 34.92,
+          "allPelletsHeadDamage": 68.73142857142857,
+          "theoreticalStraightLineTravelSeconds": 0.5877551020408164
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 28.35,
+          "pelletHeadDamage": 55.800000000000004,
+          "allPelletsBodyDamage": 28.35,
+          "allPelletsHeadDamage": 55.800000000000004,
+          "theoreticalStraightLineTravelSeconds": 0.6802721088435374
+        }
+      ]
+    },
+    {
+      "name": "LW Tundra",
+      "preferredWorld": 1500,
+      "legacyFalloffTiles": 45,
+      "falloffStartWorld": 3150,
+      "falloffFractionPerLegacyTile": 0.01,
+      "projectileSpeedWorldPerSecond": 8750,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 115,
+          "pelletHeadDamage": 175,
+          "allPelletsBodyDamage": 115,
+          "allPelletsHeadDamage": 175,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 115,
+          "pelletHeadDamage": 175,
+          "allPelletsBodyDamage": 115,
+          "allPelletsHeadDamage": 175,
+          "theoreticalStraightLineTravelSeconds": 0.008
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 115,
+          "pelletHeadDamage": 175,
+          "allPelletsBodyDamage": 115,
+          "allPelletsHeadDamage": 175,
+          "theoreticalStraightLineTravelSeconds": 0.032
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 115,
+          "pelletHeadDamage": 175,
+          "allPelletsBodyDamage": 115,
+          "allPelletsHeadDamage": 175,
+          "theoreticalStraightLineTravelSeconds": 0.048
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 115,
+          "pelletHeadDamage": 175,
+          "allPelletsBodyDamage": 115,
+          "allPelletsHeadDamage": 175,
+          "theoreticalStraightLineTravelSeconds": 0.088
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 115,
+          "pelletHeadDamage": 175,
+          "allPelletsBodyDamage": 115,
+          "allPelletsHeadDamage": 175,
+          "theoreticalStraightLineTravelSeconds": 0.112
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 115,
+          "pelletHeadDamage": 175,
+          "allPelletsBodyDamage": 115,
+          "allPelletsHeadDamage": 175,
+          "theoreticalStraightLineTravelSeconds": 0.176
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 115,
+          "pelletHeadDamage": 175,
+          "allPelletsBodyDamage": 115,
+          "allPelletsHeadDamage": 175,
+          "theoreticalStraightLineTravelSeconds": 0.256
+        },
+        {
+          "worldTravel": 3149,
+          "pelletBodyDamage": 115,
+          "pelletHeadDamage": 175,
+          "allPelletsBodyDamage": 115,
+          "allPelletsHeadDamage": 175,
+          "theoreticalStraightLineTravelSeconds": 0.3598857142857143
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 115,
+          "pelletHeadDamage": 175,
+          "allPelletsBodyDamage": 115,
+          "allPelletsHeadDamage": 175,
+          "theoreticalStraightLineTravelSeconds": 0.36
+        },
+        {
+          "worldTravel": 3151,
+          "pelletBodyDamage": 114.98357142857144,
+          "pelletHeadDamage": 174.975,
+          "allPelletsBodyDamage": 114.98357142857144,
+          "allPelletsHeadDamage": 174.975,
+          "theoreticalStraightLineTravelSeconds": 0.3601142857142857
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 95.77857142857142,
+          "pelletHeadDamage": 145.75,
+          "allPelletsBodyDamage": 95.77857142857142,
+          "allPelletsHeadDamage": 145.75,
+          "theoreticalStraightLineTravelSeconds": 0.4937142857142857
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 84.60714285714286,
+          "pelletHeadDamage": 128.75,
+          "allPelletsBodyDamage": 84.60714285714286,
+          "allPelletsHeadDamage": 128.75,
+          "theoreticalStraightLineTravelSeconds": 0.5714285714285714
+        }
+      ]
+    },
+    {
+      "name": "War Head LMG",
+      "preferredWorld": 1000,
+      "legacyFalloffTiles": 24,
+      "falloffStartWorld": 1680,
+      "falloffFractionPerLegacyTile": 0.02,
+      "projectileSpeedWorldPerSecond": 5670,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 40,
+          "pelletHeadDamage": 60,
+          "allPelletsBodyDamage": 40,
+          "allPelletsHeadDamage": 60,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 40,
+          "pelletHeadDamage": 60,
+          "allPelletsBodyDamage": 40,
+          "allPelletsHeadDamage": 60,
+          "theoreticalStraightLineTravelSeconds": 0.012345679012345678
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 40,
+          "pelletHeadDamage": 60,
+          "allPelletsBodyDamage": 40,
+          "allPelletsHeadDamage": 60,
+          "theoreticalStraightLineTravelSeconds": 0.04938271604938271
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 40,
+          "pelletHeadDamage": 60,
+          "allPelletsBodyDamage": 40,
+          "allPelletsHeadDamage": 60,
+          "theoreticalStraightLineTravelSeconds": 0.07407407407407407
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 40,
+          "pelletHeadDamage": 60,
+          "allPelletsBodyDamage": 40,
+          "allPelletsHeadDamage": 60,
+          "theoreticalStraightLineTravelSeconds": 0.13580246913580246
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 40,
+          "pelletHeadDamage": 60,
+          "allPelletsBodyDamage": 40,
+          "allPelletsHeadDamage": 60,
+          "theoreticalStraightLineTravelSeconds": 0.1728395061728395
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 40,
+          "pelletHeadDamage": 60,
+          "allPelletsBodyDamage": 40,
+          "allPelletsHeadDamage": 60,
+          "theoreticalStraightLineTravelSeconds": 0.2716049382716049
+        },
+        {
+          "worldTravel": 1679,
+          "pelletBodyDamage": 40,
+          "pelletHeadDamage": 60,
+          "allPelletsBodyDamage": 40,
+          "allPelletsHeadDamage": 60,
+          "theoreticalStraightLineTravelSeconds": 0.29611992945326276
+        },
+        {
+          "worldTravel": 1680,
+          "pelletBodyDamage": 40,
+          "pelletHeadDamage": 60,
+          "allPelletsBodyDamage": 40,
+          "allPelletsHeadDamage": 60,
+          "theoreticalStraightLineTravelSeconds": 0.2962962962962963
+        },
+        {
+          "worldTravel": 1681,
+          "pelletBodyDamage": 39.988571428571426,
+          "pelletHeadDamage": 59.98285714285714,
+          "allPelletsBodyDamage": 39.988571428571426,
+          "allPelletsHeadDamage": 59.98285714285714,
+          "theoreticalStraightLineTravelSeconds": 0.2964726631393298
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 33.6,
+          "pelletHeadDamage": 50.4,
+          "allPelletsBodyDamage": 33.6,
+          "allPelletsHeadDamage": 50.4,
+          "theoreticalStraightLineTravelSeconds": 0.3950617283950617
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 23.200000000000003,
+          "pelletHeadDamage": 34.800000000000004,
+          "allPelletsBodyDamage": 23.200000000000003,
+          "allPelletsHeadDamage": 34.800000000000004,
+          "theoreticalStraightLineTravelSeconds": 0.5555555555555556
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 18,
+          "pelletHeadDamage": 27,
+          "allPelletsBodyDamage": 18,
+          "allPelletsHeadDamage": 27,
+          "theoreticalStraightLineTravelSeconds": 0.7619047619047619
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 18,
+          "pelletHeadDamage": 27,
+          "allPelletsBodyDamage": 18,
+          "allPelletsHeadDamage": 27,
+          "theoreticalStraightLineTravelSeconds": 0.8818342151675485
+        }
+      ]
+    },
+    {
+      "name": "P90",
+      "preferredWorld": 720,
+      "legacyFalloffTiles": 20,
+      "falloffStartWorld": 1400,
+      "falloffFractionPerLegacyTile": 0.032,
+      "projectileSpeedWorldPerSecond": 4900,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 25,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 25,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 25,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 25,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.014285714285714285
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 25,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 25,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.05714285714285714
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 25,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 25,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.08571428571428572
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 25,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 25,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.15714285714285714
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 25,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 25,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.2
+        },
+        {
+          "worldTravel": 1399,
+          "pelletBodyDamage": 25,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 25,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.28551020408163263
+        },
+        {
+          "worldTravel": 1400,
+          "pelletBodyDamage": 25,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 25,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.2857142857142857
+        },
+        {
+          "worldTravel": 1401,
+          "pelletBodyDamage": 24.988571428571426,
+          "pelletHeadDamage": 39.98171428571428,
+          "allPelletsBodyDamage": 24.988571428571426,
+          "allPelletsHeadDamage": 39.98171428571428,
+          "theoreticalStraightLineTravelSeconds": 0.28591836734693876
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 23.4,
+          "pelletHeadDamage": 37.44,
+          "allPelletsBodyDamage": 23.4,
+          "allPelletsHeadDamage": 37.44,
+          "theoreticalStraightLineTravelSeconds": 0.3142857142857143
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 15.4,
+          "pelletHeadDamage": 24.64,
+          "allPelletsBodyDamage": 15.4,
+          "allPelletsHeadDamage": 24.64,
+          "theoreticalStraightLineTravelSeconds": 0.45714285714285713
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 11.25,
+          "pelletHeadDamage": 18,
+          "allPelletsBodyDamage": 11.25,
+          "allPelletsHeadDamage": 18,
+          "theoreticalStraightLineTravelSeconds": 0.6428571428571429
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 11.25,
+          "pelletHeadDamage": 18,
+          "allPelletsBodyDamage": 11.25,
+          "allPelletsHeadDamage": 18,
+          "theoreticalStraightLineTravelSeconds": 0.8816326530612245
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 11.25,
+          "pelletHeadDamage": 18,
+          "allPelletsBodyDamage": 11.25,
+          "allPelletsHeadDamage": 18,
+          "theoreticalStraightLineTravelSeconds": 1.0204081632653061
+        }
+      ]
+    },
+    {
+      "name": "9mm",
+      "preferredWorld": 440,
+      "legacyFalloffTiles": 13,
+      "falloffStartWorld": 910,
+      "falloffFractionPerLegacyTile": 0.04,
+      "projectileSpeedWorldPerSecond": 4200,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.016666666666666666
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.06666666666666667
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.1
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.18333333333333332
+        },
+        {
+          "worldTravel": 909,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.21642857142857144
+        },
+        {
+          "worldTravel": 910,
+          "pelletBodyDamage": 28,
+          "pelletHeadDamage": 50,
+          "allPelletsBodyDamage": 28,
+          "allPelletsHeadDamage": 50,
+          "theoreticalStraightLineTravelSeconds": 0.21666666666666667
+        },
+        {
+          "worldTravel": 911,
+          "pelletBodyDamage": 27.984,
+          "pelletHeadDamage": 49.971428571428575,
+          "allPelletsBodyDamage": 27.984,
+          "allPelletsHeadDamage": 49.971428571428575,
+          "theoreticalStraightLineTravelSeconds": 0.2169047619047619
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 26.88,
+          "pelletHeadDamage": 48,
+          "allPelletsBodyDamage": 26.88,
+          "allPelletsHeadDamage": 48,
+          "theoreticalStraightLineTravelSeconds": 0.23333333333333334
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 17.92,
+          "pelletHeadDamage": 32,
+          "allPelletsBodyDamage": 17.92,
+          "allPelletsHeadDamage": 32,
+          "theoreticalStraightLineTravelSeconds": 0.36666666666666664
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 12.6,
+          "pelletHeadDamage": 22.5,
+          "allPelletsBodyDamage": 12.6,
+          "allPelletsHeadDamage": 22.5,
+          "theoreticalStraightLineTravelSeconds": 0.5333333333333333
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 12.6,
+          "pelletHeadDamage": 22.5,
+          "allPelletsBodyDamage": 12.6,
+          "allPelletsHeadDamage": 22.5,
+          "theoreticalStraightLineTravelSeconds": 0.75
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 12.6,
+          "pelletHeadDamage": 22.5,
+          "allPelletsBodyDamage": 12.6,
+          "allPelletsHeadDamage": 22.5,
+          "theoreticalStraightLineTravelSeconds": 1.0285714285714285
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 12.6,
+          "pelletHeadDamage": 22.5,
+          "allPelletsBodyDamage": 12.6,
+          "allPelletsHeadDamage": 22.5,
+          "theoreticalStraightLineTravelSeconds": 1.1904761904761905
+        }
+      ]
+    },
+    {
+      "name": "X16",
+      "preferredWorld": 390,
+      "legacyFalloffTiles": 11,
+      "falloffStartWorld": 770,
+      "falloffFractionPerLegacyTile": 0.045,
+      "projectileSpeedWorldPerSecond": 4060,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 24,
+          "pelletHeadDamage": 34,
+          "allPelletsBodyDamage": 24,
+          "allPelletsHeadDamage": 34,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 24,
+          "pelletHeadDamage": 34,
+          "allPelletsBodyDamage": 24,
+          "allPelletsHeadDamage": 34,
+          "theoreticalStraightLineTravelSeconds": 0.017241379310344827
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 24,
+          "pelletHeadDamage": 34,
+          "allPelletsBodyDamage": 24,
+          "allPelletsHeadDamage": 34,
+          "theoreticalStraightLineTravelSeconds": 0.06896551724137931
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 24,
+          "pelletHeadDamage": 34,
+          "allPelletsBodyDamage": 24,
+          "allPelletsHeadDamage": 34,
+          "theoreticalStraightLineTravelSeconds": 0.10344827586206896
+        },
+        {
+          "worldTravel": 769,
+          "pelletBodyDamage": 24,
+          "pelletHeadDamage": 34,
+          "allPelletsBodyDamage": 24,
+          "allPelletsHeadDamage": 34,
+          "theoreticalStraightLineTravelSeconds": 0.1894088669950739
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 24,
+          "pelletHeadDamage": 34,
+          "allPelletsBodyDamage": 24,
+          "allPelletsHeadDamage": 34,
+          "theoreticalStraightLineTravelSeconds": 0.1896551724137931
+        },
+        {
+          "worldTravel": 771,
+          "pelletBodyDamage": 23.984571428571428,
+          "pelletHeadDamage": 33.978142857142856,
+          "allPelletsBodyDamage": 23.984571428571428,
+          "allPelletsHeadDamage": 33.978142857142856,
+          "theoreticalStraightLineTravelSeconds": 0.18990147783251232
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 20.759999999999998,
+          "pelletHeadDamage": 29.41,
+          "allPelletsBodyDamage": 20.759999999999998,
+          "allPelletsHeadDamage": 29.41,
+          "theoreticalStraightLineTravelSeconds": 0.2413793103448276
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 12.120000000000001,
+          "pelletHeadDamage": 17.17,
+          "allPelletsBodyDamage": 12.120000000000001,
+          "allPelletsHeadDamage": 17.17,
+          "theoreticalStraightLineTravelSeconds": 0.3793103448275862
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 10.8,
+          "pelletHeadDamage": 15.3,
+          "allPelletsBodyDamage": 10.8,
+          "allPelletsHeadDamage": 15.3,
+          "theoreticalStraightLineTravelSeconds": 0.5517241379310345
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 10.8,
+          "pelletHeadDamage": 15.3,
+          "allPelletsBodyDamage": 10.8,
+          "allPelletsHeadDamage": 15.3,
+          "theoreticalStraightLineTravelSeconds": 0.7758620689655172
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 10.8,
+          "pelletHeadDamage": 15.3,
+          "allPelletsBodyDamage": 10.8,
+          "allPelletsHeadDamage": 15.3,
+          "theoreticalStraightLineTravelSeconds": 1.064039408866995
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 10.8,
+          "pelletHeadDamage": 15.3,
+          "allPelletsBodyDamage": 10.8,
+          "allPelletsHeadDamage": 15.3,
+          "theoreticalStraightLineTravelSeconds": 1.2315270935960592
+        }
+      ]
+    },
+    {
+      "name": "X-16 Auto",
+      "preferredWorld": 430,
+      "legacyFalloffTiles": 10,
+      "falloffStartWorld": 700,
+      "falloffFractionPerLegacyTile": 0.0475,
+      "projectileSpeedWorldPerSecond": 4340,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 21,
+          "pelletHeadDamage": 30,
+          "allPelletsBodyDamage": 21,
+          "allPelletsHeadDamage": 30,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 21,
+          "pelletHeadDamage": 30,
+          "allPelletsBodyDamage": 21,
+          "allPelletsHeadDamage": 30,
+          "theoreticalStraightLineTravelSeconds": 0.016129032258064516
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 21,
+          "pelletHeadDamage": 30,
+          "allPelletsBodyDamage": 21,
+          "allPelletsHeadDamage": 30,
+          "theoreticalStraightLineTravelSeconds": 0.06451612903225806
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 21,
+          "pelletHeadDamage": 30,
+          "allPelletsBodyDamage": 21,
+          "allPelletsHeadDamage": 30,
+          "theoreticalStraightLineTravelSeconds": 0.0967741935483871
+        },
+        {
+          "worldTravel": 699,
+          "pelletBodyDamage": 21,
+          "pelletHeadDamage": 30,
+          "allPelletsBodyDamage": 21,
+          "allPelletsHeadDamage": 30,
+          "theoreticalStraightLineTravelSeconds": 0.16105990783410137
+        },
+        {
+          "worldTravel": 700,
+          "pelletBodyDamage": 21,
+          "pelletHeadDamage": 30,
+          "allPelletsBodyDamage": 21,
+          "allPelletsHeadDamage": 30,
+          "theoreticalStraightLineTravelSeconds": 0.16129032258064516
+        },
+        {
+          "worldTravel": 701,
+          "pelletBodyDamage": 20.98575,
+          "pelletHeadDamage": 29.979642857142856,
+          "allPelletsBodyDamage": 20.98575,
+          "allPelletsHeadDamage": 29.979642857142856,
+          "theoreticalStraightLineTravelSeconds": 0.16152073732718894
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 20.0025,
+          "pelletHeadDamage": 28.575,
+          "allPelletsBodyDamage": 20.0025,
+          "allPelletsHeadDamage": 28.575,
+          "theoreticalStraightLineTravelSeconds": 0.1774193548387097
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 17.01,
+          "pelletHeadDamage": 24.3,
+          "allPelletsBodyDamage": 17.01,
+          "allPelletsHeadDamage": 24.3,
+          "theoreticalStraightLineTravelSeconds": 0.22580645161290322
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 9.450000000000001,
+          "pelletHeadDamage": 13.5,
+          "allPelletsBodyDamage": 9.450000000000001,
+          "allPelletsHeadDamage": 13.5,
+          "theoreticalStraightLineTravelSeconds": 0.3548387096774194
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 9.450000000000001,
+          "pelletHeadDamage": 13.5,
+          "allPelletsBodyDamage": 9.450000000000001,
+          "allPelletsHeadDamage": 13.5,
+          "theoreticalStraightLineTravelSeconds": 0.5161290322580645
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 9.450000000000001,
+          "pelletHeadDamage": 13.5,
+          "allPelletsBodyDamage": 9.450000000000001,
+          "allPelletsHeadDamage": 13.5,
+          "theoreticalStraightLineTravelSeconds": 0.7258064516129032
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 9.450000000000001,
+          "pelletHeadDamage": 13.5,
+          "allPelletsBodyDamage": 9.450000000000001,
+          "allPelletsHeadDamage": 13.5,
+          "theoreticalStraightLineTravelSeconds": 0.9953917050691244
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 9.450000000000001,
+          "pelletHeadDamage": 13.5,
+          "allPelletsBodyDamage": 9.450000000000001,
+          "allPelletsHeadDamage": 13.5,
+          "theoreticalStraightLineTravelSeconds": 1.152073732718894
+        }
+      ]
+    },
+    {
+      "name": "SR-Aug",
+      "preferredWorld": 750,
+      "legacyFalloffTiles": 19,
+      "falloffStartWorld": 1330,
+      "falloffFractionPerLegacyTile": 0.024,
+      "projectileSpeedWorldPerSecond": 6160,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 23,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 23,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 23,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 23,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.011363636363636364
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 23,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 23,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.045454545454545456
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 23,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 23,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.06818181818181818
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 23,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 23,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.125
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 23,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 23,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.1590909090909091
+        },
+        {
+          "worldTravel": 1329,
+          "pelletBodyDamage": 23,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 23,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.21574675324675324
+        },
+        {
+          "worldTravel": 1330,
+          "pelletBodyDamage": 23,
+          "pelletHeadDamage": 40,
+          "allPelletsBodyDamage": 23,
+          "allPelletsHeadDamage": 40,
+          "theoreticalStraightLineTravelSeconds": 0.2159090909090909
+        },
+        {
+          "worldTravel": 1331,
+          "pelletBodyDamage": 22.992114285714283,
+          "pelletHeadDamage": 39.986285714285714,
+          "allPelletsBodyDamage": 22.992114285714283,
+          "allPelletsHeadDamage": 39.986285714285714,
+          "theoreticalStraightLineTravelSeconds": 0.21607142857142858
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 21.343999999999998,
+          "pelletHeadDamage": 37.12,
+          "allPelletsBodyDamage": 21.343999999999998,
+          "allPelletsHeadDamage": 37.12,
+          "theoreticalStraightLineTravelSeconds": 0.25
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 15.823999999999998,
+          "pelletHeadDamage": 27.519999999999996,
+          "allPelletsBodyDamage": 15.823999999999998,
+          "allPelletsHeadDamage": 27.519999999999996,
+          "theoreticalStraightLineTravelSeconds": 0.36363636363636365
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 10.35,
+          "pelletHeadDamage": 18,
+          "allPelletsBodyDamage": 10.35,
+          "allPelletsHeadDamage": 18,
+          "theoreticalStraightLineTravelSeconds": 0.5113636363636364
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 10.35,
+          "pelletHeadDamage": 18,
+          "allPelletsBodyDamage": 10.35,
+          "allPelletsHeadDamage": 18,
+          "theoreticalStraightLineTravelSeconds": 0.7012987012987013
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 10.35,
+          "pelletHeadDamage": 18,
+          "allPelletsBodyDamage": 10.35,
+          "allPelletsHeadDamage": 18,
+          "theoreticalStraightLineTravelSeconds": 0.8116883116883117
+        }
+      ]
+    },
+    {
+      "name": "SPAS-12",
+      "preferredWorld": 420,
+      "legacyFalloffTiles": 7,
+      "falloffStartWorld": 490,
+      "falloffFractionPerLegacyTile": 0.05,
+      "projectileSpeedWorldPerSecond": 5250,
+      "pellets": 12,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 8.333333333333334,
+          "pelletHeadDamage": 17.5,
+          "allPelletsBodyDamage": 100,
+          "allPelletsHeadDamage": 210,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 8.333333333333334,
+          "pelletHeadDamage": 17.5,
+          "allPelletsBodyDamage": 100,
+          "allPelletsHeadDamage": 210,
+          "theoreticalStraightLineTravelSeconds": 0.013333333333333334
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 8.333333333333334,
+          "pelletHeadDamage": 17.5,
+          "allPelletsBodyDamage": 100,
+          "allPelletsHeadDamage": 210,
+          "theoreticalStraightLineTravelSeconds": 0.05333333333333334
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 8.333333333333334,
+          "pelletHeadDamage": 17.5,
+          "allPelletsBodyDamage": 100,
+          "allPelletsHeadDamage": 210,
+          "theoreticalStraightLineTravelSeconds": 0.08
+        },
+        {
+          "worldTravel": 489,
+          "pelletBodyDamage": 8.333333333333334,
+          "pelletHeadDamage": 17.5,
+          "allPelletsBodyDamage": 100,
+          "allPelletsHeadDamage": 210,
+          "theoreticalStraightLineTravelSeconds": 0.09314285714285714
+        },
+        {
+          "worldTravel": 490,
+          "pelletBodyDamage": 8.333333333333334,
+          "pelletHeadDamage": 17.5,
+          "allPelletsBodyDamage": 100,
+          "allPelletsHeadDamage": 210,
+          "theoreticalStraightLineTravelSeconds": 0.09333333333333334
+        },
+        {
+          "worldTravel": 491,
+          "pelletBodyDamage": 8.327380952380953,
+          "pelletHeadDamage": 17.4875,
+          "allPelletsBodyDamage": 99.92857142857143,
+          "allPelletsHeadDamage": 209.85000000000002,
+          "theoreticalStraightLineTravelSeconds": 0.09352380952380952
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 6.666666666666668,
+          "pelletHeadDamage": 14,
+          "allPelletsBodyDamage": 80.00000000000001,
+          "allPelletsHeadDamage": 168,
+          "theoreticalStraightLineTravelSeconds": 0.14666666666666667
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 5.416666666666666,
+          "pelletHeadDamage": 11.374999999999998,
+          "allPelletsBodyDamage": 65,
+          "allPelletsHeadDamage": 136.49999999999997,
+          "theoreticalStraightLineTravelSeconds": 0.18666666666666668
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 3.7500000000000004,
+          "pelletHeadDamage": 7.875,
+          "allPelletsBodyDamage": 45.00000000000001,
+          "allPelletsHeadDamage": 94.5,
+          "theoreticalStraightLineTravelSeconds": 0.29333333333333333
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 3.7500000000000004,
+          "pelletHeadDamage": 7.875,
+          "allPelletsBodyDamage": 45.00000000000001,
+          "allPelletsHeadDamage": 94.5,
+          "theoreticalStraightLineTravelSeconds": 0.4266666666666667
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 3.7500000000000004,
+          "pelletHeadDamage": 7.875,
+          "allPelletsBodyDamage": 45.00000000000001,
+          "allPelletsHeadDamage": 94.5,
+          "theoreticalStraightLineTravelSeconds": 0.6
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 3.7500000000000004,
+          "pelletHeadDamage": 7.875,
+          "allPelletsBodyDamage": 45.00000000000001,
+          "allPelletsHeadDamage": 94.5,
+          "theoreticalStraightLineTravelSeconds": 0.8228571428571428
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 3.7500000000000004,
+          "pelletHeadDamage": 7.875,
+          "allPelletsBodyDamage": 45.00000000000001,
+          "allPelletsHeadDamage": 94.5,
+          "theoreticalStraightLineTravelSeconds": 0.9523809523809523
+        }
+      ]
+    },
+    {
+      "name": "FAL",
+      "preferredWorld": 1100,
+      "legacyFalloffTiles": 28,
+      "falloffStartWorld": 1960,
+      "falloffFractionPerLegacyTile": 0.03,
+      "projectileSpeedWorldPerSecond": 6160,
+      "pellets": 1,
+      "samples": [
+        {
+          "worldTravel": 0,
+          "pelletBodyDamage": 48,
+          "pelletHeadDamage": 72,
+          "allPelletsBodyDamage": 48,
+          "allPelletsHeadDamage": 72,
+          "theoreticalStraightLineTravelSeconds": 0
+        },
+        {
+          "worldTravel": 70,
+          "pelletBodyDamage": 48,
+          "pelletHeadDamage": 72,
+          "allPelletsBodyDamage": 48,
+          "allPelletsHeadDamage": 72,
+          "theoreticalStraightLineTravelSeconds": 0.011363636363636364
+        },
+        {
+          "worldTravel": 280,
+          "pelletBodyDamage": 48,
+          "pelletHeadDamage": 72,
+          "allPelletsBodyDamage": 48,
+          "allPelletsHeadDamage": 72,
+          "theoreticalStraightLineTravelSeconds": 0.045454545454545456
+        },
+        {
+          "worldTravel": 420,
+          "pelletBodyDamage": 48,
+          "pelletHeadDamage": 72,
+          "allPelletsBodyDamage": 48,
+          "allPelletsHeadDamage": 72,
+          "theoreticalStraightLineTravelSeconds": 0.06818181818181818
+        },
+        {
+          "worldTravel": 770,
+          "pelletBodyDamage": 48,
+          "pelletHeadDamage": 72,
+          "allPelletsBodyDamage": 48,
+          "allPelletsHeadDamage": 72,
+          "theoreticalStraightLineTravelSeconds": 0.125
+        },
+        {
+          "worldTravel": 980,
+          "pelletBodyDamage": 48,
+          "pelletHeadDamage": 72,
+          "allPelletsBodyDamage": 48,
+          "allPelletsHeadDamage": 72,
+          "theoreticalStraightLineTravelSeconds": 0.1590909090909091
+        },
+        {
+          "worldTravel": 1540,
+          "pelletBodyDamage": 48,
+          "pelletHeadDamage": 72,
+          "allPelletsBodyDamage": 48,
+          "allPelletsHeadDamage": 72,
+          "theoreticalStraightLineTravelSeconds": 0.25
+        },
+        {
+          "worldTravel": 1959,
+          "pelletBodyDamage": 48,
+          "pelletHeadDamage": 72,
+          "allPelletsBodyDamage": 48,
+          "allPelletsHeadDamage": 72,
+          "theoreticalStraightLineTravelSeconds": 0.31801948051948054
+        },
+        {
+          "worldTravel": 1960,
+          "pelletBodyDamage": 48,
+          "pelletHeadDamage": 72,
+          "allPelletsBodyDamage": 48,
+          "allPelletsHeadDamage": 72,
+          "theoreticalStraightLineTravelSeconds": 0.3181818181818182
+        },
+        {
+          "worldTravel": 1961,
+          "pelletBodyDamage": 47.97942857142857,
+          "pelletHeadDamage": 71.96914285714286,
+          "allPelletsBodyDamage": 47.97942857142857,
+          "allPelletsHeadDamage": 71.96914285714286,
+          "theoreticalStraightLineTravelSeconds": 0.3183441558441558
+        },
+        {
+          "worldTravel": 2240,
+          "pelletBodyDamage": 42.24,
+          "pelletHeadDamage": 63.36,
+          "allPelletsBodyDamage": 42.24,
+          "allPelletsHeadDamage": 63.36,
+          "theoreticalStraightLineTravelSeconds": 0.36363636363636365
+        },
+        {
+          "worldTravel": 3150,
+          "pelletBodyDamage": 23.52,
+          "pelletHeadDamage": 35.28,
+          "allPelletsBodyDamage": 23.52,
+          "allPelletsHeadDamage": 35.28,
+          "theoreticalStraightLineTravelSeconds": 0.5113636363636364
+        },
+        {
+          "worldTravel": 4320,
+          "pelletBodyDamage": 21.6,
+          "pelletHeadDamage": 32.4,
+          "allPelletsBodyDamage": 21.6,
+          "allPelletsHeadDamage": 32.4,
+          "theoreticalStraightLineTravelSeconds": 0.7012987012987013
+        },
+        {
+          "worldTravel": 5000,
+          "pelletBodyDamage": 21.6,
+          "pelletHeadDamage": 32.4,
+          "allPelletsBodyDamage": 21.6,
+          "allPelletsHeadDamage": 32.4,
+          "theoreticalStraightLineTravelSeconds": 0.8116883116883117
+        }
+      ]
+    }
+  ],
+  "projectileSamples": [
+    {
+      "weapon": "AR-15",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 5599.944768195841,
+          "vy": -24.871533045310862,
+          "speedWorldPerSecond": 5599.999999999999,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 280,
+          "travelAfterWorld": 302
+        }
+      ]
+    },
+    {
+      "weapon": "AK47",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 5179.922166136958,
+          "vy": 28.396351226846697,
+          "speedWorldPerSecond": 5180,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 259.00000000000006,
+          "travelAfterWorld": 281.00000000000006
+        }
+      ]
+    },
+    {
+      "weapon": "SMG-9",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 4339.593402663296,
+          "vy": 59.406224936442136,
+          "speedWorldPerSecond": 4340,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 217.00000000000009,
+          "travelAfterWorld": 239.00000000000009
+        }
+      ]
+    },
+    {
+      "weapon": "Pump Shotgun",
+      "projectileCount": 8,
+      "velocities": [
+        {
+          "vx": 3357.823133243454,
+          "vy": -120.92892894223385,
+          "speedWorldPerSecond": 3360.0000000000005,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 168.00000000000009,
+          "travelAfterWorld": 190.00000000000009
+        },
+        {
+          "vx": 3357.4570926417236,
+          "vy": 130.6976322271655,
+          "speedWorldPerSecond": 3360,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 168,
+          "travelAfterWorld": 190
+        },
+        {
+          "vx": 3358.768500883938,
+          "vy": -90.96239591096872,
+          "speedWorldPerSecond": 3360,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 167.99999999999994,
+          "travelAfterWorld": 189.99999999999994
+        },
+        {
+          "vx": 3359.42206932718,
+          "vy": -62.31661189031307,
+          "speedWorldPerSecond": 3360,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 168.00000000000006,
+          "travelAfterWorld": 190.00000000000006
+        },
+        {
+          "vx": 3357.78579080695,
+          "vy": 121.96139985645867,
+          "speedWorldPerSecond": 3360.0000000000005,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 168,
+          "travelAfterWorld": 190
+        },
+        {
+          "vx": 3357.2006061084626,
+          "vy": -137.1280071501519,
+          "speedWorldPerSecond": 3360,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 168.00000000000003,
+          "travelAfterWorld": 190.00000000000003
+        },
+        {
+          "vx": 3356.3662253116922,
+          "vy": 156.22343481995225,
+          "speedWorldPerSecond": 3360,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 168,
+          "travelAfterWorld": 190
+        },
+        {
+          "vx": 3359.8583194821854,
+          "vy": 30.85568029303933,
+          "speedWorldPerSecond": 3359.9999999999995,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 168.00000000000006,
+          "travelAfterWorld": 190.00000000000006
+        }
+      ]
+    },
+    {
+      "weapon": "Auto 12",
+      "projectileCount": 6,
+      "velocities": [
+        {
+          "vx": 3494.6692862154105,
+          "vy": 193.09733292480485,
+          "speedWorldPerSecond": 3500,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 175.00000000000009,
+          "travelAfterWorld": 197.00000000000009
+        },
+        {
+          "vx": 3492.796408997713,
+          "vy": -224.4398478271617,
+          "speedWorldPerSecond": 3499.9999999999995,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 174.99999999999997,
+          "travelAfterWorld": 196.99999999999997
+        },
+        {
+          "vx": 3497.579651278472,
+          "vy": -130.14062764087444,
+          "speedWorldPerSecond": 3499.999999999999,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 175,
+          "travelAfterWorld": 197
+        },
+        {
+          "vx": 3494.7065859771515,
+          "vy": 192.42109532980402,
+          "speedWorldPerSecond": 3500,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 175.00000000000009,
+          "travelAfterWorld": 197.00000000000009
+        },
+        {
+          "vx": 3495.6521984573988,
+          "vy": 174.40099604059805,
+          "speedWorldPerSecond": 3500,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 175,
+          "travelAfterWorld": 197
+        },
+        {
+          "vx": 3493.7293506531187,
+          "vy": 209.4163899625217,
+          "speedWorldPerSecond": 3499.9999999999995,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 174.99999999999997,
+          "travelAfterWorld": 196.99999999999997
+        }
+      ]
+    },
+    {
+      "weapon": "LR-762",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 7323.345904791932,
+          "vy": -625.383689239841,
+          "speedWorldPerSecond": 7350.000000000001,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 367.5000000000001,
+          "travelAfterWorld": 389.5000000000001
+        }
+      ]
+    },
+    {
+      "weapon": "LW Tundra",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 8749.547168739138,
+          "vy": 89.01877335104925,
+          "speedWorldPerSecond": 8749.999999999998,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 437.49999999999994,
+          "travelAfterWorld": 459.49999999999994
+        }
+      ]
+    },
+    {
+      "weapon": "War Head LMG",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 5663.963755239538,
+          "vy": -261.5618078635162,
+          "speedWorldPerSecond": 5670.000000000001,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 283.5,
+          "travelAfterWorld": 305.5
+        }
+      ]
+    },
+    {
+      "weapon": "P90",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 4899.726002050116,
+          "vy": 51.817997201594885,
+          "speedWorldPerSecond": 4900.000000000001,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 245,
+          "travelAfterWorld": 267
+        }
+      ]
+    },
+    {
+      "weapon": "9mm",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 4198.995343166731,
+          "vy": 91.85917517651109,
+          "speedWorldPerSecond": 4200.000000000001,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 210.00000000000009,
+          "travelAfterWorld": 232.00000000000009
+        }
+      ]
+    },
+    {
+      "weapon": "X16",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 4059.9889238449864,
+          "vy": -9.483578229132261,
+          "speedWorldPerSecond": 4060,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 202.99999999999991,
+          "travelAfterWorld": 224.99999999999991
+        }
+      ]
+    },
+    {
+      "weapon": "X-16 Auto",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 4339.802913558365,
+          "vy": -41.36026438904352,
+          "speedWorldPerSecond": 4340,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 217.00000000000014,
+          "travelAfterWorld": 239.00000000000014
+        }
+      ]
+    },
+    {
+      "weapon": "SR-Aug",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 6153.804757726198,
+          "vy": -276.2010206107405,
+          "speedWorldPerSecond": 6159.999999999999,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 308.00000000000017,
+          "travelAfterWorld": 330.00000000000017
+        }
+      ]
+    },
+    {
+      "weapon": "SPAS-12",
+      "projectileCount": 12,
+      "velocities": [
+        {
+          "vx": 5243.3596762666175,
+          "vy": -263.9683793586483,
+          "speedWorldPerSecond": 5250,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.49999999999994,
+          "travelAfterWorld": 284.49999999999994
+        },
+        {
+          "vx": 5249.753103249045,
+          "vy": 50.91517383866465,
+          "speedWorldPerSecond": 5250,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.5,
+          "travelAfterWorld": 284.5
+        },
+        {
+          "vx": 5243.436117366914,
+          "vy": 262.44558120148673,
+          "speedWorldPerSecond": 5250.000000000001,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.5000000000001,
+          "travelAfterWorld": 284.5000000000001
+        },
+        {
+          "vx": 5249.84593398408,
+          "vy": -40.220261446538245,
+          "speedWorldPerSecond": 5250.000000000001,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.5000000000001,
+          "travelAfterWorld": 284.5000000000001
+        },
+        {
+          "vx": 5249.99582449916,
+          "vy": 6.6213851559387935,
+          "speedWorldPerSecond": 5250,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.5000000000001,
+          "travelAfterWorld": 284.5000000000001
+        },
+        {
+          "vx": 5245.831507985549,
+          "vy": -209.16928509237766,
+          "speedWorldPerSecond": 5250,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.5,
+          "travelAfterWorld": 284.5
+        },
+        {
+          "vx": 5247.598951360424,
+          "vy": -158.76160014621124,
+          "speedWorldPerSecond": 5250,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.5000000000001,
+          "travelAfterWorld": 284.5000000000001
+        },
+        {
+          "vx": 5246.040739733879,
+          "vy": -203.85425443787045,
+          "speedWorldPerSecond": 5250,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.5000000000001,
+          "travelAfterWorld": 284.5000000000001
+        },
+        {
+          "vx": 5245.226650217948,
+          "vy": 223.82445765241715,
+          "speedWorldPerSecond": 5249.999999999999,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.5,
+          "travelAfterWorld": 284.5
+        },
+        {
+          "vx": 5247.944632995308,
+          "vy": 146.8915552907577,
+          "speedWorldPerSecond": 5250,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.49999999999994,
+          "travelAfterWorld": 284.49999999999994
+        },
+        {
+          "vx": 5248.594809052823,
+          "vy": -121.45999499324446,
+          "speedWorldPerSecond": 5250,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.50000000000006,
+          "travelAfterWorld": 284.50000000000006
+        },
+        {
+          "vx": 5249.241112588382,
+          "vy": 89.26220875535968,
+          "speedWorldPerSecond": 5249.999999999999,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 262.50000000000006,
+          "travelAfterWorld": 284.50000000000006
+        }
+      ]
+    },
+    {
+      "weapon": "FAL",
+      "projectileCount": 1,
+      "velocities": [
+        {
+          "vx": 6159.180786220859,
+          "vy": -100.4591591035952,
+          "speedWorldPerSecond": 6160.000000000001,
+          "spawnTravelWorld": 22,
+          "deltaTimeSeconds": 0.05,
+          "displacementWorld": 308,
+          "travelAfterWorld": 330
+        }
+      ]
+    }
+  ],
+  "spreadSamples": [
+    {
+      "weapon": "AR-15",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 2.7
+    },
+    {
+      "weapon": "AR-15",
+      "state": "walking",
+      "aimIndependentConeDegrees": 2.9
+    },
+    {
+      "weapon": "AR-15",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 3.6
+    },
+    {
+      "weapon": "AR-15",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1.5
+    },
+    {
+      "weapon": "AK47",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 4
+    },
+    {
+      "weapon": "AK47",
+      "state": "walking",
+      "aimIndependentConeDegrees": 4.5
+    },
+    {
+      "weapon": "AK47",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 5.2
+    },
+    {
+      "weapon": "AK47",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1.6
+    },
+    {
+      "weapon": "SMG-9",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 3.1
+    },
+    {
+      "weapon": "SMG-9",
+      "state": "walking",
+      "aimIndependentConeDegrees": 3.3
+    },
+    {
+      "weapon": "SMG-9",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 3.7
+    },
+    {
+      "weapon": "SMG-9",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1.8
+    },
+    {
+      "weapon": "Pump Shotgun",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 6.5
+    },
+    {
+      "weapon": "Pump Shotgun",
+      "state": "walking",
+      "aimIndependentConeDegrees": 7.5
+    },
+    {
+      "weapon": "Pump Shotgun",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 9
+    },
+    {
+      "weapon": "Pump Shotgun",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 3
+    },
+    {
+      "weapon": "Auto 12",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 7.45
+    },
+    {
+      "weapon": "Auto 12",
+      "state": "walking",
+      "aimIndependentConeDegrees": 8.5
+    },
+    {
+      "weapon": "Auto 12",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 10
+    },
+    {
+      "weapon": "Auto 12",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 2.5
+    },
+    {
+      "weapon": "LR-762",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 10
+    },
+    {
+      "weapon": "LR-762",
+      "state": "walking",
+      "aimIndependentConeDegrees": 12
+    },
+    {
+      "weapon": "LR-762",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 15
+    },
+    {
+      "weapon": "LR-762",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1.1999999999999993
+    },
+    {
+      "weapon": "LW Tundra",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 12.2
+    },
+    {
+      "weapon": "LW Tundra",
+      "state": "walking",
+      "aimIndependentConeDegrees": 14
+    },
+    {
+      "weapon": "LW Tundra",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 18
+    },
+    {
+      "weapon": "LW Tundra",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1
+    },
+    {
+      "weapon": "War Head LMG",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 5.35
+    },
+    {
+      "weapon": "War Head LMG",
+      "state": "walking",
+      "aimIndependentConeDegrees": 5.8
+    },
+    {
+      "weapon": "War Head LMG",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 6.2
+    },
+    {
+      "weapon": "War Head LMG",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1.7999999999999998
+    },
+    {
+      "weapon": "P90",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 2.2
+    },
+    {
+      "weapon": "P90",
+      "state": "walking",
+      "aimIndependentConeDegrees": 2.4
+    },
+    {
+      "weapon": "P90",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 2.8
+    },
+    {
+      "weapon": "P90",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1.2
+    },
+    {
+      "weapon": "9mm",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 4.75
+    },
+    {
+      "weapon": "9mm",
+      "state": "walking",
+      "aimIndependentConeDegrees": 5
+    },
+    {
+      "weapon": "9mm",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 5.45
+    },
+    {
+      "weapon": "9mm",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1.1
+    },
+    {
+      "weapon": "X16",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 4.75
+    },
+    {
+      "weapon": "X16",
+      "state": "walking",
+      "aimIndependentConeDegrees": 4.4
+    },
+    {
+      "weapon": "X16",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 4.75
+    },
+    {
+      "weapon": "X16",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1.2999999999999998
+    },
+    {
+      "weapon": "X-16 Auto",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 4.65
+    },
+    {
+      "weapon": "X-16 Auto",
+      "state": "walking",
+      "aimIndependentConeDegrees": 5
+    },
+    {
+      "weapon": "X-16 Auto",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 5.35
+    },
+    {
+      "weapon": "X-16 Auto",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1.5
+    },
+    {
+      "weapon": "SR-Aug",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 7
+    },
+    {
+      "weapon": "SR-Aug",
+      "state": "walking",
+      "aimIndependentConeDegrees": 4.75
+    },
+    {
+      "weapon": "SR-Aug",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 5.5
+    },
+    {
+      "weapon": "SR-Aug",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 2.2
+    },
+    {
+      "weapon": "SPAS-12",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 5.8
+    },
+    {
+      "weapon": "SPAS-12",
+      "state": "walking",
+      "aimIndependentConeDegrees": 5.925
+    },
+    {
+      "weapon": "SPAS-12",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 6.25
+    },
+    {
+      "weapon": "SPAS-12",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 1.7000000000000002
+    },
+    {
+      "weapon": "FAL",
+      "state": "stationary",
+      "aimIndependentConeDegrees": 8.5
+    },
+    {
+      "weapon": "FAL",
+      "state": "walking",
+      "aimIndependentConeDegrees": 10
+    },
+    {
+      "weapon": "FAL",
+      "state": "sprinting",
+      "aimIndependentConeDegrees": 12.5
+    },
+    {
+      "weapon": "FAL",
+      "state": "ADS",
+      "aimIndependentConeDegrees": 2
+    }
+  ]
+}

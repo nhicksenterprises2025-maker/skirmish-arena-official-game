@@ -130,6 +130,7 @@ WEAPONS = {
     "SMG-9": "weapon-detail-smg9", "Pump Shotgun": "weapon-detail-pump",
     "LR-762": "weapon-detail-lr762", "LW Tundra": "weapon-detail-tundra",
     "9mm": "weapon-detail-9mm", "X16": "weapon-detail-x16",
+    "FAL": "weapon-detail-fal",
 }
 for weapon, name in WEAPONS.items():
     asset(name)
@@ -166,6 +167,29 @@ for weapon, name in WEAPONS.items():
         attachment("mag")
         for side in (-1, 1):
             strip("magazine_reinforcement", (25, -9, side*3.7), (32, -24, side*3.7), 1, .7, "hardware")
+    elif weapon == "FAL":
+        # Long slab-sided receiver and ventilated fixed handguard, with every
+        # detail seated into its base surface. Charging handle stays on the
+        # receiver; the exposed breech detail follows the existing bolt node.
+        for side in (-1, 1):
+            block("receiver_recess", (14, 3.1, .55), (16, 2.2, side*4.7), "recess", .25)
+            for x in (32, 38, 44, 49):
+                block("handguard_vent", (3.0, 1.65, .45), (x, .3, side*4.55), "recess", .2)
+            pin("receiver_crosspin", .7, .55, (-1, -.7, side*4.85), "hardware")
+            block("buttstock_panel", (12, 3.0, .55), (-22, -2.1, side*4.0), "recess", .3)
+        block("charging_slide", (9, 1.2, .7), (6, 1.7, -4.85), "hardware", .2)
+        block("charging_knob", (2.0, 2.5, 2.3), (4, 1.7, -5.5), "recess", .3)
+        # A rear aperture is physically seated on the rear-sight block. The
+        # front guard legs terminate in the tall gas block, not empty space.
+        for side in (-1, 1):
+            block("front_sight_ear", (2.0, 5.3, 1.2), (58, 8.1, side*2.1), "hardware", .25)
+        block("rear_sight_aperture", (1.5, 1.8, 2.8), (-.5, 9.0, 0), "recess", .2)
+        attachment("mag")
+        block("magazine_floorplate", (11.0, 1.5, 8.8), (0, -19.5, 0), "hardware", .3)
+        for side in (-1, 1):
+            block("magazine_stamping", (6.4, 12.5, .5), (0, -9.8, side*3.7), "recess", .25)
+        attachment("bolt")
+        block("breech_face", (5.8, 1.7, .5), (.5, 0, .55), "hardware", .2)
     elif weapon == "Pump Shotgun":
         for side in (-1, 1):
             block("receiver_inlay", (18, 4.2, .6), (8, .5, side*4.65), "hardware", .45)
@@ -368,7 +392,7 @@ bpy.ops.export_scene.gltf(filepath=str(OUTPUT / "live-circuit-details.glb"), exp
 manifest_path = OUTPUT / "manifest.json"
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 manifest["models"] = [e for e in manifest["models"] if e.get("file") != "live-circuit-details.glb"] + entries
-manifest["version"] = "brightfield-fieldcraft-visual-fix-1"
+manifest["version"] = "brightfield-arena-refined-audit-4-fal"
 manifest["detailGenerator"] = f"Blender {bpy.app.version_string}; tools/blender_live_circuit.py"
 manifest_path.write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
 

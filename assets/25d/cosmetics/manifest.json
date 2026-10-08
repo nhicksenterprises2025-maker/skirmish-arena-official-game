@@ -1,0 +1,1083 @@
+{
+  "schema": 1,
+  "version": "overclock-cosmetics-d2fbb63447a9",
+  "generator": "Blender 5.2.2 LTS; tools/blender_overclock_cosmetics.py",
+  "coordinateContract": "+X forward / +Y up / game units / existing torso attachment",
+  "cosmetics": {
+    "urban-assault.helmet-off": {
+      "operatorId": "urban-assault",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/urban-assault.helmet-off.glb",
+          "node": "urban-assault_helmet-off__main",
+          "palette": {
+            "body": "#4a5962",
+            "vest": "#28353c",
+            "accent": "#93a4ad",
+            "pants": "#2f3a40",
+            "skin": "#c38f6a",
+            "build": 1.02
+          },
+          "attachments": {
+            "head": "urban-assault_helmet-off__main__head",
+            "torso": "urban-assault_helmet-off__main__torso"
+          },
+          "meshes": 11,
+          "triangles": 1256,
+          "sha256": "502d6c7c3ae33bd66cc1084ffde960b73ef9497f19df1dacda7926a304a5ffd4",
+          "bytes": 97584
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "urban-assault.polar-camo": {
+      "operatorId": "urban-assault",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/urban-assault.polar-camo.glb",
+          "node": "urban-assault_polar-camo__main",
+          "palette": {
+            "body": "#e0e5e5",
+            "vest": "#485863",
+            "accent": "#93a4ad",
+            "pants": "#b5c1c8",
+            "skin": "#c38f6a",
+            "build": 1.02
+          },
+          "attachments": {
+            "head": "urban-assault_polar-camo__main__head",
+            "torso": "urban-assault_polar-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1372,
+          "sha256": "5009516d1b9e76889b084c61cf0f1ddfc0e916dd3687d5447e2aa3e2a66cb969",
+          "bytes": 112916
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "urban-assault.carbon-camo": {
+      "operatorId": "urban-assault",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/urban-assault.carbon-camo.glb",
+          "node": "urban-assault_carbon-camo__main",
+          "palette": {
+            "body": "#3c4d5b",
+            "vest": "#657682",
+            "accent": "#93a4ad",
+            "pants": "#344654",
+            "skin": "#c38f6a",
+            "build": 1.02
+          },
+          "attachments": {
+            "head": "urban-assault_carbon-camo__main__head",
+            "torso": "urban-assault_carbon-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1372,
+          "sha256": "6e7eee53403bc3fbcb5c2a9b4ad31643a72f8047369fb02fc6375f0f44f8257d",
+          "bytes": 112932
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "woodland-scout.helmet-off": {
+      "operatorId": "woodland-scout",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/woodland-scout.helmet-off.glb",
+          "node": "woodland-scout_helmet-off__main",
+          "palette": {
+            "body": "#627d4d",
+            "vest": "#3e5437",
+            "accent": "#a3c47c",
+            "pants": "#405044",
+            "skin": "#805b47",
+            "build": 0.98
+          },
+          "attachments": {
+            "head": "woodland-scout_helmet-off__main__head",
+            "torso": "woodland-scout_helmet-off__main__torso"
+          },
+          "meshes": 11,
+          "triangles": 1300,
+          "sha256": "0bfa614766ee56b4da04b29852069459ad22ea3c88ed514a4fd4406d41753c98",
+          "bytes": 100112
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "woodland-scout.polar-camo": {
+      "operatorId": "woodland-scout",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/woodland-scout.polar-camo.glb",
+          "node": "woodland-scout_polar-camo__main",
+          "palette": {
+            "body": "#e0e5e5",
+            "vest": "#485863",
+            "accent": "#a3c47c",
+            "pants": "#b5c1c8",
+            "skin": "#805b47",
+            "build": 0.98
+          },
+          "attachments": {
+            "head": "woodland-scout_polar-camo__main__head",
+            "torso": "woodland-scout_polar-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1416,
+          "sha256": "bff002a46bb4cf2793ac65bb50bc2f914f327ff2900abd339cddfadf6896a8eb",
+          "bytes": 116264
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "woodland-scout.carbon-camo": {
+      "operatorId": "woodland-scout",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/woodland-scout.carbon-camo.glb",
+          "node": "woodland-scout_carbon-camo__main",
+          "palette": {
+            "body": "#3c4d5b",
+            "vest": "#657682",
+            "accent": "#a3c47c",
+            "pants": "#344654",
+            "skin": "#805b47",
+            "build": 0.98
+          },
+          "attachments": {
+            "head": "woodland-scout_carbon-camo__main__head",
+            "torso": "woodland-scout_carbon-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1416,
+          "sha256": "b8d74b61aec9d099441b48cbdcefb6f059158b5f6c59e38db18f5d07d468a125",
+          "bytes": 116280
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "desert-runner.helmet-off": {
+      "operatorId": "desert-runner",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/desert-runner.helmet-off.glb",
+          "node": "desert-runner_helmet-off__main",
+          "palette": {
+            "body": "#c5a36d",
+            "vest": "#8c744e",
+            "accent": "#f0d3a1",
+            "pants": "#786b52",
+            "skin": "#d3a079",
+            "build": 0.95
+          },
+          "attachments": {
+            "head": "desert-runner_helmet-off__main__head",
+            "torso": "desert-runner_helmet-off__main__torso"
+          },
+          "meshes": 11,
+          "triangles": 1256,
+          "sha256": "d2ada15ccd723f420a17bf836a12c90578d597a71258fafb00f5f0200fd744f2",
+          "bytes": 97616
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "desert-runner.polar-camo": {
+      "operatorId": "desert-runner",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/desert-runner.polar-camo.glb",
+          "node": "desert-runner_polar-camo__main",
+          "palette": {
+            "body": "#e0e5e5",
+            "vest": "#485863",
+            "accent": "#f0d3a1",
+            "pants": "#b5c1c8",
+            "skin": "#d3a079",
+            "build": 0.95
+          },
+          "attachments": {
+            "head": "desert-runner_polar-camo__main__head",
+            "torso": "desert-runner_polar-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1372,
+          "sha256": "c74a4a4b999d5faa5805474b086a44ceafae7f1bde09d4da5e9eecac8275a3fc",
+          "bytes": 113604
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "desert-runner.carbon-camo": {
+      "operatorId": "desert-runner",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/desert-runner.carbon-camo.glb",
+          "node": "desert-runner_carbon-camo__main",
+          "palette": {
+            "body": "#3c4d5b",
+            "vest": "#657682",
+            "accent": "#f0d3a1",
+            "pants": "#344654",
+            "skin": "#d3a079",
+            "build": 0.95
+          },
+          "attachments": {
+            "head": "desert-runner_carbon-camo__main__head",
+            "torso": "desert-runner_carbon-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1372,
+          "sha256": "b1b729f33d4c26b88f8b070e858acc325f9e38b2e614469ce1983da277519713",
+          "bytes": 113620
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "blue-strike.helmet-off": {
+      "operatorId": "blue-strike",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/blue-strike.helmet-off.glb",
+          "node": "blue-strike_helmet-off__main",
+          "palette": {
+            "body": "#26384a",
+            "vest": "#182631",
+            "accent": "#25a8ff",
+            "pants": "#1e2c35",
+            "skin": "#a96f55",
+            "build": 1
+          },
+          "attachments": {
+            "head": "blue-strike_helmet-off__main__head",
+            "torso": "blue-strike_helmet-off__main__torso"
+          },
+          "meshes": 11,
+          "triangles": 1212,
+          "sha256": "fd037933813dffe6047af6d96ac0abcbde7a0988b96a09bcf77dadd5e423390a",
+          "bytes": 94196
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "blue-strike.polar-camo": {
+      "operatorId": "blue-strike",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/blue-strike.polar-camo.glb",
+          "node": "blue-strike_polar-camo__main",
+          "palette": {
+            "body": "#e0e5e5",
+            "vest": "#485863",
+            "accent": "#25a8ff",
+            "pants": "#b5c1c8",
+            "skin": "#a96f55",
+            "build": 1
+          },
+          "attachments": {
+            "head": "blue-strike_polar-camo__main__head",
+            "torso": "blue-strike_polar-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1328,
+          "sha256": "720f950154b702eaface76429b7d7d0a60ba0dc0ed3f98432a39943bc46ca3dc",
+          "bytes": 108332
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "blue-strike.carbon-camo": {
+      "operatorId": "blue-strike",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/blue-strike.carbon-camo.glb",
+          "node": "blue-strike_carbon-camo__main",
+          "palette": {
+            "body": "#3c4d5b",
+            "vest": "#657682",
+            "accent": "#25a8ff",
+            "pants": "#344654",
+            "skin": "#a96f55",
+            "build": 1
+          },
+          "attachments": {
+            "head": "blue-strike_carbon-camo__main__head",
+            "torso": "blue-strike_carbon-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1328,
+          "sha256": "7f98f32016fa2af7b8a6ea1ad269d553acd0c5cd59fc69fba7692dfe60f42720",
+          "bytes": 108352
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "crimson-guard.helmet-off": {
+      "operatorId": "crimson-guard",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/crimson-guard.helmet-off.glb",
+          "node": "crimson-guard_helmet-off__main",
+          "palette": {
+            "body": "#342f35",
+            "vest": "#201f24",
+            "accent": "#e64f5c",
+            "pants": "#29282d",
+            "skin": "#70483b",
+            "build": 1.05
+          },
+          "attachments": {
+            "head": "crimson-guard_helmet-off__main__head",
+            "torso": "crimson-guard_helmet-off__main__torso"
+          },
+          "meshes": 11,
+          "triangles": 1256,
+          "sha256": "74b9c0061122e0030f1ebb480dca34959b9c413f19240ceef1c18888f8e37ee0",
+          "bytes": 97616
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "crimson-guard.polar-camo": {
+      "operatorId": "crimson-guard",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/crimson-guard.polar-camo.glb",
+          "node": "crimson-guard_polar-camo__main",
+          "palette": {
+            "body": "#e0e5e5",
+            "vest": "#485863",
+            "accent": "#e64f5c",
+            "pants": "#b5c1c8",
+            "skin": "#70483b",
+            "build": 1.05
+          },
+          "attachments": {
+            "head": "crimson-guard_polar-camo__main__head",
+            "torso": "crimson-guard_polar-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1372,
+          "sha256": "f341b158e3a86177f419bec52332c8382b79a066839fd2c285c77ed2555c2e32",
+          "bytes": 112916
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "crimson-guard.carbon-camo": {
+      "operatorId": "crimson-guard",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/crimson-guard.carbon-camo.glb",
+          "node": "crimson-guard_carbon-camo__main",
+          "palette": {
+            "body": "#3c4d5b",
+            "vest": "#657682",
+            "accent": "#e64f5c",
+            "pants": "#344654",
+            "skin": "#70483b",
+            "build": 1.05
+          },
+          "attachments": {
+            "head": "crimson-guard_carbon-camo__main__head",
+            "torso": "crimson-guard_carbon-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1372,
+          "sha256": "417be045cac0436c155fca17059fa663eb23df949d3184ea7ab9ffb3834e7540",
+          "bytes": 112932
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "steel-recon.helmet-off": {
+      "operatorId": "steel-recon",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/steel-recon.helmet-off.glb",
+          "node": "steel-recon_helmet-off__main",
+          "palette": {
+            "body": "#8c989e",
+            "vest": "#59666d",
+            "accent": "#d8e1e4",
+            "pants": "#4b575c",
+            "skin": "#e2b28e",
+            "build": 0.97
+          },
+          "attachments": {
+            "head": "steel-recon_helmet-off__main__head",
+            "torso": "steel-recon_helmet-off__main__torso"
+          },
+          "meshes": 11,
+          "triangles": 1300,
+          "sha256": "ec15aecd5d7d47dfb75ac958cb8362907b47e78b7688df137e6fb92a45fa8e5a",
+          "bytes": 100888
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "steel-recon.polar-camo": {
+      "operatorId": "steel-recon",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/steel-recon.polar-camo.glb",
+          "node": "steel-recon_polar-camo__main",
+          "palette": {
+            "body": "#e0e5e5",
+            "vest": "#485863",
+            "accent": "#d8e1e4",
+            "pants": "#b5c1c8",
+            "skin": "#e2b28e",
+            "build": 0.97
+          },
+          "attachments": {
+            "head": "steel-recon_polar-camo__main__head",
+            "torso": "steel-recon_polar-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1416,
+          "sha256": "9199dc4c5dd8eae93cf224418e182f86ba21f01c578ff35f289ea4730df23709",
+          "bytes": 116224
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "steel-recon.carbon-camo": {
+      "operatorId": "steel-recon",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/steel-recon.carbon-camo.glb",
+          "node": "steel-recon_carbon-camo__main",
+          "palette": {
+            "body": "#3c4d5b",
+            "vest": "#657682",
+            "accent": "#d8e1e4",
+            "pants": "#344654",
+            "skin": "#e2b28e",
+            "build": 0.97
+          },
+          "attachments": {
+            "head": "steel-recon_carbon-camo__main__head",
+            "torso": "steel-recon_carbon-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1416,
+          "sha256": "4fa440018d42538422f9658cb07e0913c66f4c011b6ecb69d4924fb720e03d1d",
+          "bytes": 116240
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "ranger-elite.helmet-off": {
+      "operatorId": "ranger-elite",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/ranger-elite.helmet-off.glb",
+          "node": "ranger-elite_helmet-off__main",
+          "palette": {
+            "body": "#6c7147",
+            "vest": "#464a31",
+            "accent": "#b3945b",
+            "pants": "#4d4b35",
+            "skin": "#9c684e",
+            "build": 1.04
+          },
+          "attachments": {
+            "head": "ranger-elite_helmet-off__main__head",
+            "torso": "ranger-elite_helmet-off__main__torso"
+          },
+          "meshes": 11,
+          "triangles": 1256,
+          "sha256": "b2e7b009926dfd5ee35f39357093b98318c3d9a4bc447674b6c69c07ec006d7f",
+          "bytes": 97608
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "ranger-elite.polar-camo": {
+      "operatorId": "ranger-elite",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/ranger-elite.polar-camo.glb",
+          "node": "ranger-elite_polar-camo__main",
+          "palette": {
+            "body": "#e0e5e5",
+            "vest": "#485863",
+            "accent": "#b3945b",
+            "pants": "#b5c1c8",
+            "skin": "#9c684e",
+            "build": 1.04
+          },
+          "attachments": {
+            "head": "ranger-elite_polar-camo__main__head",
+            "torso": "ranger-elite_polar-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1372,
+          "sha256": "a77a845736d291d8aa6a4c87533aeb0493738f6bcac079b46df1eb7597a77544",
+          "bytes": 113596
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "ranger-elite.carbon-camo": {
+      "operatorId": "ranger-elite",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/ranger-elite.carbon-camo.glb",
+          "node": "ranger-elite_carbon-camo__main",
+          "palette": {
+            "body": "#3c4d5b",
+            "vest": "#657682",
+            "accent": "#b3945b",
+            "pants": "#344654",
+            "skin": "#9c684e",
+            "build": 1.04
+          },
+          "attachments": {
+            "head": "ranger-elite_carbon-camo__main__head",
+            "torso": "ranger-elite_carbon-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1372,
+          "sha256": "a744c07825ebb1b5a4f582af04f70bdfc38a923c356e1491036527af28e03f5b",
+          "bytes": 113608
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "night-ops.helmet-off": {
+      "operatorId": "night-ops",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/night-ops.helmet-off.glb",
+          "node": "night-ops_helmet-off__main",
+          "palette": {
+            "body": "#222f3e",
+            "vest": "#151e29",
+            "accent": "#5f7fa2",
+            "pants": "#17222d",
+            "skin": "#bb8262",
+            "build": 1
+          },
+          "attachments": {
+            "head": "night-ops_helmet-off__main__head",
+            "torso": "night-ops_helmet-off__main__torso"
+          },
+          "meshes": 11,
+          "triangles": 1212,
+          "sha256": "b61ba7b5a44c8514fb8db44ae64907876c7c82eb2cc3ee5899e74eb6d323839f",
+          "bytes": 94176
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "night-ops.polar-camo": {
+      "operatorId": "night-ops",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/night-ops.polar-camo.glb",
+          "node": "night-ops_polar-camo__main",
+          "palette": {
+            "body": "#e0e5e5",
+            "vest": "#485863",
+            "accent": "#5f7fa2",
+            "pants": "#b5c1c8",
+            "skin": "#bb8262",
+            "build": 1
+          },
+          "attachments": {
+            "head": "night-ops_polar-camo__main__head",
+            "torso": "night-ops_polar-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1328,
+          "sha256": "b5515ee615221a5c5a4c7993fc459cfb1aa630937f4699eb355ad8013a9c6fec",
+          "bytes": 108324
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "night-ops.carbon-camo": {
+      "operatorId": "night-ops",
+      "verified": true,
+      "priceAC": 500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/night-ops.carbon-camo.glb",
+          "node": "night-ops_carbon-camo__main",
+          "palette": {
+            "body": "#3c4d5b",
+            "vest": "#657682",
+            "accent": "#5f7fa2",
+            "pants": "#344654",
+            "skin": "#bb8262",
+            "build": 1
+          },
+          "attachments": {
+            "head": "night-ops_carbon-camo__main__head",
+            "torso": "night-ops_carbon-camo__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1328,
+          "sha256": "f176e68f94b81ac26e0cc61636ae292d3f82adede6d95c0c80fd76359285fe15",
+          "bytes": 108344
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "urban-assault.urban-utility": {
+      "operatorId": "urban-assault",
+      "verified": true,
+      "priceAC": 1000,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/urban-assault.urban-utility.glb",
+          "node": "urban-assault_urban-utility__main",
+          "palette": {
+            "body": "#414b53",
+            "vest": "#293840",
+            "accent": "#e49a50",
+            "pants": "#626d77",
+            "skin": "#c38f6a",
+            "build": 1.02
+          },
+          "attachments": {
+            "head": "urban-assault_urban-utility__main__head",
+            "torso": "urban-assault_urban-utility__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 1108,
+          "sha256": "2216b590f5b29629849f04087c1ac6bb46b49bca12d2c2bba4770cb6105117a7",
+          "bytes": 90396
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "steel-recon.alpine-scout": {
+      "operatorId": "steel-recon",
+      "verified": true,
+      "priceAC": 1000,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/steel-recon.alpine-scout.glb",
+          "node": "steel-recon_alpine-scout__main",
+          "palette": {
+            "body": "#d8dddc",
+            "vest": "#3f5059",
+            "accent": "#a7b8c3",
+            "pants": "#a6b2b9",
+            "skin": "#e2b28e",
+            "build": 0.97
+          },
+          "attachments": {
+            "head": "steel-recon_alpine-scout__main__head",
+            "torso": "steel-recon_alpine-scout__main__torso"
+          },
+          "meshes": 9,
+          "triangles": 1372,
+          "sha256": "7e30a9a5a23e8e62ca7cb94701a73583e71273d6041484d2a51b39ded2400bf2",
+          "bytes": 113296
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "ranger-elite.workshop": {
+      "operatorId": "ranger-elite",
+      "verified": true,
+      "priceAC": 1000,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/ranger-elite.workshop.glb",
+          "node": "ranger-elite_workshop__main",
+          "palette": {
+            "body": "#7d806b",
+            "vest": "#424d49",
+            "accent": "#bd9b60",
+            "pants": "#7d806b",
+            "skin": "#9c684e",
+            "build": 1.04
+          },
+          "attachments": {
+            "head": "ranger-elite_workshop__main__head",
+            "torso": "ranger-elite_workshop__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 1064,
+          "sha256": "e733f913132ae29d80574e35003e3c4f1048faeeb20e4c9014bd05ba9a8fabe7",
+          "bytes": 87000
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "woodland-scout.signal-runner": {
+      "operatorId": "woodland-scout",
+      "verified": true,
+      "priceAC": 1000,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/woodland-scout.signal-runner.glb",
+          "node": "woodland-scout_signal-runner__main",
+          "palette": {
+            "body": "#6b8796",
+            "vest": "#334b58",
+            "accent": "#a6c8d8",
+            "pants": "#4c6473",
+            "skin": "#805b47",
+            "build": 0.98
+          },
+          "attachments": {
+            "head": "woodland-scout_signal-runner__main__head",
+            "torso": "woodland-scout_signal-runner__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 1108,
+          "sha256": "a889c552c743735b8f81619b41b739276a0768e209fe4c31af91868ad591b9ba",
+          "bytes": 90960
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "steel-recon.cold-front": {
+      "operatorId": "steel-recon",
+      "verified": true,
+      "priceAC": 1500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/steel-recon.cold-front.glb",
+          "node": "steel-recon_cold-front__main",
+          "palette": {
+            "body": "#b7c8ce",
+            "vest": "#dde3e1",
+            "accent": "#779bad",
+            "pants": "#879ca7",
+            "skin": "#e2b28e",
+            "build": 0.97
+          },
+          "attachments": {
+            "head": "steel-recon_cold-front__main__head",
+            "torso": "steel-recon_cold-front__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 1108,
+          "sha256": "85c93d985db02f5bf069320138ff235a6652a582e5eb3773ae325caf5eafd92d",
+          "bytes": 90888
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "urban-assault.containment": {
+      "operatorId": "urban-assault",
+      "verified": true,
+      "priceAC": 1500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/urban-assault.containment.glb",
+          "node": "urban-assault_containment__main",
+          "palette": {
+            "body": "#424c51",
+            "vest": "#2f3c43",
+            "accent": "#d5be62",
+            "pants": "#465258",
+            "skin": "#c38f6a",
+            "build": 1.02
+          },
+          "attachments": {
+            "head": "urban-assault_containment__main__head",
+            "torso": "urban-assault_containment__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 1196,
+          "sha256": "3b7e77c42ec9778869d08089f54fadd06cf28e694421005b9a465a6bee58e3d2",
+          "bytes": 97160
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "ranger-elite.recon-pilot": {
+      "operatorId": "ranger-elite",
+      "verified": true,
+      "priceAC": 1500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/ranger-elite.recon-pilot.glb",
+          "node": "ranger-elite_recon-pilot__main",
+          "palette": {
+            "body": "#6b796c",
+            "vest": "#394c45",
+            "accent": "#b7b092",
+            "pants": "#536659",
+            "skin": "#9c684e",
+            "build": 1.04
+          },
+          "attachments": {
+            "head": "ranger-elite_recon-pilot__main__head",
+            "torso": "ranger-elite_recon-pilot__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1196,
+          "sha256": "b49f984d393955d0008331cdd8bf72a716a57342c184f47da8a1fd66c5aae9dc",
+          "bytes": 99080
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "night-ops.midnight-circuit": {
+      "operatorId": "night-ops",
+      "verified": true,
+      "priceAC": 1500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/night-ops.midnight-circuit.glb",
+          "node": "night-ops_midnight-circuit__main",
+          "palette": {
+            "body": "#33475d",
+            "vest": "#26384d",
+            "accent": "#689dca",
+            "pants": "#2b3d51",
+            "skin": "#bb8262",
+            "build": 1
+          },
+          "attachments": {
+            "head": "night-ops_midnight-circuit__main__head",
+            "torso": "night-ops_midnight-circuit__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 1064,
+          "sha256": "a4e2cf4e11ff28e4058e67a559f11e1381c118ae1c92db037d58dc00886dbc33",
+          "bytes": 87340
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "blue-strike.black-ice": {
+      "operatorId": "blue-strike",
+      "verified": true,
+      "priceAC": 2500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/blue-strike.black-ice.glb",
+          "node": "blue-strike_black-ice__main",
+          "palette": {
+            "body": "#40515f",
+            "vest": "#354652",
+            "accent": "#90d5e9",
+            "pants": "#304253",
+            "skin": "#a96f55",
+            "build": 1
+          },
+          "attachments": {
+            "head": "blue-strike_black-ice__main__head",
+            "torso": "blue-strike_black-ice__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 1064,
+          "sha256": "34849ee777ca443bbe6931ee8d924345427e5fa834d488fbf9bf4f07b72c8286",
+          "bytes": 170780
+        },
+        "white-ice": {
+          "file": "assets/25d/cosmetics/blue-strike.black-ice.glb",
+          "node": "blue-strike_black-ice__white-ice",
+          "palette": {
+            "body": "#dfe6e7",
+            "vest": "#e9ece6",
+            "accent": "#89bece",
+            "pants": "#485760",
+            "skin": "#a96f55",
+            "build": 1
+          },
+          "attachments": {
+            "head": "blue-strike_black-ice__white-ice__head",
+            "torso": "blue-strike_black-ice__white-ice__torso"
+          },
+          "meshes": 7,
+          "triangles": 1064,
+          "sha256": "34849ee777ca443bbe6931ee8d924345427e5fa834d488fbf9bf4f07b72c8286",
+          "bytes": 170780
+        }
+      },
+      "lobbyPose": "black-ice",
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "steel-recon.aegis": {
+      "operatorId": "steel-recon",
+      "verified": true,
+      "priceAC": 2500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/steel-recon.aegis.glb",
+          "node": "steel-recon_aegis__main",
+          "palette": {
+            "body": "#637781",
+            "vest": "#9badb6",
+            "accent": "#dce7ed",
+            "pants": "#3d5360",
+            "skin": "#e2b28e",
+            "build": 0.97
+          },
+          "attachments": {
+            "head": "steel-recon_aegis__main__head",
+            "torso": "steel-recon_aegis__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 1240,
+          "sha256": "9e0c23323ba83da51b3cd9a57ab5ee55b7c55a0f94583b7f1312399fb452c56a",
+          "bytes": 195864
+        },
+        "aegis-arctic": {
+          "file": "assets/25d/cosmetics/steel-recon.aegis.glb",
+          "node": "steel-recon_aegis__aegis-arctic",
+          "palette": {
+            "body": "#d1dbdf",
+            "vest": "#e5e9e5",
+            "accent": "#98c4d4",
+            "pants": "#3b536b",
+            "skin": "#e2b28e",
+            "build": 0.97
+          },
+          "attachments": {
+            "head": "steel-recon_aegis__aegis-arctic__head",
+            "torso": "steel-recon_aegis__aegis-arctic__torso"
+          },
+          "meshes": 7,
+          "triangles": 1240,
+          "sha256": "9e0c23323ba83da51b3cd9a57ab5ee55b7c55a0f94583b7f1312399fb452c56a",
+          "bytes": 195864
+        }
+      },
+      "lobbyPose": "aegis",
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "crimson-guard.monarch": {
+      "operatorId": "crimson-guard",
+      "verified": true,
+      "priceAC": 2500,
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/crimson-guard.monarch.glb",
+          "node": "crimson-guard_monarch__main",
+          "palette": {
+            "body": "#3b424a",
+            "vest": "#303943",
+            "accent": "#bb9a60",
+            "pants": "#38434d",
+            "skin": "#70483b",
+            "build": 1.05
+          },
+          "attachments": {
+            "head": "crimson-guard_monarch__main__head",
+            "torso": "crimson-guard_monarch__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 1120,
+          "sha256": "33b488bc46407e3b174fcecebdf69ea77766d57bf4a3538f462ec9fe46832bd6",
+          "bytes": 177472
+        },
+        "monarch-platinum": {
+          "file": "assets/25d/cosmetics/crimson-guard.monarch.glb",
+          "node": "crimson-guard_monarch__monarch-platinum",
+          "palette": {
+            "body": "#3b4653",
+            "vest": "#34414e",
+            "accent": "#b9c5cd",
+            "pants": "#455160",
+            "skin": "#70483b",
+            "build": 1.05
+          },
+          "attachments": {
+            "head": "crimson-guard_monarch__monarch-platinum__head",
+            "torso": "crimson-guard_monarch__monarch-platinum__torso"
+          },
+          "meshes": 7,
+          "triangles": 1120,
+          "sha256": "33b488bc46407e3b174fcecebdf69ea77766d57bf4a3538f462ec9fe46832bd6",
+          "bytes": 177472
+        }
+      },
+      "lobbyPose": "monarch",
+      "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    }
+  }
+}

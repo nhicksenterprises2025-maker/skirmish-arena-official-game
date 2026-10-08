@@ -2,11 +2,11 @@
 
 A tactical arena shooter with a persistent league of 50 bots. Pick a loadout, play a match, and watch rivalries, careers and seasons develop around you.
 
-**Version 1.11 · Windows build 1.11.0 · Weapon Balance 8.0 · Beta**
+**1.13.0 — ARENA REFINED · Weapon Balance 9.0 · Beta**
 
-[Download for Windows (64-bit)](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest/download/Skirmish.Arena.Reimagined_1.11.0_x64-setup.exe) · [Release notes and downloads](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest)
+[Download for Windows (64-bit)](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest) — choose the Windows setup file from the latest published release.
 
-![Skirmish Arena lobby](docs/screenshots/lobby-blue-circuit.png)
+![Skirmish Arena lobby](docs/screenshots/lobby-arena-refined.png)
 
 ## Install
 
@@ -22,12 +22,12 @@ For an existing installation, run the new installer over it. Accounts and save d
 
 - **Ranked and ordinary 5v5 Team Deathmatch, ten-player Deathmatch and custom matches.** Practice alone or choose a bot roster and difficulty.
 - **A league that remembers.** Fifty bots keep their careers, weapon familiarity, form and season history.
-- **Four live matches to watch.** Switch matches, follow individual bots or use the tactical camera.
-- **Fourteen weapons and cosmetic operators.** Inspect the 2.5D models, build a primary/sidearm loadout and follow the current Weapon Meta.
+- **Four background match slots.** Two TDM and two Deathmatch slots rotate fairly through the 50-bot roster. Switch matches, follow individual bots or use the tactical camera.
+- **Fifteen weapons and cosmetic operators.** Inspect the 2.5D models, build a primary/sidearm loadout and follow the current Weapon Meta.
 - **Account progression.** Earn XP through eligible matches and progress through Levels 1–50. Lifetime XP keeps accumulating at the cap.
-- **Tournaments and Phone.** Register teams, follow brackets, invite bots and keep up with their conversations.
+- **Tournaments and Phone.** Register teams, follow brackets, invite bots and inspect live scores and bot records. Phone retains Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta.
 
-The current release is built around bot opponents. A hosted account connection is for accounts and synchronization; it is not human-versus-human online multiplayer.
+The game is built around bot opponents. A hosted account connection is for accounts and synchronization; it is not human-versus-human online multiplayer.
 
 ## Playing and saving
 
@@ -35,21 +35,23 @@ Aim with the mouse; gameplay captures it and menus release it. Open **Settings �
 
 Previously authenticated accounts can use their cached world when the account connection is unavailable. The game shows **CLOUD OFFLINE — LOCAL MODE**, keeps saving locally and synchronizes when the connection returns. First-time login and account creation require a working account service. The desktop app starts its included local service automatically.
 
-Bot replies use an optional local dialogue service. Its availability is separate from the account connection, and it is not required to play matches. The installer does not download the dialogue model.
-
-Your username menu opens **Player Profile** and **Settings**. Settings has four tabs: **Game**, **Audio**, **Account** and **About**. Backups are under **Account → Data Management**. Open **Phone** for Messages, Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta.
+Your username menu opens **Player Profile** and **Settings**. Settings has four tabs: **Game**, **Audio**, **Account** and **About**. Backups are under **Account → Data Management**. Open **Phone** for Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta.
 
 The [player guide](docs/PLAYER-GUIDE.md) covers modes, careers, seasons, tournaments, Phone and backups.
 
-## Current release: Blue Circuit
+## Arena Refined
 
-Build **1.11.0** adds Ranked TDM with a separate 26-rank ELO ladder for players and named bots. Level and rank progress have their own lobby panels and match breakdowns. The existing XP curve stays the same; a new 5,000-damage reward tier joins the scoring schedule.
+Build **1.13.0** combines all ten Arena Refined audits. Mode entry prepares the match for at least three seconds before its countdown. Phone keeps its four live-statistics and spectator apps; the conversation feature is retired with recoverable data archives.
 
-Every weapon and operator card has its own rotation, Reset and zoom controls. Exact stat bars, modeled rank crests and clearer typography carry through the existing blue interface.
+A $0.50 Polar Camo offer is available for Sandbox payment testing when its service is configured. Public real-money checkout remains unavailable. Returning from checkout does not grant credits or an appearance by itself; delivery requires verification.
 
-Phone contacts speak as competitors: their own reactions, rivalries, weapon opinions and rank grind. Factual replies use current game records, and a failed generation stays in the normal retry flow. Conversation history and personalities carry forward.
+Application version **1.13.0**, analytics schema **1**, and Weapon Balance **9.0** are separate. Full historical notes remain available in **Settings → About** and [version.json](version.json).
 
-Application version **1.11**, analytics schema **1**, and weapon balance **8.0** are separate. This release does not change weapon values or reset telemetry. Full history is available in **Settings → About** and [version.json](version.json).
+AK magazine details stay attached, the lobby display moves subtly, stat bars show performance in color and combat panels use neutral surfaces. Click a dimensional ranked emblem to inspect the current ladder and Ranked Stats. Combined Stats uses unique casual TDM, casual Deathmatch and Ranked TDM records; tournaments, custom sessions and practice remain excluded.
+
+Skirmish Challenge Tournament runs every three calendar days at 7:30 PM Eastern, with daylight saving. Check in during the first 90 seconds of each two-minute preparation block. Play all three quarterfinal and semifinal games and all five final games; total kills decide advancement, followed by team damage if tied. Event pages show the fixed schedule, connected bracket, tournament-only leaderboards and official history.
+
+Balance 9.0 adds the semi-automatic FAL. Ranges use meters without changing the map's size or physical weapon behavior. Current-patch telemetry starts clean while lifetime records and previous patches remain available. The [player guide](docs/PLAYER-GUIDE.md) covers schedules, permanent no-show replacements, rewards and statistical eligibility.
 
 ## Source and builds
 

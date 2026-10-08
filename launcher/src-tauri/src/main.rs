@@ -348,12 +348,46 @@ fn require_game(app: &tauri::AppHandle, window: &tauri::WebviewWindow) -> Result
     }
     Ok(())
 }
+fn checked_sandbox_checkout(input: &str) -> Result<reqwest::Url, String> {
+    let url = reqwest::Url::parse(input).map_err(|_| "The test checkout address is invalid.".to_string())?;
+    let session = url.path().strip_prefix("/c/pay/cs_test_").unwrap_or("");
+    if input.len() > 32768 || input.chars().any(char::is_control) || url.scheme() != "https"
+        || url.host_str() != Some("checkout.stripe.com") || url.port().is_some()
+        || !url.username().is_empty() || url.password().is_some()
+        || session.is_empty() || !session.bytes().all(|byte| byte.is_ascii_alphanumeric()) {
+        return Err("Only the verified Sandbox checkout can open from the game.".into());
+    }
+    Ok(url)
+}
+#[tauri::command]
+fn open_sandbox_checkout(app: tauri::AppHandle, window: tauri::WebviewWindow, url: String) -> Result<(), String> {
+    require_game(&app, &window)?;
+    let checked = checked_sandbox_checkout(&url)?;
+    #[cfg(windows)] {
+        // Open the validated URL directly through Windows, never a command shell.
+        #[link(name = "shell32")]
+        extern "system" {
+            fn ShellExecuteW(window: *mut std::ffi::c_void, verb: *const u16, file: *const u16,
+                parameters: *const u16, directory: *const u16, show: i32) -> *mut std::ffi::c_void;
+        }
+        let verb: Vec<u16> = "open".encode_utf16().chain(Some(0)).collect();
+        let address: Vec<u16> = checked.as_str().encode_utf16().chain(Some(0)).collect();
+        let result = unsafe { ShellExecuteW(std::ptr::null_mut(), verb.as_ptr(), address.as_ptr(),
+            std::ptr::null(), std::ptr::null(), 1) };
+        if result as isize <= 32 { return Err("Windows could not open your browser. Check the default browser and retry.".into()); }
+        Ok(())
+    }
+    #[cfg(not(windows))] {
+        let _ = checked;
+        Err("External test checkout is supported by the Windows desktop build.".into())
+    }
+}
 #[tauri::command]
 fn quit_game(app: tauri::AppHandle, window: tauri::WebviewWindow) -> Result<(), String> {
     require_game(&app, &window)?;
     if app.state::<LauncherState>().busy.load(Ordering::SeqCst) { return Err("Wait for the update to finish.".into()); }
     // The game durably saves its local checkpoint before invoking this command.
-    // Shared backend and independent dialogue processes remain untouched.
+    // The shared account backend remains available to other clients.
     app.exit(0);
     Ok(())
 }
@@ -361,11 +395,6 @@ fn quit_game(app: tauri::AppHandle, window: tauri::WebviewWindow) -> Result<(), 
 async fn check_local_backend(app: tauri::AppHandle, window: tauri::WebviewWindow) -> Result<Value, String> {
     require_game(&app, &window)?;
     backend::prepare(&app).await
-}
-#[tauri::command]
-async fn offline_local_api(app: tauri::AppHandle, window: tauri::WebviewWindow, account_id: String, path: String, method: String, body: Value) -> Result<Value, String> {
-    require_game(&app, &window)?;
-    backend::offline_request(app, account_id, path, method, body).await
 }
 #[tauri::command]
 fn game_fullscreen_state(app: tauri::AppHandle, window: tauri::WebviewWindow) -> Result<Value, String> {
@@ -559,7 +588,7 @@ fn main() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![launcher_settings, save_server, server_status, check_launcher_update, play, install_launcher_update, finish_game_checkpoint, game_fullscreen_state, set_game_fullscreen, check_local_backend, offline_local_api, quit_game])
+        .invoke_handler(tauri::generate_handler![launcher_settings, save_server, server_status, check_launcher_update, play, install_launcher_update, finish_game_checkpoint, game_fullscreen_state, set_game_fullscreen, check_local_backend, quit_game, open_sandbox_checkout])
         .run(tauri::generate_context!()).expect("Could not start Skirmish launcher");
 }
 
@@ -574,6 +603,16 @@ mod tests {
         assert!(checked_origin("https://user:pass@arena.example.com").is_err());
         assert!(checked_origin("file:///c:/secret").is_err());
         assert!(checked_origin("https://arena.example.com/game").is_err());
+    }
+    #[test]
+    fn sandbox_checkout_validation() {
+        assert!(checked_sandbox_checkout("https://checkout.stripe.com/c/pay/cs_test_Ab12#configuration").is_ok());
+        for value in ["http://checkout.stripe.com/c/pay/cs_test_Ab12", "https://checkout.stripe.com.evil.test/c/pay/cs_test_Ab12",
+            "https://evil.test@checkout.stripe.com/c/pay/cs_test_Ab12", "https://checkout.stripe.com:444/c/pay/cs_test_Ab12",
+            "https://checkout.stripe.com/c/pay/cs_live_Ab12", "https://checkout.stripe.com/c/pay/cs_test_", "https://checkout.stripe.com/c/pay/cs_test_Ab12/extra",
+            "https://checkout.stripe.com/c/pay/cs_test_Ab12\n", "file:///C:/Windows/notepad.exe"] {
+            assert!(checked_sandbox_checkout(value).is_err(), "Rejected {value}");
+        }
     }
     #[test]
     fn bad_signature_rejected() {

@@ -16,11 +16,11 @@
     "Legend",
     "Ascendant"
   ],
-  "triangles": 19348,
+  "triangles": 19400,
   "meshes": 95,
-  "glbBytes": 1141300,
-  "glbSha256": "ba0c627502c0ede5525cf9d08b16aa8d73e9b05252491a597a5e02a9baa0bebc",
-  "thumbnailBytes": 768768,
+  "glbBytes": 1150452,
+  "glbSha256": "e7599352720664692d90b43900fd30dea3aa43bb985a745a85ed1e03f2f1c2e0",
+  "thumbnailBytes": 767639,
   "source": "editable named geometry in blue-circuit-ranks.blend; exact registry read via Node",
   "contract": "ranked ELO only; 26 centered Y-up +Z crests; four materials; no texture or decoder dependencies"
 }

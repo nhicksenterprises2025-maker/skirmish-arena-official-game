@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "blender": "5.2.2 LTS",
+  "products": 35,
+  "appearances": 38,
+  "glbBytes": 3884516,
+  "triangles": 48064,
+  "source": "assets/25d/cosmetics/overclock-collection.blend",
+  "validation": {
+    "modelCheck": "dev/overclock-cosmetics-check.mjs",
+    "previewCheck": "dev/overclock-cosmetic-preview-check.cjs",
+    "faceCheck": "dev/overclock-face-preview-check.cjs",
+    "appearanceCount": 38,
+    "rigPoses": 3724,
+    "renderedOrientations": 912,
+    "gameCameraAppearances": 38,
+    "faceCloseups": 48,
+    "normalFacePreviews": 16,
+    "visualInspection": "All eight faces checked from front, three-quarter and profile; default headgear/face-cover and exposed heads checked at normal card scale. Palettes and headgear identities retained. Only eight helmet-off GLBs rebuilt; other27 product files and records unchanged."
+  }
+}

@@ -4,7 +4,8 @@ const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const root=path.resolve(__dirname,'..');
-const portable=fs.readFileSync(path.join(root,'dist/skirmish-launcher.exe'));
+const portablePath=path.resolve(process.argv[3]||path.join(root,'dist/skirmish-launcher.exe'));
+const portable=fs.readFileSync(portablePath);
 const installedPath=process.argv[2]||path.join(process.env.LOCALAPPDATA,'Skirmish Arena Reimagined/skirmish-launcher.exe');
 const installed=fs.readFileSync(installedPath);
 const unknown=Buffer.from('__TAURI_BUNDLE_TYPE_VAR_UNK');
@@ -15,4 +16,4 @@ assert.equal(portable.indexOf(unknown,marker+1),-1,'Only the known Tauri bundle 
 assert.equal(installed.subarray(marker,marker+nsis.length).equals(nsis),true,'NSIS should set Tauri’s bundle type to NSS');
 const expected=Buffer.from(portable);nsis.copy(expected,marker);
 assert.equal(installed.equals(expected),true,'The installed binary must match the tested code except for Tauri’s packaging marker');
-console.log(JSON.stringify({ok:true,installedExe:installedPath,installedSha256:crypto.createHash('sha256').update(installed).digest('hex'),portableSha256:crypto.createHash('sha256').update(portable).digest('hex'),codeBytesIdentical:true,packagingDifference:{marker:'__TAURI_BUNDLE_TYPE_VAR_',portable:'UNK',installed:'NSS',changedBytes:3,offset:marker+unknown.length-3}}));
+console.log(JSON.stringify({ok:true,installedExe:installedPath,portableExe:portablePath,installedSha256:crypto.createHash('sha256').update(installed).digest('hex'),portableSha256:crypto.createHash('sha256').update(portable).digest('hex'),codeBytesIdentical:true,packagingDifference:{marker:'__TAURI_BUNDLE_TYPE_VAR_',portable:'UNK',installed:'NSS',changedBytes:3,offset:marker+unknown.length-3}}));

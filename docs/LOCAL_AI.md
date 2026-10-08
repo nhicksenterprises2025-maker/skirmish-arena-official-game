@@ -1,3 +1,5 @@
+> Historical record: GPT-OSS and Messages were retired in ARENA REFINED Audit 1. The setup and tools below describe older releases and are not part of the current runtime. Continue maintenance in [arena-refined-audit.md](arena-refined-audit.md).
+
 # Local GPT-OSS messages — release 1.5.2
 
 The existing Messages tab uses your already-installed Ollama model `gpt-oss:20b`. The server probes `http://127.0.0.1:11434/api/tags` and submits structured, non-streaming `/api/chat` requests. There is no model download, remote account credential or placeholder dialogue. Run the included `Start-Game.cmd`, sign into your game account and open Settings → AI. The game and account database remain in their original locations.

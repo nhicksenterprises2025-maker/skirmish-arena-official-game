@@ -26,11 +26,13 @@ const server=http.createServer((req,res)=>{
   res.setHeader('content-type','text/javascript');res.end(`self.addEventListener('install',e=>e.waitUntil(self.skipWaiting()));self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('message',e=>{if(e.data.type==='GET_VERSION')e.source.postMessage({type:'SW_VERSION',version:'1.9.2',cache:'sar-shell-1.9.2-account-progression-3'});});self.addEventListener('fetch',e=>{if(new URL(e.request.url).pathname==='/boot.js')e.respondWith(new Response(${JSON.stringify(boot)},{headers:{'content-type':'text/javascript'}}));});`);return;
  }
  if(url.pathname==='/version.json'){res.setHeader('content-type','application/json');res.end(JSON.stringify({...release,version:mismatch?'1.8.0':release.version}));return;}
- if(url.pathname==='/api/status'){res.setHeader('content-type','application/json');res.end(JSON.stringify({ok:true,version:release.version,databaseSchema:5}));return;}
+ if(url.pathname==='/api/status'){res.setHeader('content-type','application/json');res.end(JSON.stringify({ok:true,version:release.version,databaseSchema:require('../server/db.cjs').LATEST_DB_SCHEMA}));return;}
  if(url.pathname==='/index.html'){
   res.setHeader('content-type','text/html');res.end('<!doctype html><body><script src="/boot.js"></script><main>LOBBY</main><script>window.__readyAt=0;window.__gameLoads=1;window.SAR={};window.SAR25D={diagnostics:()=>({assetState:"loading"})};addEventListener("sar:boot-ready",()=>__readyAt=Date.now());setTimeout(()=>SARBoot.gameReady(),'+indexDelay+');</script>');return;
  }
- if(url.pathname.startsWith('/assets/')){res.writeHead(503);res.end('Optional fixture asset unavailable');return;}
+ // The cosmetic catalog is essential shell metadata, unlike optional scenery,
+ // models and audio. Do not fault that required manifest in this fixture.
+ if(url.pathname.startsWith('/assets/')&&url.pathname!=='/assets/25d/cosmetics/manifest.json'){res.writeHead(503);res.end('Optional fixture asset unavailable');return;}
  if(url.pathname==='/desktop-entry.html')entryRequests++;
  const file=path.join(root,url.pathname);if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404);res.end();return;}
  res.setHeader('cache-control','no-store');res.setHeader('content-type',file.endsWith('.js')||file.endsWith('.mjs')?'text/javascript':file.endsWith('.css')?'text/css':file.endsWith('.json')?'application/json':'text/html');res.end(fs.readFileSync(file));
@@ -43,7 +45,8 @@ const server=http.createServer((req,res)=>{
  await page.goto(origin+'/desktop-entry.html');await page.waitForFunction(()=>window.__SAR_DESKTOP_LAUNCH_DIAGNOSTIC__);
  assert.equal(await page.evaluate(()=>typeof SARBoot.stage),'undefined','Must reproduce the real cached 1.9.2 boot API');
  const error=await page.evaluate(()=>window.__SAR_DESKTOP_LAUNCH_DIAGNOSTIC__);assert.equal(error.stage,'installed-release');assert.match(error.stack,/desktop-launch.js/);assert.match(error.message,/1.8.0/);
- mismatch=false;await page.locator('#retry').click();await page.waitForURL('**/index.html?*');
+ mismatch=false;await page.locator('#retry').click();
+ try{await page.waitForURL('**/index.html?*');}catch(error){const diagnostic=await page.evaluate(()=>({startup:window.__SAR_DESKTOP_LAUNCH_DIAGNOSTIC__||null,status:document.getElementById('status')?.textContent,boot:window.SARBoot?.getState?.()||null}));throw new Error(error.message+'\nIsolated desktop fixture: '+JSON.stringify(diagnostic));}
  await page.waitForTimeout(3300);assert.equal(await page.evaluate(()=>SARBoot.getState().closed),false,'Three seconds is not an initialization deadline');
  await page.waitForFunction(()=>window.__readyAt>0);const state=await page.evaluate(()=>({boot:SARBoot.getState(),readyAt:__readyAt,loads:__gameLoads,failed:window.__SAR_BOOT_FAILURE__||null}));
  assert.ok(state.readyAt-state.boot.started>=6500);assert.equal(state.loads,1);assert.equal(state.failed,null);assert.equal(entryRequests,2);

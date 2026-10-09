@@ -22,7 +22,7 @@ pub fn validate(record: &Value, expected: &Identity) -> Option<Status> {
         || !same_path(Path::new(record["databasePath"].as_str()?), &expected.database)
         || !same_path(Path::new(record["nodeExecutable"].as_str()?), &expected.node)
         || !same_path(Path::new(record["entryPath"].as_str()?), &expected.entry)
-        || !matches!(stage,"opening-database"|"snapshot"|"snapshot-verify"|"archive"|"archive-verify"|"migration-9"|"migration-10"|"listening"|"ready"|"failed") {
+        || !matches!(stage,"opening-database"|"snapshot"|"snapshot-verify"|"archive"|"archive-verify"|"migration-9"|"migration-10"|"migration-11"|"listening"|"ready"|"failed") {
         return None;
     }
     let artifact=record["artifactPath"].as_str().filter(|s|!s.is_empty()).map(PathBuf::from);
@@ -56,7 +56,7 @@ impl Watch {
             if status.stage!=self.stage {self.stage=status.stage.clone();self.stage_at=elapsed;self.last_activity=elapsed;self.bytes=0;changed=true;}
         }
         let heavy=matches!(self.stage.as_str(),"snapshot"|"snapshot-verify"|"archive"|"archive-verify");
-        let applying=matches!(self.stage.as_str(),"migration-9"|"migration-10");
+        let applying=matches!(self.stage.as_str(),"migration-9"|"migration-10"|"migration-11");
         self.migrated|=heavy||applying;
         if activity.cpu>self.activity.cpu || activity.io>self.activity.io || bytes>self.bytes {self.last_activity=elapsed;}
         // A temporary marker read failure must not reset counters and turn an
@@ -126,9 +126,18 @@ pub fn process_activity(_pid:u32,_node:&Path)->Option<Activity> {None}
         let mut expired=status("snapshot");expired.stage_age=Duration::from_secs(901);
         assert!(Watch::new(15).observe(Duration::ZERO,Some(&expired),Activity{cpu:99,..Activity::default()},0).unwrap_err().contains("Existing"));
     }
+    #[test] fn schema11_reset_requires_verified_progress_and_keeps_the_migration_bound() {
+        let mut watch=Watch::new(15);let reset=status("migration-11");
+        for second in 0..121 {watch.observe(Duration::from_secs(second),Some(&reset),Activity{cpu:second+1,..Activity::default()},0).unwrap();}
+        assert_eq!(watch.stage(),"migration-11");
+        assert!(watch.observe(Duration::from_secs(121),Some(&reset),Activity{cpu:999,..Activity::default()},0).unwrap_err().contains("bounded migration-11"));
+        let mut silent=Watch::new(15);silent.observe(Duration::ZERO,Some(&reset),Activity::default(),0).unwrap();
+        assert!(silent.observe(Duration::from_secs(61),Some(&reset),Activity::default(),0).unwrap_err().contains("migration-11"));
+    }
     #[test] fn marker_requires_the_exact_attempt_process_paths_database_and_release() {
         let base=std::env::temp_dir().join("sar-progress-test");let id=Identity{pid:42,attempt:"a".repeat(32),version:"1.13.0".into(),database:base.join("data/world.sqlite"),node:base.join("node.exe"),entry:base.join("server/desktop-service.cjs"),origin:"http://127.0.0.1:8803".into(),created:1};
         let good=json!({"schema":1,"pid":id.pid,"attempt":id.attempt,"version":id.version,"databasePath":id.database,"nodeExecutable":id.node,"entryPath":id.entry,"origin":id.origin,"stage":"snapshot","artifactPath":base.join("data/world.sqlite.pre-schema8-proof.sqlite")});assert!(validate(&good,&id).is_some());
+        let mut reset=good.clone();reset["stage"]=json!("migration-11");assert!(validate(&reset,&id).is_some());reset["stage"]=json!("migration-999");assert!(validate(&reset,&id).is_none());
         for (key,value) in [("pid",json!(43)),("attempt",json!("b".repeat(32))),("version",json!("1.8.0")),("databasePath",json!(base.join("other.sqlite"))),("nodeExecutable",json!(base.join("other.exe"))),("entryPath",json!(base.join("other.cjs"))),("origin",json!("http://127.0.0.1:8804")),("artifactPath",json!(base.join("outside/pre-schema.sqlite")))] {let mut bad=good.clone();bad[key]=value;assert!(validate(&bad,&id).is_none(),"{key}");}
     }
     #[cfg(windows)]

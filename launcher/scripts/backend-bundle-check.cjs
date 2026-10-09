@@ -5,8 +5,15 @@ const launcher=path.resolve(__dirname,'..'),release=path.resolve(launcher,'..'),
 const shell=JSON.parse(fs.readFileSync(path.join(bundle,'desktop-shell.json'),'utf8'));
 const integrity=JSON.parse(fs.readFileSync(path.join(bundle,'desktop-integrity.json'),'utf8'));
 const nativeBackend=fs.readFileSync(path.join(launcher,'src-tauri/src/backend.rs'),'utf8');
-assert.equal(Number(nativeBackend.match(/const DATABASE_SCHEMA: u64 = (\d+);/)?.[1]),require(path.join(bundle,'server/db.cjs')).LATEST_DB_SCHEMA,'Native health/handoff contract must match the packaged database schema');
-assert.equal(Number(fs.readFileSync(path.join(bundle,'desktop-launch.js'),'utf8').match(/health\.databaseSchema!==(\d+)/)?.[1]),require(path.join(bundle,'server/db.cjs')).LATEST_DB_SCHEMA,'Desktop preflight must match the packaged database schema');
+const packagedSchema=require(path.join(bundle,'server/db.cjs')).LATEST_DB_SCHEMA;
+const packagedVersion=JSON.parse(fs.readFileSync(path.join(bundle,'version.json'),'utf8'));
+const packagedPreflight=fs.readFileSync(path.join(bundle,'desktop-launch.js'),'utf8');
+assert.equal(Number.isInteger(packagedVersion.databaseSchema)&&packagedVersion.databaseSchema>0,true,'Packaged release must declare its database schema');
+assert.equal(packagedVersion.databaseSchema,packagedSchema,'Installed release metadata must match its actual backend schema');
+assert.equal(Number(nativeBackend.match(/const DATABASE_SCHEMA: u64 = (\d+);/)?.[1]),packagedSchema,'Native health/handoff contract must match the packaged database schema');
+assert.match(packagedPreflight,/const expectedSchema=version\.databaseSchema;/,'Installed preflight must read the packaged release schema');
+assert.match(packagedPreflight,/health\.databaseSchema!==expectedSchema/,'Installed preflight must enforce the exact packaged schema');
+assert.match(packagedPreflight,/Number\.isInteger\(expectedSchema\)/,'Invalid installed schema metadata must fail preflight');
 assert.ok(shell.includes('desktop-entry.html'),'Fresh native bootstrap entry must ship with the backend');
 assert.ok(shell.includes('phone-ui.js')&&shell.includes('phone-ui.css'),'Retained Phone shell must ship');
 assert.ok(shell.includes('mode-entry.js'),'Required match-entry controller must ship');

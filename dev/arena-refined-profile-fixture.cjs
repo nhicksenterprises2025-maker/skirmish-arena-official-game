@@ -52,6 +52,6 @@ function profileFixture(participantId='audit9-profile-fixture',source){
  for(const [key,value]of Object.entries({kills:12,deaths:12,damage:2500,shots:42,hits:33,headshots:1,equippedTime:55})){deathmatch.meta['AR-15'][key]+=value;legacy[key]+=value;}
  deathmatch.recentMatches=[{matchId:dm.id,mode:'deathmatch',sessionType:'standard',eligible:true,practice:false,endedAtWall:dm.at,winnerIds:[2],rows:dmRows}];
  XP.validate(world.progression);XP.validateRanked(world.ranked);
- return {world,participantId,now,rows,expected:{combined:{games:3,wins:2,losses:1,draws:0,kills:32,deaths:15,assists:10,damage:5200,headshots:7,shots:130,hits:59},ranked:{games:1,wins:1,losses:0,draws:0,kills:18,deaths:2,assists:7,damage:3800,headshots:4,shots:20,hits:10}}};
+ return {world,participantId,now,rows,expected:{combined:{games:3,wins:2,losses:1,draws:0,kills:32,deaths:15,assists:10,damage:5200,taken:null,headshots:7,shots:130,hits:59,timeAlive:165,timePlayed:null},ranked:{games:1,wins:1,losses:0,draws:0,kills:18,deaths:2,assists:7,damage:3800,taken:null,headshots:4,shots:20,hits:10,timeAlive:100,timePlayed:null}}};
 }
 module.exports={profileFixture,clone};

@@ -3,7 +3,7 @@
 // It never appears in the HTTP API and contains no account data or credentials.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const version=require('../version.json').version;
-const STAGES=new Set(['opening-database','snapshot','snapshot-verify','archive','archive-verify','migration-9','migration-10','listening','ready','failed']);
+const STAGES=new Set(['opening-database','snapshot','snapshot-verify','archive','archive-verify','migration-9','migration-10','migration-11','listening','ready','failed']);
 let active=null;
 const same=(a,b)=>path.resolve(a).toLowerCase()===path.resolve(b).toLowerCase();
 function begin({databasePath,serviceRoot,origin,entryPath}){

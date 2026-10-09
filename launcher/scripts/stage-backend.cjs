@@ -44,7 +44,7 @@ shell.push('theme.css','skyline.css','phone-apps.css','skyline-tournaments.css',
 const audioManifest=JSON.parse(fs.readFileSync(path.join(release,'assets/audio/LICENSES.json'),'utf8'));
 shell.push('profile-stats.js','distance-units.js');
 shell.push('fonts.css','blue-circuit.css','assets/fonts/Inter-Variable.ttf','assets/fonts/Oxanium-Variable.ttf','assets/fonts/Inter-OFL.txt','assets/fonts/Oxanium-OFL.txt','assets/fonts/README.md','assets/fonts/manifest.json','assets/25d/ranks/manifest.json','assets/25d/ranks/blue-circuit-ranks.glb');
-shell.push('commerce.js','commerce.css','cosmetics-25d.mjs','assets/25d/cosmetics/manifest.json');
+shell.push('commerce.js','commerce.css','refined-ui.css','cosmetics-25d.mjs','assets/25d/cosmetics/manifest.json');
 const cosmetics=JSON.parse(fs.readFileSync(path.join(release,'assets/25d/cosmetics/manifest.json'),'utf8'));
 const cosmeticFiles=new Set();
 for(const item of Object.values(cosmetics.cosmetics||{}))for(const style of Object.values(item.styles||{})){

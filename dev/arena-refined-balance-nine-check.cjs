@@ -7,7 +7,7 @@ const beforeDir=process.env.ARENA_REFINED_AUDIT4_BEFORE||path.join(os.homedir(),
 const oldSource=fs.readFileSync(path.join(beforeDir,'game.js'),'utf8'),previous=JSON.parse(fs.readFileSync(path.join(beforeDir,'balance-8.0-authoritative.json'),'utf8'));
 const preferred=Number(process.argv[2]);
 assert.ok(Number.isFinite(preferred)&&preferred>0,'Pass the explicitly supplied FAL PreferredWorld as the first argument. Do not infer it.');
-const exposed=source.replace('window.SAR = {','window.__NINE={PRIMARYS,SIDEARMS,coverageState,chooseCoverageWeapon,chooseBotPrimary,weaponSheet,weaponDisplayMetrics,loadoutCard,weaponDescription,makeWeaponState,updateBurst,effectiveSpreadDeg,updateCrosshairVisual,damageAtRange,recordParticipantEvent,recordParticipantCompletion,recordPatchEvent,commitMatchXP,WEAPON_PATCH_NOTES};window.SAR = {');
+const exposed=source.replace('window.SAR = {','window.__NINE={PRIMARYS,SIDEARMS,coverageState,underSampledWeaponBoost,chooseBotPrimary,weaponSheet,weaponDisplayMetrics,loadoutCard,weaponDescription,makeWeaponState,updateBurst,effectiveSpreadDeg,updateCrosshairVisual,damageAtRange,recordParticipantEvent,recordParticipantCompletion,recordPatchEvent,commitMatchXP,WEAPON_PATCH_NOTES};window.SAR = {');
 const make=(storage={},options={})=>engine(storage,exposed,options),clone=value=>JSON.parse(JSON.stringify(value)),near=(a,b,label='')=>assert.ok(Math.abs(a-b)<1e-8,label+': '+a+' != '+b);
 const checks=[],pass=test=>{checks.push(test);console.log('PASS '+test);};
 const fields=['type','role','auto','damage','head','spread','walkSpread','sprintSpread','adsSpread','falloffStart','falloff','speed','hitSpeed','mag','reserve','reload','pellets','burstCount','preferred'];
@@ -48,7 +48,10 @@ pass('Every supplied value is exact; all other prior weapon fields and source-un
  const f=make(),d=f.context.__NINE,{state,SAVE}=f.dev.inspect();assert.ok(d.PRIMARYS.includes('FAL'));assert.ok(!d.SIDEARMS.includes('FAL'));
  for(const b of Object.values(SAVE.bots)){assert.equal(b.familiarity.FAL,0);assert.ok(b.career.weaponUsage.FAL);}
  const coverage=d.coverageState();coverage.assignments=0;for(const name of d.PRIMARYS)coverage.counts[name]=name==='FAL'?0:99;
- const bot=state.actors.find(a=>!a.isPlayer&&!a.sandbox&&a.matchId===0);assert.equal(d.chooseCoverageWeapon(bot),'FAL');assert.equal(d.chooseBotPrimary(bot,'match'),'FAL');assert.equal(coverage.counts.FAL,1);
+ const bot=state.actors.find(a=>!a.isPlayer&&!a.sandbox&&a.matchId===0),empty={m:f.dev.blankWeaponMeta('FAL')},boost=d.underSampledWeaponBoost('FAL',empty,'DISCOVERY',1);
+ assert.ok(boost>d.underSampledWeaponBoost('AR-15',{m:f.dev.blankWeaponMeta('AR-15')},'DISCOVERY',1)&&boost<=5,'Under-sampled FAL receives bounded probability, never a forced winner');
+ assert.ok(Array.from({length:200},()=>d.chooseBotPrimary(bot,'life')).includes('FAL'),'Real weighted bot selection samples the registered FAL');
+ const picked=d.chooseBotPrimary(bot,'match');assert.ok(d.PRIMARYS.includes(picked));assert.equal(coverage.counts[picked],picked==='FAL'?1:100);
  assert.equal(f.dev.botTacticalRange('FAL'),preferred);assert.ok(f.dev.currentMetaRows().some(row=>row.name==='FAL'));assert.ok(!SAVE.progression.usedWeapons.includes('FAL'));
 }
 pass('FAL registers as a primary, enters actual bot coverage/selection and meta, initializes familiarity, and uses the explicitly supplied bot range without fabricating first use');

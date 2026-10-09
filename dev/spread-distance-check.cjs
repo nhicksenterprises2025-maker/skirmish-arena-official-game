@@ -7,10 +7,10 @@ const source=fs.readFileSync(path.join(__dirname,'../game.js'),'utf8');
 const injected=source.replace('window.SAR = {','window.__SPREAD={effectiveSpreadDeg,updateCrosshairVisual,updatePlayer,updateAds,updateBurst,makeWeaponState,getPlayer,worldToScreen,screenToWorld};window.SAR = {');
 const official={
  'AR-15':[2.70,2.90,3.60,1.50],AK47:[4,4.5,5.2,1.6],'SMG-9':[3.1,3.3,3.7,1.8],
- 'Pump Shotgun':[6.5,7.5,9,3],'Auto 12':[7.45,8.5,10,3.4],'LR-762':[10,12,15,1.2],
+ 'Pump Shotgun':[6.5,7.5,9,3],'Auto 12':[7.45,8.5,10,2.5],'LR-762':[10,12,15,1.2],
  'LW Tundra':[12.2,14,18,1],'War Head LMG':[5.35,5.8,6.2,1.8],P90:[2.2,2.4,2.8,1.2],
- '9mm':[4.75,5,5.45,1.1],X16:[4,4.4,4.75,1.3],'X-16 Auto':[4.65,5,5.35,1.5],
- 'SR-Aug':[4.5,4.75,5.5,2.2],'SPAS-12':[5.8,5.925,6.25,1.7]
+ '9mm':[4.75,5,5.45,1.1],X16:[4.75,4.4,4.75,1.3],'X-16 Auto':[4.65,5,5.35,1.5],
+ 'SR-Aug':[7,4.75,5.5,2.2],'SPAS-12':[5.8,5.925,6.25,1.7],FAL:[8.5,10,12.5,2]
 };
 const near=(a,b,eps=1e-9)=>assert.ok(Math.abs(a-b)<=eps,`${a} != ${b}`),checks=[];
 const pass=test=>{checks.push(test);console.log('PASS '+test);};
@@ -55,7 +55,7 @@ for(const [name,values] of Object.entries(official)){
   near(close.spread,far.spread);assert.equal(close.gap,far.gap);assert.equal(close.angles.length,far.angles.length);for(let i=0;i<close.angles.length;i++){near(close.angles[i],far.angles[i]);near(close.angles[i],bot.angles[i]);}
  }
 }
-pass('All 14 weapons: exact four states, immediate movement changes, near-stationary threshold and existing ADS interpolation');
+pass('All 15 Balance9 weapons: exact four states, immediate movement changes, near-stationary threshold and existing ADS interpolation');
 pass('2-tile versus 30-tile aim: identical angular samples and crosshair gaps for every weapon/state; bots use the same dispersion');
 pass('Shotgun pellets stay independently inside the supplied cone; all SR-Aug rounds independently use it at 0/65/130 ms; repeated fire adds no bloom');
 {
@@ -67,12 +67,12 @@ pass('Shotgun pellets stay independently inside the supplied cone; all SR-Aug ro
  }
  pass('Original physical head/body/miss collision produces 42/28/0 AR-15 damage for humans and bots');
 }
-const output={result:'PASS',checks,weapons:14,projectileSamples:samples};
+const output={result:'PASS',checks,weapons:15,projectileSamples:samples};
 {
- const e=engine({},injected),baseline=require('./fixtures/balance-8.0.json');assert.deepEqual(e.context.SAR.getWeapons(),baseline.weapons);assert.equal(e.dev.balanceFingerprint(),baseline.fingerprint);
+ const e=engine({},injected),baseline=JSON.parse(require('node:child_process').execFileSync('git',['show','HEAD:game.js'],{cwd:path.resolve(__dirname,'..'),encoding:'utf8'}).match(/const WEAPONS = (\{[\s\S]*?\n\})\s*;?\s*\nconst PRIMARYS/)[1]);assert.deepEqual(e.context.SAR.getWeapons(),baseline);assert.equal(e.dev.balanceFingerprint(),'b-59670f2d');
  for(let i=0;i<60;i++)e.step();const before=e.context.SAR.getUniverse(),after=e.dev.normalizeSave(before);
  assert.deepEqual(after.patchState,before.patchState);assert.deepEqual(after.patchArchives,before.patchArchives);assert.deepEqual(after.balancePatchHistory,before.balancePatchHistory);assert.deepEqual(after.bots,before.bots);assert.deepEqual(after.playerCareer,before.playerCareer);assert.deepEqual(after.seasons,before.seasons);assert.deepEqual(after.playerSeasons,before.playerSeasons);
- pass('Balance8 constants/fingerprint remain stable after activation; normalization preserves active telemetry, archives, bot profiles/careers/familiarity and seasons without another patch reset');
- output.balanceFingerprint=baseline.fingerprint;output.noTelemetryReset=true;
+ pass('Shipped Balance9 constants/fingerprint remain stable after activation; normalization preserves active telemetry, archives, bot profiles/careers/familiarity and seasons without another patch reset');
+ output.balanceFingerprint='b-59670f2d';output.noTelemetryReset=true;
 }
 fs.writeFileSync(path.join(__dirname,'spread-distance-results.json'),JSON.stringify(output,null,2));

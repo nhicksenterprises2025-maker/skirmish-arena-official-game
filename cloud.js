@@ -68,6 +68,38 @@
       for(const name of names)if(archived(name,local(name)))removeLocal(name);
     }
     async function retireDraftsSafely(){try{await archiveRetiredDrafts();}catch(failure){console.warn('Saved reply draft retirement deferred; original data retained.',failure.message);}}
+    async function archiveTournamentReset(owner,generation){
+      await ready;
+      const marker='sar.tournament.reset.'+owner,archiveKey='sar-tournament-reset-backup-'+owner+'-'+generation;
+      if((values.has(marker)?values.get(marker):local(marker))===generation)return false;
+      const scoped=key=>key==='sar.tournament.calendar.'+owner||key==='sar.tournament.pending.'+owner||key.startsWith('sar.tournament.pending.'+owner+'.retained.')||key.startsWith('sar.tournament.runtime.'+owner+'.');
+      const source=new Map();for(let index=0;index<localStorage.length;index++){const key=localStorage.key(index);if(scoped(key))source.set(key,local(key));}for(const[key,value]of values)if(scoped(key)&&value!==null)source.set(key,value);
+      const localOriginals=new Map([...source].map(([key])=>[key,local(key)]));
+      if(db){
+        await flush();
+        let committed;
+        await new Promise((resolve,reject)=>{
+          let failure;const tx=db.transaction('entries','readwrite'),store=tx.objectStore('entries'),request=store.get(archiveKey);
+          request.onsuccess=()=>{try{
+            const archive=request.result?.value||{schema:1,owner,generation,retiredAt:Date.now(),entries:[]};
+            if(archive.schema!==1||archive.owner!==owner||archive.generation!==generation||!Array.isArray(archive.entries))throw new Error('Tournament recovery archive needs inspection.');
+            const reads=[...source.keys()].map(key=>new Promise(done=>{const entry=store.get(key);entry.onsuccess=()=>{if(entry.result)source.set(key,entry.result.value);done();};entry.onerror=()=>{failure=entry.error;tx.abort();};}));
+            // IndexedDB callbacks/microtasks finish inside this same transaction.
+            Promise.all(reads).then(()=>{try{for(const[key,value]of source){archive.entries.push({key,value:structuredClone(value)});store.delete(key);}committed=archive;store.put({key:archiveKey,value:archive});store.put({key:marker,value:generation});}catch(error){failure=error;tx.abort();}});
+          }catch(error){failure=error;tx.abort();}};
+          tx.oncomplete=resolve;tx.onerror=tx.onabort=()=>reject(failure||tx.error||new Error('Tournament recovery archive could not commit.'));
+        });
+        const verified=await new Promise((resolve,reject)=>{const tx=db.transaction('entries','readonly'),request=tx.objectStore('entries').get(archiveKey);request.onsuccess=()=>resolve(request.result?.value);request.onerror=()=>reject(request.error);});
+        if(!verified||verified.owner!==owner||verified.generation!==generation||source.size&&source.size>verified.entries.length)throw new Error('Tournament recovery archive verification failed.');
+        values.set(archiveKey,committed);values.set(marker,generation);for(const key of source.keys()){values.delete(key);dirty.delete(key);}
+      }else{
+        const archive={schema:1,owner,generation,retiredAt:Date.now(),entries:[...source].map(([key,value])=>({key,value}))},serialized=JSON.stringify(archive);
+        localStorage.setItem(archiveKey,serialized);if(local(archiveKey)!==serialized)throw new Error('Tournament recovery archive verification failed.');
+        localStorage.setItem(marker,generation);if(local(marker)!==generation)throw new Error('Tournament reset marker could not be saved.');
+      }
+      for(const[key,original]of localOriginals)if(local(key)===original)removeLocal(key);
+      return true;
+    }
     const ready=(async()=>{
       if(!window.indexedDB){await retireDraftsSafely();return;}
       try{
@@ -81,7 +113,7 @@
         await retireDraftsSafely();
       }catch(failure){error=failure;throw failure;}
     })();
-    return {ready,flush,get error(){return error?.message||null;},
+    return {ready,flush,archiveTournamentReset,get error(){return error?.message||null;},
       get(key){return values.has(key)?values.get(key):local(key);},
       // Tournament checkpoints retain cyclic actor/projectile references and
       // Maps through IndexedDB's structured clone, independently of world JSON.
@@ -104,6 +136,12 @@
   function localSet(key,value){return storage.set(key,value);}
   function localRemove(key){storage.remove(key);}
   function readJSON(key){try{return JSON.parse(localGet(key));}catch{return null;}}
+  async function applyTournamentReset(generation){
+    if(!state.account||typeof generation!=='string'||!/^[a-z0-9-]{1,100}$/.test(generation))return false;
+    state.tournamentResetId=generation;
+    try{const changed=await storage.archiveTournamentReset(state.account.id,generation);state.tournamentResetBlocked=false;if(changed)window.SARTournaments?.resetForUpdate?.();return changed;}
+    catch(error){state.tournamentResetBlocked=true;window.SARTournaments?.resetForUpdate?.({blocked:true});console.warn('Tournament recovery is preserved; reset cleanup will retry.',error.message);return false;}
+  }
   function nativeLocalBackend(){return !!window.__SAR_NATIVE_GAME__&&typeof window.__TAURI__?.core?.invoke==='function'&&['127.0.0.1','localhost','[::1]'].includes(location.hostname);}
   function rememberAccount(){
     if(!state.account)return;
@@ -193,7 +231,8 @@
   async function cloudWorld(){
     if(state.loaded&&state.reauthNeeded)state.replacing=true;
     const body=await api('/world');let world=body.world;
-    if(Array.isArray(body.tournamentReservations)){state.tournamentReservations=body.tournamentReservations;const key='sar.tournament.calendar.'+state.account.id;let cached={};try{cached=JSON.parse(localGet(key)||'{}')||{};}catch{}const retained=(Array.isArray(cached.tournaments)?cached.tournaments:[]).filter(t=>t.kind!=='official'||t.status!=='ACTIVE');localSet(key,JSON.stringify({...cached,tournaments:[...retained,...body.tournamentReservations]}));}
+    await applyTournamentReset(body.tournamentResetId);
+    if(Array.isArray(body.tournamentReservations)&&!state.tournamentResetBlocked){state.tournamentReservations=body.tournamentReservations;const key='sar.tournament.calendar.'+state.account.id;let cached={};try{cached=JSON.parse(localGet(key)||'{}')||{};}catch{}const incoming=new Set(body.tournamentReservations.map(t=>t.id)),retained=(Array.isArray(cached.tournaments)?cached.tournaments:[]).filter(t=>!incoming.has(t.id)&&(body.tournamentResetId?!Array.isArray(t.scheduling?.reservations)||!t.scheduling.reservations.length:t.kind!=='official'||t.status!=='ACTIVE'));localSet(key,JSON.stringify({...cached,tournaments:[...retained,...body.tournamentReservations]}));}
     const rawPending=localGet(PENDING_KEY);
     if(rawPending){
       try{
@@ -389,6 +428,7 @@
         // a connection returning between the usual two-second save intervals.
         if(window.SAR?.getUniverse)queueSave(window.SAR.getUniverse());
         const result=await api('/world'),world=result.world,remoteRevision=world?.revision||0;
+        await applyTournamentReset(result.tournamentResetId);
         const pending=readJSON(PENDING_KEY);
         if(state.unknownRevision||remoteRevision!==(pending?.baseRevision??state.revision)){
           if(state.dirty)localSet('sar-cloud-conflict-backup',state.dirty);
@@ -425,6 +465,6 @@
       }
     }
   }
-  window.SARCloud={state,queueSave,commitMatch,flush,checkpoint,importWorld,logout,showProfile,showTournaments,api,now,reconnect};
+  window.SARCloud={state,queueSave,commitMatch,flush,checkpoint,importWorld,logout,showProfile,showTournaments,api,now,reconnect,applyTournamentReset};
   boot();
 })();

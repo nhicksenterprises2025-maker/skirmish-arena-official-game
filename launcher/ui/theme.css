@@ -1,22 +1,27 @@
-/* SKYLINE shared interface palette. World materials and cosmetic palettes are independent. */
+/* Shared application palette; world and cosmetic materials stay independent. */
 :root{
+  color-scheme:dark;
+  --arena-background:#0B1712;--arena-surface:#13251D;--arena-elevated:#1A3026;--arena-card:#20392C;
+  --arena-stage:#101E17;--arena-border:#355241;--arena-accent:#88AD70;--arena-active:#ADCD91;
+  --arena-text:#F1F3E9;--arena-muted:#A9B7A8;--arena-warning:#D4A35E;--arena-error:#D66D63;
+  --arena-space-1:8px;--arena-space-2:16px;--arena-space-3:24px;--arena-space-4:32px;--arena-motion:150ms;
   --arena-hud-panel:#1B241F;--arena-hud-border:#47534B;--arena-hud-text:#EDF1E9;
-  --sky-background:#101C2A;--sky-background-rgb:16 28 42;
-  --sky-surface-dark:#192C40;--sky-surface-dark-rgb:25 44 64;
-  --sky-surface-raised:#25425D;--sky-surface-raised-rgb:37 66 93;
-  --sky-surface-light:#EDF4FA;--sky-surface-light-rgb:237 244 250;
-  --sky-panel-light:#DFEBF5;--sky-panel-light-rgb:223 235 245;
-  --sky-panel-mid:#C5D9E8;--sky-panel-mid-rgb:197 217 232;
-  --sky-accent:#79C5F3;--sky-accent-rgb:121 197 243;
-  --sky-accent-hover:#A7DEFF;--sky-accent-hover-rgb:167 222 255;
-  --sky-text-light:#192E42;--sky-text-light-rgb:25 46 66;
-  --sky-text-dark:#F0F7FC;--sky-text-dark-rgb:240 247 252;
-  --sky-muted-light:#4C657A;--sky-muted-light-rgb:76 101 122;
-  --sky-muted-dark:#A4BED3;--sky-muted-dark-rgb:164 190 211;
-  --sky-border:#9CB2C5;--sky-border-rgb:156 178 197;
-  --sky-border-dark:#37556F;--sky-border-dark-rgb:55 85 111;
-  --sky-link:#245D83;--sky-link-rgb:36 93 131;
-  --sky-red:#F08A87;--sky-error:#9E3945;
+  --sky-background:var(--arena-background);--sky-background-rgb:11 23 18;
+  --sky-surface-dark:var(--arena-surface);--sky-surface-dark-rgb:19 37 29;
+  --sky-surface-raised:var(--arena-elevated);--sky-surface-raised-rgb:26 48 38;
+  --sky-surface-light:var(--arena-surface);--sky-surface-light-rgb:19 37 29;
+  --sky-panel-light:var(--arena-stage);--sky-panel-light-rgb:16 30 23;
+  --sky-panel-mid:var(--arena-card);--sky-panel-mid-rgb:32 57 44;
+  --sky-accent:var(--arena-accent);--sky-accent-rgb:136 173 112;
+  --sky-accent-hover:var(--arena-active);--sky-accent-hover-rgb:173 205 145;
+  --sky-text-light:var(--arena-text);--sky-text-light-rgb:241 243 233;
+  --sky-text-dark:var(--arena-text);--sky-text-dark-rgb:241 243 233;
+  --sky-muted-light:var(--arena-muted);--sky-muted-light-rgb:169 183 168;
+  --sky-muted-dark:var(--arena-muted);--sky-muted-dark-rgb:169 183 168;
+  --sky-border:var(--arena-border);--sky-border-rgb:53 82 65;
+  --sky-border-dark:var(--arena-border);--sky-border-dark-rgb:53 82 65;
+  --sky-link:var(--arena-active);--sky-link-rgb:173 205 145;
+  --sky-red:var(--arena-error);--sky-error:var(--arena-error);
   --ink:var(--sky-text-light);--muted:var(--sky-muted-light);--panel:var(--sky-surface-light);
   --line:var(--sky-border);--accent:var(--sky-accent);--accent2:var(--sky-accent-hover);
   --field-dark:var(--sky-background);--field-mid:var(--sky-surface-dark);

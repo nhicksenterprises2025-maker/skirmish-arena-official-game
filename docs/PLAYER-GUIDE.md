@@ -1,6 +1,6 @@
 # Skirmish Arena
 
-**1.13.0 — ARENA REFINED · Weapon Balance 9.0**
+**1.14.0 — ARENA REFINED · Weapon Balance 9.0**
 
 Application updates and weapon balance have separate version numbers. Arena Refined brings together all ten audits while retaining existing accounts and progress.
 
@@ -46,7 +46,7 @@ Open your username menu for **Profile**, **Settings**, **Account** and **Logout*
 
 Click your 3D ranked emblem in the lobby, profile or ranked result to inspect your actual ranked statistics, current ELO progress and complete ranked ladder. **Back** returns to the screen you opened it from. Profiles retain Team Deathmatch and Deathmatch and add **Ranked Stats** and **Combined Stats**. Choose lifetime records or a saved season; the displayed current ELO remains your lifetime competitive rating.
 
-Ranked Stats includes eligible Ranked TDM only. Combined Stats includes casual TDM, casual Deathmatch and Ranked TDM, counting each completed match once. Official tournaments, custom matches and practice are excluded. K/D, accuracy and win rate use raw totals. Older missing match details or shot measurements are marked unavailable; existing mode careers remain intact. Eligible results refresh the relevant tabs immediately and persist through offline play and reconnection.
+Ranked Stats includes eligible Ranked TDM only. Combined Stats includes casual TDM, casual Deathmatch, Ranked and accepted official tournament games, counting each completed match once. Custom matches, custom tournaments, practice and test sessions are excluded. K/D, accuracy and win rate use raw totals. Older missing match details or shot measurements are marked unavailable; source careers and tournament records remain separate. Eligible results refresh the relevant tabs immediately and persist through offline play and reconnection.
 
 Season pages show the current competition and previous results. **Weapon Meta** separates primary weapons and sidearms and supports sorting. Select a weapon to inspect its model, detailed measurements and leading bot users.
 
@@ -70,7 +70,9 @@ The tournament Calendar lists real official and custom events with local start t
 
 Official events recur every **three calendar days at 7:30 PM Eastern (America/New_York)**, following daylight saving. Calendar dates follow the existing event sequence. The local account service owns the persistent schedule; it cannot run while Windows is off. Events whose playable windows were missed are cancelled without invented scores or rewards. Custom tournaments retain their creator's date and time.
 
-Each tournament has eight teams of five participants. Quarterfinals and semifinals use **3-game aggregate kills**; finals use **5-game aggregate kills**. Every game is played, and the higher total team kills advances. Individual game wins do not determine advancement. Games retain their 50-kill target, five-minute limit and existing in-game tie rule. Equal aggregate kills use total team damage; an exact damage tie holds advancement for an explicit ruling. Historical tournaments retain their recorded format. Register a team and invite eligible bots, who may accept or decline.
+Each tournament has eight teams of five participants. Quarterfinals and semifinals use **3-game aggregate kills**; finals use **5-game aggregate kills**. Every game is played, and the higher total team kills advances. Individual game wins do not determine advancement. Games retain their 50-kill target, five-minute limit and existing in-game tie rule. Equal aggregate kills use total team damage; an exact damage tie holds advancement for an explicit ruling. Historical tournaments retain their recorded format. Register a team and invite eligible bots, who may accept or decline. Before check-in, vacant positions and teams fill automatically with eligible bots from the real persistent roster; automated filling does not require an invitation response.
+
+The scheduler reserves tournament bots seven minutes before an official event so their current background matches can finish. A genuine shortage is shown as a roster conflict. Standard custom tournaments use the same check-in and no-show rules, with their own start time and subsequent games opening after the prior result. The update retires incomplete tournament state once with recoverable records; completed official history and shared account progress remain intact.
 
 | Round | Preparation/check-in opens for each game (Eastern) | Latest round finish |
 | --- | --- | --- |

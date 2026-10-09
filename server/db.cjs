@@ -6,7 +6,7 @@ const {DatabaseSync}=require('node:sqlite');
 const startup=require('./startup-status.cjs');
 
 const MIGRATIONS=path.join(__dirname,'migrations');
-const LATEST_DB_SCHEMA=10;
+const LATEST_DB_SCHEMA=11;
 const isoNow=()=>Date.now();
 const encoded=value=>JSON.stringify(value??{});
 
@@ -17,6 +17,7 @@ function createDatabase(file=process.env.SAR_DB_PATH||path.join(__dirname,'data'
   if(file!==':memory:')db.exec('PRAGMA journal_mode=WAL');
   let version=db.prepare('PRAGMA user_version').get().user_version;
   if(version>LATEST_DB_SCHEMA){db.close();throw new Error('Database requires a newer Skirmish server');}
+  let recoveryFile=null;
   if(version>0&&version<LATEST_DB_SCHEMA&&file!==':memory:'){
     // VACUUM INTO takes a consistent SQLite snapshot, including committed WAL
     // pages even when an older reader prevents checkpointing the main file.
@@ -27,10 +28,11 @@ function createDatabase(file=process.env.SAR_DB_PATH||path.join(__dirname,'data'
       const fd=fs.openSync(backup,'r+');try{fs.fsyncSync(fd);}finally{fs.closeSync(fd);}
       startup.forDatabase(file,'snapshot-verify',{artifactPath:path.resolve(backup)});
       const verify=new DatabaseSync(backup,{readOnly:true});try{if(verify.prepare('PRAGMA integrity_check').get().integrity_check!=='ok'||verify.prepare('PRAGMA user_version').get().user_version!==version)throw new Error('Pre-migration backup failed verification');}finally{verify.close();}
+      recoveryFile=path.resolve(backup);
     }catch(error){db.close();startup.forDatabase(file,'failed');throw error;}
   }
   for(let next=version+1;next<=LATEST_DB_SCHEMA;next++){
-    const name=String(next).padStart(3,'0')+({1:'_core.sql',2:'_social.sql',3:'_local_ai.sql',4:'_live_circuit.sql',5:'_tactical_instinct.sql',6:'_overclock_commerce.sql',7:'_overclock_payments.sql',8:'_sandbox_skin_offer.sql',9:'_retire_messages.sql',10:'_tournament_cancellation.sql'}[next]);
+    const name=String(next).padStart(3,'0')+({1:'_core.sql',2:'_social.sql',3:'_local_ai.sql',4:'_live_circuit.sql',5:'_tactical_instinct.sql',6:'_overclock_commerce.sql',7:'_overclock_payments.sql',8:'_sandbox_skin_offer.sql',9:'_retire_messages.sql',10:'_tournament_cancellation.sql',11:'_tournament_reliability_reset.sql'}[next]);
     const sql=fs.readFileSync(path.join(MIGRATIONS,name),'utf8');
     // SQLite's documented table-rebuild sequence: disable enforcement before
     // BEGIN, preserve child references, then check the completed graph before
@@ -39,10 +41,11 @@ function createDatabase(file=process.env.SAR_DB_PATH||path.join(__dirname,'data'
     if(rebuildTables)db.exec('PRAGMA foreign_keys=OFF');
     db.exec('BEGIN IMMEDIATE');
     try{
-      if(next===9||next===10)startup.forDatabase(file,'migration-'+next);
+      if(next>=9)startup.forDatabase(file,'migration-'+next);
       const archive=next===9?require('./retirement-archive.cjs').archiveMessages(db,file):null;
-      if(next===9||next===10)startup.forDatabase(file,'migration-'+next);
+      if(next>=9)startup.forDatabase(file,'migration-'+next);
       db.exec(sql);
+      if(next===11)require('./tournament-reset.cjs').apply(db,{recoveryFile});
       if(archive)db.prepare('INSERT INTO retired_feature_archives(feature,schema_version,archive_file,sha256,bytes,row_counts_json,created_at) VALUES(?,?,?,?,?,?,?)').run('messages',9,archive.file,archive.sha256,archive.bytes,JSON.stringify(archive.rowCounts),archive.createdAt);
       if(rebuildTables&&db.prepare('PRAGMA foreign_key_check').all().length)throw new Error('Migration failed its foreign-key integrity check');
       db.prepare('INSERT INTO save_migrations(version,applied_at,note) VALUES(?,?,?)').run(next,isoNow(),name);

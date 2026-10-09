@@ -60,6 +60,8 @@
         if(!response.ok)throw Error('The installed game release could not be read. Check the desktop startup log.');
         const version=await response.json();const balance=document.getElementById('sarBootBalance');if(balance)balance.textContent=version.weaponBalance||'8.0';
         if(version.version!==expected)throw Error(`Version mismatch: installed launcher ${expected}, running backend ${version.version||'unknown'}. Reopen the updated desktop app.`);
+        const expectedSchema=version.databaseSchema;
+        if(!Number.isInteger(expectedSchema)||expectedSchema<1)throw Error('The installed release did not identify its account schema. Reopen the updated app to finish its service handoff.');
         expectedCache=`sar-shell-${expected}-${version.shellRevision||'live-circuit-2'}`;
         // An installer may replace static files while a legacy HTTP process is
         // still alive. Validate its running health metadata as well as disk files.
@@ -67,7 +69,7 @@
         const healthResponse=await fetch('./api/status?desktop='+Date.now(),{cache:'no-store',redirect:'error',signal:AbortSignal.timeout(10000)});
         const health=await healthResponse.json();
         if(healthResponse.ok&&health.ok===true){
-          if(health.version!==expected||health.databaseSchema!==10)throw Error(`Startup compatibility mismatch: desktop ${expected}, active backend ${health.version||'unknown'}, account schema ${health.databaseSchema??'unknown'} (expected 10). Reopen the updated app to finish its service handoff.`);
+          if(health.version!==expected||health.databaseSchema!==expectedSchema)throw Error(`Startup compatibility mismatch: desktop ${expected}, active backend ${health.version||'unknown'}, account schema ${health.databaseSchema??'unknown'} (expected ${expectedSchema}). Reopen the updated app to finish its service handoff.`);
         }else if(health.localShell!==true)throw Error('The game service has not completed startup. Retry after it becomes healthy.');
         stage='shell-activation';window.SARBoot?.stage?.(stage,'Preparing the installed game files…',125000);
         await activateRelease();

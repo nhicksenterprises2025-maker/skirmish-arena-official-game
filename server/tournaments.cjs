@@ -17,7 +17,7 @@ const transact=(db,fn)=>{db.exec('BEGIN IMMEDIATE');try{const value=fn();db.exec
 function getTournament(db,userId,tournamentId){
  const row=db.prepare('SELECT * FROM tournaments WHERE user_id=? AND id=?').get(userId,tournamentId);if(!row)throw error('Tournament not found',404);if(row.deleted_at)throw error('Custom tournament was deleted',410);
  const state=decode(row.bracket_json),metadata=decode(row.metadata_json);
- return {id:row.id,canDelete:row.kind==='custom',creatorId:row.user_id,name:row.name,kind:row.kind,seasonId:row.season_id,startsAt:row.starts_at,status:row.status,createdAt:row.created_at,...state,...(metadata.schedulePolicy?{schedulePolicy:metadata.schedulePolicy,schedule:metadata.schedule,scheduling:metadata.scheduling||{games:{},reservations:[],conflicts:[]}}:{}),rulesetId:state.rulesetId||LEGACY_RULESET,teams:state.teams||[],series:state.series||[],placements:state.placements||[],earnings:state.earnings||[],invites:state.invites||[]};
+ return {id:row.id,canDelete:row.kind==='custom',creatorId:row.user_id,name:row.name,kind:row.kind,seasonId:row.season_id,startsAt:row.starts_at,status:row.status,createdAt:row.created_at,...state,...(metadata.schedulePolicy?{schedulePolicy:metadata.schedulePolicy,schedule:metadata.schedule,...(metadata.customTimetable?{customTimetable:true,customPreparationStartsAt:metadata.customPreparationStartsAt}:{} )}:{}),...(metadata.scheduling?{scheduling:metadata.scheduling}:{}),rulesetId:state.rulesetId||LEGACY_RULESET,teams:state.teams||[],series:state.series||[],placements:state.placements||[],earnings:state.earnings||[],invites:state.invites||[]};
 }
 function put(db,value,now){const previous=decode(db.prepare('SELECT bracket_json FROM tournaments WHERE id=?').get(value.id)?.bracket_json);db.prepare('UPDATE tournaments SET status=?,bracket_json=?,updated_at=? WHERE id=?').run(value.status,JSON.stringify({...previous,rulesetId:value.rulesetId,tiePolicy:value.tiePolicy,teams:value.teams,series:value.series,placements:value.placements,earnings:value.earnings,invites:value.invites}),now,value.id);return value;}
 function create(db,userId,{name,startsAt,kind,seasonId=null},now,tournamentId=id()){
@@ -36,7 +36,7 @@ function participant(db,userId,participantId){
  if(participantId===userId)return {id:userId,kind:'user',name:db.prepare('SELECT username FROM users WHERE id=?').get(userId)?.username||'YOU'};
  const row=db.prepare('SELECT name,power,form,personality_json FROM bots WHERE user_id=? AND bot_id=?').get(userId,participantId);if(!row)throw error('Unknown participant');return {id:participantId,kind:'bot',name:row.name,power:row.power};
 }
-function commitment(db,userId,participantId,excluding){return db.prepare("SELECT r.tournament_id FROM tournament_registrations r JOIN tournaments t ON t.id=r.tournament_id WHERE t.user_id=? AND r.participant_id=? AND t.status='ACTIVE' AND t.deleted_at IS NULL AND t.id<>?").get(userId,participantId,excluding);}
+function commitment(db,userId,participantId,excluding){return Lifecycle.externalReservations(db,userId,excluding).has(participantId);}
 function decision(db,userId,tournament,botId){
  const row=db.prepare('SELECT b.form,b.personality_json,p.bot_id AS competition_id,p.competitiveness,p.socialness,p.ego FROM bots b LEFT JOIN bot_competition_profiles p ON p.user_id=b.user_id AND p.bot_id=b.bot_id WHERE b.user_id=? AND b.bot_id=?').get(userId,botId);if(!row)throw error('Unknown bot');
  if(commitment(db,userId,botId,tournament.id))return {accepted:false,reason:'Already playing another tournament'};
@@ -63,6 +63,7 @@ function inviteBot(db,userId,tournamentId,{teamId,botId},now=Date.now()){
  });
 }
 function startTournament(db,userId,tournamentId,now=Date.now()){
+ const existing=getTournament(db,userId,tournamentId);if(now>=existing.startsAt&&!['ACTIVE','COMPLETED','CANCELLED'].includes(existing.status))Lifecycle.completeTeams(db,userId,tournamentId,now);
  return transact(db,()=>{const t=getTournament(db,userId,tournamentId);if(t.status==='ACTIVE'||t.status==='COMPLETED')return t;
  if(t.status==='CANCELLED')throw error('A cancelled tournament cannot restart',409);
  if(t.series.some(s=>s.games?.length))throw error('A tournament with recorded games cannot restart',409);
@@ -120,7 +121,7 @@ function recordGame(db,userId,tournamentId,seriesId,result,now=Date.now()){
  }
  for(const s of t.series)db.prepare('UPDATE tournament_series SET state_json=? WHERE id=?').run(JSON.stringify(s),s.id);
  if(t.series.find(s=>s.round==='FINAL').winnerTeamId){t.status='COMPLETED';t.placements=rankPlacements(t);for(const place of t.placements){db.prepare('INSERT INTO tournament_placements VALUES(?,?,?)').run(t.id,place.teamId,place.placement);const team=t.teams.find(team=>team.id===place.teamId);for(const p of team.participants){const amount=t.kind==='official'?PAYOUTS[place.placement-1]:0;t.earnings.push({participantId:p.id,kind:p.kind,amount});db.prepare('INSERT INTO tournament_earnings VALUES(?,?,?,?,?)').run(t.id,p.id,p.kind,amount,now);}}}
- if(scheduled){const m=Lifecycle.metadata(db,t.id),g=m.scheduling.games[result.id];g.finalizedAt=now;g.waitingAt=now;delete g.lease;if(t.status==='COMPLETED')m.scheduling.reservations=[];Lifecycle.saveMetadata(db,t.id,m,now);t.scheduling=m.scheduling;}
+ if(scheduled){const m=Lifecycle.metadata(db,t.id),g=m.scheduling.games[result.id];g.finalizedAt=now;g.waitingAt=now;delete g.lease;if(t.status==='COMPLETED'){m.scheduling.reservations=[];m.scheduling.standbyReservations=[];}Lifecycle.saveMetadata(db,t.id,m,now);t.scheduling=m.scheduling;}
  return put(db,t,now);
  });
 }
@@ -132,8 +133,9 @@ function deleteCustom(db,userId,tournamentId,confirmedName,now=Date.now(),author
   if(confirmedName!==row.name)throw error('Confirm the tournament name before deleting',400);
   if(row.deleted_at)return {id:row.id,deleted:true,deletedAt:row.deleted_at};
   db.prepare('UPDATE tournaments SET deleted_at=?,updated_at=? WHERE id=?').run(now,now,row.id);
+  const m=Lifecycle.metadata(db,row.id);if(m.scheduling){m.scheduling.reservations=[];m.scheduling.standbyReservations=[];m.scheduling.cancelledAt=now;m.scheduling.cancellationReason='CUSTOM_EVENT_DELETED';Lifecycle.saveMetadata(db,row.id,m,now);}
   for(const table of ['tournament_invites','tournament_registrations','tournament_participants'])db.prepare('DELETE FROM '+table+' WHERE tournament_id=?').run(row.id);
   return {id:row.id,deleted:true,deletedAt:now};
  });
 }
-module.exports={deleteCustom,INTERVAL,PAYOUTS,AGGREGATE_RULESET,LEGACY_RULESET,isAggregateSeries,canPlaySeries,scheduleOfficial,createCustom,getTournament,registerTeam,inviteBot,startTournament,recordGame,rankPlacements,decision,...Object.fromEntries(['configureOfficialSchedule','advanceScheduled','checkIn','gameRoster','markScheduledPrepared','claimScheduledGame','renewScheduledGame','markScheduledStarted','markScheduledError'].map(key=>[key,Lifecycle[key]]))};
+module.exports={deleteCustom,INTERVAL,PAYOUTS,AGGREGATE_RULESET,LEGACY_RULESET,isAggregateSeries,canPlaySeries,scheduleOfficial,createCustom,getTournament,registerTeam,inviteBot,startTournament,recordGame,rankPlacements,decision,...Object.fromEntries(['prepareReservations','completeTeams','configureOfficialSchedule','advanceCustom','advanceScheduled','checkIn','gameRoster','markScheduledPrepared','claimScheduledGame','renewScheduledGame','markScheduledStarted','markScheduledError'].map(key=>[key,Lifecycle[key]]))};

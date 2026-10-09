@@ -220,7 +220,7 @@ fn report_startup(app:&tauri::AppHandle,status:&startup_progress::Status) {
     emit_startup(app,status);
 }
 fn emit_startup(app:&tauri::AppHandle,status:&startup_progress::Status) {
-    let message=match status.stage.as_str(){"snapshot"=>"Backing up your saved account before updating…","snapshot-verify"=>"Verifying your recoverable account backup…","archive"=>"Preserving retired conversation data…","archive-verify"=>"Verifying the retired-data archive…","migration-9"|"migration-10"=>"Updating saved account records…","listening"|"ready"=>"Starting the local account service…",_=>"Opening your saved account…"};
+    let message=match status.stage.as_str(){"snapshot"=>"Backing up your saved account before updating…","snapshot-verify"=>"Verifying your recoverable account backup…","archive"=>"Preserving retired conversation data…","archive-verify"=>"Verifying the retired-data archive…","migration-9"|"migration-10"|"migration-11"=>"Updating saved account records…","listening"|"ready"=>"Starting the local account service…",_=>"Opening your saved account…"};
     let _=app.emit("backend-startup",json!({"stage":status.stage,"message":message}));
 }
 fn backend_ownership_lock(app: &tauri::AppHandle) -> Result<File, String> {
@@ -280,7 +280,7 @@ async fn health(url: &reqwest::Url) -> Health {
         "The configured local port is occupied by an incompatible or unhealthy server.".into(),
     )
 }
-const DATABASE_SCHEMA: u64 = 10;
+const DATABASE_SCHEMA: u64 = 11;
 fn compatible(status: &Value) -> bool {
     status["version"] == env!("CARGO_PKG_VERSION") && status["databaseSchema"].as_u64() == Some(DATABASE_SCHEMA)
 }

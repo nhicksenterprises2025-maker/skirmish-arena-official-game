@@ -96,6 +96,18 @@ function planRecurrence({userId,anchor,policy:input,rangeStart,rangeEnd,existing
 }
 function gameWindows(event,input){
  const policy=confirmedPolicy(input);timestamp(event.startsAt,'event start');
+ if(event.kind==='custom'&&event.customTimetable){
+  const windows=Object.values(event.scheduling?.games||{}).map(g=>Object.fromEntries(['seriesId','gameId','round','gameNumber','checkInOpenAt','checkInCloseAt','rosterLockDeadlineAt','countdownAt','matchStartAt','latestEndAt'].map(key=>[key,g[key]])));
+  for(const s of event.series||[]){
+   if(s.winnerTeamId||s.status==='awaiting-tie-policy'||s.teamIds?.length!==2||s.teamIds.some(id=>!id)||s.games.length>=s.requiredGames)continue;
+   const gameNumber=s.games.length+1,gameId=s.id+':game'+gameNumber;if(windows.some(w=>w.gameId===gameId))continue;
+   const source=s.games.at(-1)||event.series.filter(previous=>previous.round===(s.round==='SF'?'QF':s.round==='FINAL'?'SF':null)&&previous.teamIds.some(id=>s.teamIds.includes(id))).flatMap(previous=>previous.games);
+   const checkInOpenAt=Array.isArray(source)?Math.max(event.customPreparationStartsAt??event.startsAt,...source.map(g=>g.completedAt)):source?.completedAt??event.customPreparationStartsAt??event.startsAt;
+   const checkInCloseAt=checkInOpenAt+policy.checkInMs,matchStartAt=checkInOpenAt+policy.preparationMs;
+   windows.push({seriesId:s.id,gameId,round:s.round,gameNumber,checkInOpenAt,checkInCloseAt,rosterLockDeadlineAt:checkInCloseAt,countdownAt:matchStartAt-policy.countdownMs,matchStartAt,latestEndAt:matchStartAt+policy.gameplayMs});
+  }
+  return windows;
+ }
  if(event.kind!=='official')fail('Custom tournament times must not use the official timetable');
  return Object.entries(policy.rounds).flatMap(([round,offsets])=>offsets.map((offset,index)=>{
   const checkInOpenAt=event.startsAt+offset*60000,checkInCloseAt=checkInOpenAt+policy.checkInMs,matchStartAt=checkInOpenAt+policy.preparationMs;

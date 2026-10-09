@@ -3,7 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const Stats=require('../../profile-stats.js'),XP=require('../../progression.js');
 const {validateProgression}=require('../progression.cjs');
 const clone=x=>JSON.parse(JSON.stringify(x)),account='human:profile';
-const stats=(extra={})=>({kills:0,deaths:0,assists:0,damage:0,headshots:0,timeAlive:0,shots:0,hits:0,...extra});
+const stats=(extra={})=>({kills:0,deaths:0,assists:0,damage:0,taken:0,headshots:0,timeAlive:0,timePlayed:0,shots:0,hits:0,...extra});
 function receipt(extra={}){return {participantId:account,matchId:'match:fixture',kind:'standard',sessionType:'standard',mode:'tdm',eligible:true,practice:false,at:1100,stats:stats(),events:XP.events(),leaders:{kills:false,assists:false,alive:false},won:false,winStreak:0,...extra};}
 function fixture(){
  const world={progression:XP.normalize(null),ranked:XP.normalizeRanked(),rankedResults:{},playerCareer:{games:2},modeStats:{deathmatch:{player:{games:1},recentMatches:[]}},bots:{},playerSeasons:{current:{number:2,startAt:2000,endAt:3000,stats:{games:1}},history:[{number:1,startAt:1000,endAt:2000,stats:{games:1}}]}};
@@ -19,10 +19,10 @@ function fixture(){
  return world;
 }
 const project=(world,extra={})=>Stats.project(world,{participantId:account,accountId:account,...extra});
-test('Unique participation combines casual TDM/DM and Ranked TDM, excludes official/custom/practice, derives weighted ratios',()=>{
+test('Unique ordinary participation excludes unauthorised official XP-only evidence/custom/practice and derives weighted ratios',()=>{
  const world=fixture(),before=JSON.stringify(world),p=project(world);
  assert.equal(p.totals.games,3);assert.deepEqual(p.records.map(r=>r.matchId),['match:casual','match:dm','match:ranked']);
- assert.deepEqual(p.totals,{games:3,wins:1,losses:2,draws:0,kills:20,deaths:14,assists:9,damage:2550,headshots:7,shots:120,hits:90});
+ assert.deepEqual(p.totals,{games:3,wins:1,losses:2,draws:0,kills:20,deaths:14,assists:9,damage:2550,taken:0,headshots:7,shots:120,hits:90,timeAlive:0,timePlayed:0});
  assert.equal(p.ratios.kd,20/14);assert.equal(p.ratios.accuracy,90/120);assert.equal(p.ratios.winRate,1/3);
  assert.notEqual(p.ratios.accuracy,(.1+.9+.4)/3);assert.equal(p.coverage.complete,true);assert.equal(p.coverage.missingGames,0);
  assert.deepEqual(p.included.map(r=>r.label),['Casual TDM','Casual Deathmatch','Ranked TDM']);

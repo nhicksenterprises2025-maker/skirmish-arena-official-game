@@ -30,7 +30,7 @@ function checkpointDependencies(checkpoint,gameId,source){
 }
 function aggregateSeries(t,s){return Circuit.isAggregateSeries(s,t);}
 function playableSeries(t,s){return Circuit.canPlaySeries(s,t);}
-function scheduled(t){return t.kind==='official'&&!!t.schedulePolicy;}
+function scheduled(t){return !!t.schedulePolicy;}
 function gameContext(t,s,hasPlayer,userId){
  const gameId=s.id+':game'+(s.games.length+1),record=t.scheduling?.games?.[gameId],teams=record?.teams||s.teamIds.map(id=>t.teams.find(team=>team.id===id));
  return {tournamentId:t.id,tournamentKind:t.kind,seriesId:s.id,teamIds:s.teamIds,teams,gameId,userId,hasPlayer,...(record?{schedule:publicGame(record)}:{}),...(aggregateSeries(t,s)?{rulesetId:s.rulesetId||t.rulesetId,round:s.round,requiredGames:s.requiredGames,completedGames:s.completedGames,aggregateKills:s.aggregateKills.slice()}: {})};
@@ -99,8 +99,7 @@ function makeGame(save,context,now,checkpoint){
  return e;
 }
 function fillBots(db,userId,t,now){
- const used=new Set(t.teams.flatMap(team=>team.participants.map(p=>p.id))),available=db.prepare('SELECT bot_id,name,power FROM bots WHERE user_id=? ORDER BY power DESC,bot_id').all(userId).filter(p=>!used.has(p.bot_id)&&Circuit.decision(db,userId,t,p.bot_id).accepted);
- while(t.teams.length<8&&available.length>=5){const batch=available.splice(0,5);try{t=Circuit.registerTeam(db,userId,t.id,{name:batch[0].name+' Circuit',participantIds:batch.map(p=>p.bot_id)},now);}catch{break;}}return t;
+ return Circuit.completeTeams(db,userId,t.id,now);
 }
 function playContext(db,userId,tournamentId,now=Date.now(),options={}){
  let t=Circuit.getTournament(db,userId,tournamentId);if(scheduled(t))t=Circuit.advanceScheduled(db,userId,tournamentId,now);
@@ -153,14 +152,12 @@ function advance(db,{now=Date.now(),budget=90}={}){
  for(const row of db.prepare('SELECT user_id FROM worlds').all()){
   let cached=rt.worlds.get(row.user_id);if(!cached||now-cached.at>=30000||now>=cached.save.seasons.current.endAt){const world=refreshWorldSeason(db,row.user_id,now);if(!world)continue;cached={at:now,save:world.save};rt.worlds.set(row.user_id,cached);Circuit.scheduleOfficial(db,row.user_id,cached.save.seasons.current,now);}
   const save=cached.save;
+  for(const candidate of db.prepare("SELECT id FROM tournaments WHERE user_id=? AND kind IN ('official','custom') AND starts_at>? AND starts_at<=? AND deleted_at IS NULL AND status NOT IN ('COMPLETED','CANCELLED') ORDER BY starts_at,id").all(row.user_id,now,now+7*60000))Circuit.prepareReservations(db,row.user_id,candidate.id,now);
   for(const rowT of db.prepare("SELECT id FROM tournaments WHERE user_id=? AND kind IN ('official','custom') AND starts_at<=? AND deleted_at IS NULL AND status NOT IN ('COMPLETED','CANCELLED') ORDER BY starts_at").all(row.user_id,now)){
    let t=Circuit.getTournament(db,row.user_id,rowT.id);
    pruneAcknowledgedCheckpoints(db,t.id);
+   if(t.kind==='custom'&&t.status!=='ACTIVE')t=Circuit.advanceCustom(db,row.user_id,t.id,now);
    if(scheduled(t)){advanceScheduledGames(db,rt,row.user_id,t,save,now,budget);continue;}
-   // A custom human roster remains editable until it has all five members.
-   // Filling opponent teams between invite requests could claim the very bot
-   // being invited and leave an incomplete roster that can never start.
-   if(t.status!=='ACTIVE'&&t.teams.some(team=>team.participants.length<5&&team.participants.some(p=>p.kind==='user')))continue;
    if(t.status!=='ACTIVE'){t=fillBots(db,row.user_id,t,now);if(t.teams.length!==8||t.teams.some(team=>team.participants.length!==5))continue;try{t=Circuit.startTournament(db,row.user_id,t.id,now);}catch{continue;}}
    const s=t.series.find(s=>playableSeries(t,s)&&!s.teamIds.some(id=>t.teams.find(team=>team.id===id).participants.some(p=>p.kind==='user')));if(!s)continue;
    const key=s.id+':game'+(s.games.length+1);let e=rt.games.get(key);

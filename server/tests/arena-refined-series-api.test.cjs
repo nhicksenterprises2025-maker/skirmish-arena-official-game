@@ -4,7 +4,7 @@ const {createServer}=require('../index.cjs'),Circuit=require('../tournaments.cjs
 const {fixture,snapshot}=require('../../dev/live-circuit-tournament-check.cjs');
 const {game}=require('../../dev/arena-refined-tournament-series-check.cjs');
 const USER='live-circuit-fixture',clone=value=>JSON.parse(JSON.stringify(value));
-test('authenticated aggregate API preserves 128–136 advancement, stable game IDs and immutable retries after restart',async()=>{
+test('persisted unscheduled aggregate API preserves 128–136 advancement, authorization and immutable retries after restart',async()=>{
  const f=fixture(),now=Date.now(),token=crypto.randomBytes(32).toString('base64url'),cookie='sar_session='+token;
  // An isolated test session exercises the real authentication middleware. No
  // account secrets from the installed game are read or written.
@@ -18,9 +18,11 @@ test('authenticated aggregate API preserves 128–136 advancement, stable game I
  const same=(a,b,label)=>assert.deepEqual(clone(a),clone(b),label);
  try{
   await open();assert.equal((await request('',{authenticated:false})).status,401);
-  const created=await request('',{method:'POST',body:{name:'Aggregate API Fixture',startsAt:now}});assert.equal(created.status,201);
+  const created=await request('',{method:'POST',body:{name:'Aggregate API Fixture',startsAt:now+60000}});assert.equal(created.status,201);
   let t=created.body.tournament;assert.equal(t.rulesetId,'arena-refined-aggregate-kills-v1');assert.equal(t.teams.length,1);const ownTeam=t.teams[0],route='/'+t.id;
   for(const botId of ['bot_0001','bot_0002','bot_0003','bot_0004']){const invited=await request(route+'/invite',{method:'POST',body:{teamId:ownTeam.id,botId}});assert.equal(invited.status,200,botId+': '+JSON.stringify(invited.body));assert.equal(invited.body.tournament.invites.find(i=>i.botId===botId)?.state,'ACCEPTED');if(botId==='bot_0001'){Runtime.advance(f.db,{now:Date.now(),budget:0});const draft=Circuit.getTournament(f.db,USER,t.id);assert.equal(draft.status,'REGISTRATION');assert.equal(draft.teams.length,1,'The scheduler must not consume the pending human invitations');}}
+  // Historical unscheduled aggregate records retain their original timing contract.
+  f.db.prepare('UPDATE tournaments SET starts_at=? WHERE id=?').run(now,t.id);Circuit.startTournament(f.db,USER,t.id,now);
   const started=await request(route+'/start',{method:'POST',body:{}});assert.equal(started.status,200,JSON.stringify(started.body));t=started.body.tournament;assert.equal(t.teams.length,8);assert.ok(t.teams.every(team=>team.participants.length===5));assert.equal(new Set(t.teams.flatMap(team=>team.participants.map(p=>p.id))).size,40);
   const play=await request(route+'/play',{method:'POST',body:{}});assert.equal(play.status,200);let context=play.body.context;
   const sid=context.seriesId,q=t.series.find(s=>s.id===sid),foreign=t.series.find(s=>s.id!==sid&&s.round==='QF');assert.equal(q.teamIds[0],ownTeam.id);assert.equal(context.gameId,sid+':game1');assert.equal(context.requiredGames,3);

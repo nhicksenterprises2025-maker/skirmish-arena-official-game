@@ -2,7 +2,7 @@
 
 A tactical arena shooter with a persistent league of 50 bots. Pick a loadout, play a match, and watch rivalries, careers and seasons develop around you.
 
-**1.13.0 — ARENA REFINED · Weapon Balance 9.0 · Beta**
+**1.14.0 — ARENA REFINED · Weapon Balance 9.0 · Beta**
 
 [Download for Windows (64-bit)](https://github.com/nhicksenterprises2025-maker/skirmish-arena-official-game/releases/latest) — choose the Windows setup file from the latest published release.
 
@@ -41,13 +41,13 @@ The [player guide](docs/PLAYER-GUIDE.md) covers modes, careers, seasons, tournam
 
 ## Arena Refined
 
-Build **1.13.0** combines all ten Arena Refined audits. Mode entry prepares the match for at least three seconds before its countdown. Phone keeps its four live-statistics and spectator apps; the conversation feature is retired with recoverable data archives.
+Build **1.14.0** builds on all ten Arena Refined audits with the shared dark-green interface and tournament reliability follow-up. Mode entry prepares the match for at least three seconds before its countdown. Phone keeps its four live-statistics and spectator apps; the conversation feature is retired with recoverable data archives.
 
 A $0.50 Polar Camo offer is available for Sandbox payment testing when its service is configured. Public real-money checkout remains unavailable. Returning from checkout does not grant credits or an appearance by itself; delivery requires verification.
 
-Application version **1.13.0**, analytics schema **1**, and Weapon Balance **9.0** are separate. Full historical notes remain available in **Settings → About** and [version.json](version.json).
+Application version **1.14.0**, analytics schema **1**, and Weapon Balance **9.0** are separate. Full historical notes remain available in **Settings → About** and [version.json](version.json).
 
-AK magazine details stay attached, the lobby display moves subtly, stat bars show performance in color and combat panels use neutral surfaces. Click a dimensional ranked emblem to inspect the current ladder and Ranked Stats. Combined Stats uses unique casual TDM, casual Deathmatch and Ranked TDM records; tournaments, custom sessions and practice remain excluded.
+The interface uses shared dark-green surfaces, readable tables and inspectable model stages. Click a dimensional ranked emblem to inspect the current ladder and Ranked Stats. Combined Stats uses unique casual TDM, casual Deathmatch, Ranked and official tournament records; custom sessions, custom tournaments and practice remain excluded. Ratios use the actual totals.
 
 Skirmish Challenge Tournament runs every three calendar days at 7:30 PM Eastern, with daylight saving. Check in during the first 90 seconds of each two-minute preparation block. Play all three quarterfinal and semifinal games and all five final games; total kills decide advancement, followed by team damage if tied. Event pages show the fixed schedule, connected bracket, tournament-only leaderboards and official history.
 

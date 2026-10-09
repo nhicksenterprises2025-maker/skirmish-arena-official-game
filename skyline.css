@@ -80,22 +80,11 @@ a{color:var(--sky-link)}
 :is(#hud,#spectatorHud,#scoreboard,#pause,#matchCountdown,#finalCountdown),
 body:has(#hud:not(.hidden)) #modal,body:has(#spectatorHud:not(.hidden)) #modal,
 #modal:has(#modalContent[data-view="result"]),#modal:has(#modalContent[data-view="results"]){
-  --sky-background:#182019;--sky-background-rgb:24 32 25;
-  --sky-surface-dark:var(--arena-hud-panel);--sky-surface-dark-rgb:27 36 31;
-  --sky-surface-raised:#2E3B32;--sky-surface-raised-rgb:46 59 50;
-  --sky-surface-light:#ECEFE6;--sky-surface-light-rgb:236 239 230;
-  --sky-panel-light:#E0E5D8;--sky-panel-light-rgb:224 229 216;
-  --sky-panel-mid:#CAD2C2;--sky-panel-mid-rgb:202 210 194;
-  --sky-text-light:#263329;--sky-text-light-rgb:38 51 41;
-  --sky-text-dark:var(--arena-hud-text);--sky-text-dark-rgb:237 241 233;
-  --sky-muted-light:#56614F;--sky-muted-dark:#B6C0AF;
-  --sky-border:#A4AE9D;--sky-border-rgb:164 174 157;
-  --sky-border-dark:var(--arena-hud-border);--sky-border-dark-rgb:71 83 75;
-  --panel:var(--sky-surface-light);--ink:var(--sky-text-light);--muted:var(--sky-muted-light);--line:var(--sky-border);
+  --panel:var(--arena-surface);--ink:var(--arena-text);--muted:var(--arena-muted);--line:var(--arena-border);
 }
 #spectatorHud .spectate-controls button[aria-pressed="true"],#pause .modal.compact button.primary,
 body:has(#hud:not(.hidden)) #modal button.primary,body:has(#spectatorHud:not(.hidden)) #modal button.primary,
-#modal:has(#modalContent[data-view="result"]) button.primary,#modal:has(#modalContent[data-view="results"]) button.primary{background:#596C48;border-color:#B5C6A3;color:#F4F7EF}
+#modal:has(#modalContent[data-view="result"]) button.primary,#modal:has(#modalContent[data-view="results"]) button.primary{background:var(--arena-accent);border-color:var(--arena-accent);color:var(--arena-background)}
 .phone-screen{background:var(--sky-surface-light);color:var(--sky-text-light)}
 .modal:has(.phone-device),.glass.modal:has(.phone-device){background:transparent;border:0;box-shadow:none}
 .phone-status,.phone-navigation{background:var(--sky-surface-dark);color:var(--sky-text-dark)}

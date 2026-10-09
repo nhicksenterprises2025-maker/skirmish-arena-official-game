@@ -6,7 +6,7 @@ CORE.push('./theme.css','./skyline.css','./phone-apps.css','./skyline-tournament
 CORE.push('./fonts.css','./blue-circuit.css','./assets/fonts/Inter-Variable.ttf','./assets/fonts/Oxanium-Variable.ttf','./assets/fonts/Inter-OFL.txt','./assets/fonts/Oxanium-OFL.txt','./assets/fonts/manifest.json','./assets/25d/ranks/manifest.json','./assets/25d/ranks/blue-circuit-ranks.glb');
 const COSMETIC_MANIFEST='./assets/25d/cosmetics/manifest.json';
 CORE.push('./profile-stats.js','./distance-units.js');
-CORE.push('./commerce.js','./commerce.css','./cosmetics-25d.mjs',COSMETIC_MANIFEST);
+CORE.push('./commerce.js','./commerce.css','./refined-ui.css','./cosmetics-25d.mjs',COSMETIC_MANIFEST);
 const OPTIONAL=CORE.filter(path=>path.startsWith('./assets/')&&path!==COSMETIC_MANIFEST);
 const ESSENTIAL=CORE.filter(path=>!OPTIONAL.includes(path));
 const shellUrls = new Set(CORE.map(path => new URL(path, self.registration.scope).href));

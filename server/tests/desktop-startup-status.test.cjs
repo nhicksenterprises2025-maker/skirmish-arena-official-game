@@ -1,6 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),net=require('node:net'),crypto=require('node:crypto'),{spawn}=require('node:child_process');
 const {DatabaseSync}=require('node:sqlite'),startup=require('../startup-status.cjs');
+const {LATEST_DB_SCHEMA}=require('../db.cjs');
 const ENTRY=path.resolve(__dirname,'../desktop-service.cjs'),MIGRATIONS=path.resolve(__dirname,'../migrations');
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const attempt=()=>crypto.randomBytes(16).toString('hex');
@@ -70,7 +71,7 @@ async function launch(dir,options={}){
  return {child,exited,databasePath,origin,nonce,marker:path.join(dir,'desktop-startup.json'),...instrument,get stdout(){return stdout;},get stderr(){return stderr;}};
 }
 async function until(check,timeout=30000){const end=Date.now()+timeout;while(Date.now()<end){if(await check())return;await delay(50);}throw Error('Fixture startup did not reach the expected stage');}
-async function ready(app){await until(()=>fs.existsSync(path.join(path.dirname(app.marker),'desktop-service.json')));const response=await fetch(app.origin+'/api/status');assert.equal(response.status,200);assert.equal((await response.json()).databaseSchema,10);}
+async function ready(app){await until(()=>fs.existsSync(path.join(path.dirname(app.marker),'desktop-service.json')));const response=await fetch(app.origin+'/api/status');assert.equal(response.status,200);assert.equal((await response.json()).databaseSchema,LATEST_DB_SCHEMA);}
 async function stop(app){
  if(app.child.exitCode!==null)return;
  try{
@@ -95,13 +96,13 @@ test('real schema8 retirement reports verified snapshot/export stages and binds 
  try{
   app=await launch(dir);await ready(app);
   const rows=fs.readFileSync(app.trace,'utf8').trim().split('\n').map(JSON.parse),stages=rows.map(row=>row.stage);
-  for(const stage of ['opening-database','snapshot','snapshot-verify','archive','archive-verify','migration-9','migration-10','listening','ready'])assert(stages.includes(stage),stage);
+  for(const stage of ['opening-database','snapshot','snapshot-verify','archive','archive-verify','migration-9','migration-10','migration-11','listening','ready'])assert(stages.includes(stage),stage);
   assert(stages.indexOf('snapshot')<stages.indexOf('snapshot-verify'));assert(stages.indexOf('archive')<stages.indexOf('archive-verify'));assert(stages.lastIndexOf('migration-9')>stages.indexOf('archive-verify'));assert(stages.indexOf('migration-10')<stages.indexOf('ready'));
   for(const row of rows){assert.equal(row.schema,1);assert.equal(row.pid,app.child.pid);assert.equal(row.attempt,app.nonce);assert.equal(row.databasePath,path.resolve(app.databasePath));assert.equal(row.nodeExecutable,path.resolve(process.execPath));assert.equal(row.entryPath,ENTRY);assert.equal(row.origin,app.origin);assert(row.updatedAt>=row.stageStartedAt);assert(!/never-log|controlToken|password|recovery|session_token/i.test(JSON.stringify(row)));if(row.artifactPath){assert.equal(path.dirname(row.artifactPath),dir);assert(path.basename(row.artifactPath).startsWith('fixture.sqlite.pre-'));}}
   assert(rows.every(row=>row.startedAt===rows[0].startedAt),'attempt start never resets across stages');
   assert.equal(new Set(rows.filter(row=>row.stage==='archive').map(row=>row.stageStartedAt)).size,1,'counting and archive creation share one bounded archive phase');
   assert.deepEqual(JSON.parse(fs.readFileSync(app.exercises)),{duplicateStageKeptOriginalStart:true,otherDatabaseRejected:true,unrelatedArtifactRejected:true,staleAttemptRejected:true});
-  const db=new DatabaseSync(app.databasePath,{readOnly:true});try{assert.equal(db.prepare('PRAGMA user_version').get().user_version,10);assert.equal(db.prepare('SELECT password_hash FROM users').get().password_hash,'never-log-password-hash');assert.equal(db.prepare('SELECT COUNT(*) n FROM retired_feature_archives').get().n,1);assert.deepEqual(db.prepare('PRAGMA foreign_key_check').all(),[]);}finally{db.close();}
+  const db=new DatabaseSync(app.databasePath,{readOnly:true});try{assert.equal(db.prepare('PRAGMA user_version').get().user_version,LATEST_DB_SCHEMA);assert.equal(db.prepare('SELECT password_hash FROM users').get().password_hash,'never-log-password-hash');assert.equal(db.prepare('SELECT COUNT(*) n FROM retired_feature_archives').get().n,1);assert.deepEqual(db.prepare('PRAGMA foreign_key_check').all(),[]);}finally{db.close();}
   assert.equal((await fetch(app.origin+'/desktop-startup.json')).status,404);assert.equal((await fetch(app.origin+'/api/desktop-startup',{headers:{cookie:'sar_session='+TEST_TOKEN}})).status,404);
  }finally{if(app)await stop(app);cleanup(dir);}
 });
@@ -113,7 +114,7 @@ test('a genuine snapshot preparation lasting beyond15seconds remains identifiabl
   const still=JSON.parse(fs.readFileSync(app.marker));assert.equal(still.stage,'snapshot');assert.equal(still.stageStartedAt,first.stageStartedAt);assert.equal(still.updatedAt,first.updatedAt,'marker updates are not fabricated progress');assert.equal(app.child.exitCode,null);
   const premature=await fetch(app.origin+'/api/status',{signal:AbortSignal.timeout(500)}).catch(()=>null);assert.equal(premature,null,'unready migration cannot pass the health gate');
   await ready(app);const cpu=JSON.parse(fs.readFileSync(path.join(dir,'cpu-work.json')));assert(cpu.user+cpu.system>500000,'the owned child performed measurable work during the long stage');
-  const db=new DatabaseSync(app.databasePath,{readOnly:true});try{assert.equal(db.prepare('PRAGMA integrity_check').get().integrity_check,'ok');assert.equal(db.prepare('PRAGMA user_version').get().user_version,10);}finally{db.close();}
+  const db=new DatabaseSync(app.databasePath,{readOnly:true});try{assert.equal(db.prepare('PRAGMA integrity_check').get().integrity_check,'ok');assert.equal(db.prepare('PRAGMA user_version').get().user_version,LATEST_DB_SCHEMA);}finally{db.close();}
  }finally{if(app)await stop(app);cleanup(dir);}
 });
 test('failed export reports a sanitized failing stage, retains originals and retries with a new attempt exactly once',async()=>{
@@ -123,7 +124,23 @@ test('failed export reports a sanitized failing stage, retains originals and ret
   const failed=JSON.parse(fs.readFileSync(first.marker));assert.equal(failed.stage,'failed');assert.match(failed.message,/archive-verify/);assert(!failed.message.includes('never-log'));
   let db=new DatabaseSync(first.databasePath,{readOnly:true});try{assert.equal(db.prepare('PRAGMA user_version').get().user_version,8);assert.equal(db.prepare('SELECT body FROM messages').get().body,'private retired message: never-log-body');}finally{db.close();}
   second=await launch(dir);await ready(second);const current=JSON.parse(fs.readFileSync(second.marker));assert.equal(current.attempt,second.nonce);assert.notEqual(current.attempt,failed.attempt);assert.equal(current.pid,second.child.pid);assert.equal(current.stage,'ready');
-  db=new DatabaseSync(second.databasePath,{readOnly:true});try{assert.equal(db.prepare('SELECT COUNT(*) n FROM retired_feature_archives').get().n,1);assert.equal(db.prepare('PRAGMA user_version').get().user_version,10);}finally{db.close();}
+  db=new DatabaseSync(second.databasePath,{readOnly:true});try{assert.equal(db.prepare('SELECT COUNT(*) n FROM retired_feature_archives').get().n,1);assert.equal(db.prepare('PRAGMA user_version').get().user_version,LATEST_DB_SCHEMA);}finally{db.close();}
+ }finally{if(first)await stop(first);if(second)await stop(second);cleanup(dir);}
+});
+test('an existing schema10 desktop reports verified recovery and schema11 reset once, then reopens without repeated migration',async()=>{
+ const dir=directory(),file=path.join(dir,'fixture.sqlite');let first,second;
+ try{
+  // Reconstruct the immediately previous released table set in an isolated DB.
+  const db=require('../db.cjs').createDatabase(file);
+  db.exec('DROP TABLE tournament_reset_archives; DROP TABLE tournament_state_resets; DROP TABLE tournament_schedule_anchors; DELETE FROM save_migrations WHERE version=11; PRAGMA user_version=10');
+  db.exec('CREATE TABLE startup_preserved_fixture(id TEXT PRIMARY KEY,value TEXT NOT NULL)');db.prepare('INSERT INTO startup_preserved_fixture VALUES(?,?)').run('saved','unchanged');db.close();
+  first=await launch(dir);await ready(first);const stages=fs.readFileSync(first.trace,'utf8').trim().split('\n').map(line=>JSON.parse(line).stage);
+  for(const stage of ['snapshot','snapshot-verify','migration-11','listening','ready'])assert(stages.includes(stage),stage);
+  assert(!stages.includes('archive')&&!stages.includes('migration-9'),'retired data must not be migrated again');
+  assert(stages.indexOf('migration-11')>stages.indexOf('snapshot-verify'));await stop(first);
+  let raw=new DatabaseSync(file,{readOnly:true});try{assert.equal(raw.prepare('PRAGMA user_version').get().user_version,11);assert.equal(raw.prepare('SELECT value FROM startup_preserved_fixture').get().value,'unchanged');assert.equal(raw.prepare('SELECT COUNT(*) n FROM tournament_state_resets').get().n,1);assert.equal(raw.prepare('SELECT COUNT(*) n FROM save_migrations WHERE version=11').get().n,1);}finally{raw.close();}
+  fs.unlinkSync(first.trace);second=await launch(dir);await ready(second);const reopened=fs.readFileSync(second.trace,'utf8').trim().split('\n').map(line=>JSON.parse(line).stage);assert(!reopened.includes('snapshot')&&!reopened.includes('migration-11'));
+  raw=new DatabaseSync(file,{readOnly:true});try{assert.equal(raw.prepare('SELECT COUNT(*) n FROM tournament_state_resets').get().n,1);assert.equal(raw.prepare('SELECT value FROM startup_preserved_fixture').get().value,'unchanged');assert.deepEqual(raw.prepare('PRAGMA foreign_key_check').all(),[]);}finally{raw.close();}
  }finally{if(first)await stop(first);if(second)await stop(second);cleanup(dir);}
 });
 

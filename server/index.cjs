@@ -8,6 +8,8 @@ const {createDatabase}=require('./db.cjs');
 const {readWorld,refreshWorldSeason,migrateLocalWorld,writeWorld,MAX_WORLD_BYTES,fail}=require('./world.cjs');
 const Circuit=require('./tournaments.cjs'),tournamentRuntime=require('./tournament-runtime.cjs');
 const tournamentPresentation=require('./tournament-presentation.cjs');
+const TournamentReset=require('./tournament-reset.cjs');
+const ProfileParticipations=require('./profile-participations.cjs');
 const Commerce=require('./commerce-catalog.cjs'),Wallet=require('./wallet.cjs');
 const Payments=require('./payments.cjs');
 
@@ -18,7 +20,7 @@ const audioManifest=JSON.parse(fs.readFileSync(path.join(ROOT,'assets/audio/LICE
 STATIC.add('/mode-entry.js');
 STATIC.add('/profile-stats.js');
 STATIC.add('/distance-units.js');
-for(const asset of ['commerce.js','commerce.css','cosmetics-25d.mjs','assets/25d/cosmetics/manifest.json'])STATIC.add('/'+asset);
+for(const asset of ['commerce.js','commerce.css','refined-ui.css','cosmetics-25d.mjs','assets/25d/cosmetics/manifest.json'])STATIC.add('/'+asset);
 // Runtime cosmetic exports only; editable sources remain outside the server.
 const cosmeticManifestFile=path.join(ROOT,'assets/25d/cosmetics/manifest.json');
 if(fs.existsSync(cosmeticManifestFile)){
@@ -227,7 +229,13 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
       if(paymentOrder&&req.method==='GET'&&!paymentOrder[2]){throttle(limits,req,'payment-status:'+user.id,120,60000);json(res,200,payments.status(user.id,paymentOrder[1]));return;}
       if(paymentOrder&&req.method==='POST'&&paymentOrder[2]){throttle(limits,req,'payment-reconcile:'+user.id,20,60000);Wallet.onlyFields(await readBody(req,2048),[]);json(res,200,await payments.reconcile(user.id,paymentOrder[1]));return;}
       if(pathname==='/api/account'&&req.method==='GET'){json(res,200,{account:accountJson(db,user),serverNow:Date.now()});return;}
-      if(pathname==='/api/world'&&req.method==='GET'){json(res,200,{world:refreshWorldSeason(db,user.id),tournamentReservations:db.prepare("SELECT id FROM tournaments WHERE user_id=? AND kind='official' AND status='ACTIVE' AND deleted_at IS NULL").all(user.id).map(row=>tournamentPresentation.publicTournament(Circuit.getTournament(db,user.id,row.id))),serverNow:Date.now()});return;}
+      if(pathname==='/api/world'&&req.method==='GET'){
+        const now=Date.now(),world=refreshWorldSeason(db,user.id,now);
+        if(world)Circuit.scheduleOfficial(db,user.id,world.save.seasons.current,now);
+        const rows=db.prepare("SELECT id FROM tournaments WHERE user_id=? AND kind IN ('official','custom') AND status NOT IN ('COMPLETED','CANCELLED') AND deleted_at IS NULL AND (status='ACTIVE' OR starts_at<=?) ORDER BY starts_at,id").all(user.id,now+7*60000);
+        const reservations=rows.map(row=>Circuit.prepareReservations(db,user.id,row.id,now)).filter(t=>t.status==='ACTIVE'||t.scheduling?.reservations?.length||t.scheduling?.conflicts?.length);
+        json(res,200,{world,tournamentResetId:db.prepare('SELECT reset_id FROM tournament_state_resets WHERE reset_id=?').get(TournamentReset.RESET_ID)?.reset_id||null,tournamentReservations:reservations.map(t=>tournamentPresentation.publicTournament(t)),serverNow:now});return;
+      }
       if(pathname==='/api/world'&&req.method==='PUT'){
         throttle(limits,req,'world',240,60000);
         const body=await readBody(req),baseRevision=Number(body.baseRevision);
@@ -241,6 +249,9 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
         const migrated=migrateLocalWorld(body.save);
         const result=writeWorld(db,user.id,migrated,0,{importing:true,originalSave:body.save});
         json(res,201,{...result,save:migrated});return;
+      }
+      if(pathname==='/api/profile/participations'&&req.method==='GET'){
+        json(res,200,{...ProfileParticipations.official(db,user.id),serverNow:Date.now()});return;
       }
       if(pathname==='/api/profile'&&req.method==='GET'){
         const world=refreshWorldSeason(db,user.id)?.save;
@@ -262,7 +273,7 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
         const now=Date.now(),world=refreshWorldSeason(db,user.id,now);if(world)Circuit.scheduleOfficial(db,user.id,world.save.seasons.current,now);
         const rows=db.prepare('SELECT id FROM tournaments WHERE user_id=? AND deleted_at IS NULL ORDER BY starts_at DESC').all(user.id);
         const events=rows.map(row=>Circuit.getTournament(db,user.id,row.id));
-        json(res,200,{tournaments:events.map(t=>tournamentPresentation.publicTournament(t)),officialHistory:tournamentPresentation.officialHistory(db,events),earnings:db.prepare('SELECT participant_id AS participantId,SUM(amount) AS amount FROM tournament_earnings e JOIN tournaments t ON t.id=e.tournament_id WHERE t.user_id=? GROUP BY participant_id').all(user.id),serverNow:now});return;
+        json(res,200,{tournaments:events.map(t=>tournamentPresentation.publicTournament(t)),tournamentResetId:db.prepare('SELECT reset_id FROM tournament_state_resets WHERE reset_id=?').get(TournamentReset.RESET_ID)?.reset_id||null,officialHistory:tournamentPresentation.officialHistory(db,events),earnings:db.prepare('SELECT participant_id AS participantId,SUM(amount) AS amount FROM tournament_earnings e JOIN tournaments t ON t.id=e.tournament_id WHERE t.user_id=? GROUP BY participant_id').all(user.id),serverNow:now});return;
       }
       if(pathname==='/api/tournaments'&&req.method==='POST'){
         const body=await readBody(req,8192),now=Date.now(),t=Circuit.createCustom(db,user.id,body,now);
@@ -275,7 +286,7 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
         if(req.method==='POST'){const body=await readBody(req,262144);let value;
           if(action==='team')value=Circuit.registerTeam(db,user.id,id,{name:body.name,participantIds:[user.id]},now);
           else if(action==='invite'){const team=Circuit.getTournament(db,user.id,id).teams.find(team=>team.id===body.teamId);if(!team?.participants.some(p=>p.id===user.id))throw fail(403,'You may invite bots to your own team');value=Circuit.inviteBot(db,user.id,id,body,now);}
-          else if(action==='start'){let t=Circuit.getTournament(db,user.id,id);t=tournamentRuntime.fillBots(db,user.id,t,now);value=Circuit.startTournament(db,user.id,id,now);}
+          else if(action==='start'){let t=Circuit.getTournament(db,user.id,id);if(t.kind==='custom')value=Circuit.advanceCustom(db,user.id,id,now);else{t=tournamentRuntime.fillBots(db,user.id,t,now);value=Circuit.startTournament(db,user.id,id,now);}}
           else if(action==='check-in'){value=Circuit.checkIn(db,user.id,id,{gameId:body.gameId},now);}
           else if(action==='play'){json(res,200,{context:tournamentRuntime.playContext(db,user.id,id,now,body),serverNow:now});return;}
           else if(action==='ready'){json(res,200,{context:tournamentRuntime.ready(db,user.id,id,body,now),serverNow:now});return;}

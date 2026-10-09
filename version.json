@@ -1,49 +1,77 @@
 {
-  "version": "1.13.0",
-  "applicationVersion": "1.13.0",
+  "version": "1.14.0",
+  "applicationVersion": "1.14.0",
   "weaponBalance": "9.0",
   "analyticsSchema": 1,
   "updateName": "ARENA REFINED",
-  "shellRevision": "arena-refined-2",
+  "shellRevision": "arena-refined-3",
   "channel": "live",
-  "releasedAt": "2026-10-08T13:56:28.705Z",
-  "notes": "ARENA REFINED combines all ten audits: clearer match entry, balanced bot rotation, dimensional rank inspection, consistent meter statistics and scheduled aggregate-kill tournaments. Weapon Balance 9.0 adds the FAL. Accounts, careers and historical records carry forward.",
+  "releasedAt": "2026-10-08T23:47:45.984Z",
+  "notes": "A unified dark-green interface, reliable tournament autofill and no-show recovery, broader bot weapon sampling, and Combined Stats including official tournament games. Weapon Balance 9.0 and existing account progress remain intact.",
   "categories": {
-    "Gameplay": [
-      "Mode entry prepares the match behind a separate loading screen for at least three seconds, then enters the existing pre-match countdown. Cancel and Retry cannot create duplicate matches.",
-      "Four background slots run two Team Deathmatches and two Deathmatches, with 50 persistent bots, fair waiting rotation and a 15-second restart cooldown. Tournament reservations take priority without duplicating bots."
+    "New": [
+      "Combined Stats includes accepted official tournament games alongside TDM, Deathmatch and Ranked, counting each match once. Custom, practice and test sessions remain excluded."
     ],
-    "Tournaments": [
-      "Skirmish Challenge Tournament runs every three calendar days at 7:30 PM Eastern, following daylight saving and the existing event anchor. Quarterfinals end at 7:53 PM, semifinals at 8:18 PM and the final at 8:59 PM.",
-      "Each scheduled game accepts check-in for 90 seconds inside two minutes of preparation. Fixed starts, roster locks, the first countdown and reconnect checkpoints share the saved schedule. Teams finishing early wait.",
-      "Play all three quarterfinal and semifinal games and all five final games. Aggregate team kills determine advancement; total team damage breaks a tie. Exact damage ties await an explicit ruling. Each game retains its 50-kill target and five-minute limit.",
-      "Absent humans are replaced by eligible persistent bots for the rest of the event; the replacement owns that slot’s payout. Events missed while the local authority is closed are cancelled without results or rewards.",
-      "Connected brackets, sortable team and player leaderboards, schedules, upcoming events and official history use persisted tournament records. Historical formats and custom names remain intact."
+    "Improved": [
+      "A shared dark-green presentation brings clearer model stages, controls, stat groups, tables and release history to Loadout, Operators, Phone, Weapon Meta, Tournaments, Store, Shop, Profiles and Settings.",
+      "Tournament rosters fill open positions with eligible persistent bots. Advance reservations let their background games finish before check-in, and absent humans receive a saved replacement at the deadline.",
+      "Bot weapon exploration uses actual samples from both background modes, with bounded opportunities for underused primaries and sidearms. Playstyle, familiarity and proven performance still influence each choice."
     ],
-    "Profiles": [
-      "Click a 3D ranked emblem to inspect actual Ranked Stats, rating progress and the complete current ladder.",
-      "Combined Stats counts unique casual TDM, casual Deathmatch and Ranked TDM matches once. Ratios use raw totals; official tournaments, custom matches and practice stay separate. Missing historical measurements are identified."
-    ],
-    "Presentation": [
-      "AK47 magazine ribs remain seated throughout rotation and reload. Lobby operators breathe subtly while their separate weapon rotates through a full turn.",
-      "Loadout bars use red through green to compare performance, retain exact numbers and invert lower-is-better values. Combat panels use neutral surfaces while preserving team colors.",
-      "All 26 ranked emblems have shared, dimensional 2.5D assets. Weapon ranges and travel speed display in meters and meters per second without resizing the arena or changing physical range behavior."
-    ],
-    "Weapon Balance 9.0": [
-      "Adds the semi-automatic FAL to the 15-weapon armory, bot selection, familiarity, audio, models, loadouts and statistics. Preferred engagement range is 48.61 m.",
-      "Applies the supplied Balance 9.0 values. The separate Weapon Balance entry lists exact numeric before/after changes. Previous patch telemetry archives once; lifetime statistics, careers and familiarity remain intact."
-    ],
-    "Fixes": [
-      "Upcoming official events no longer disappear at season boundaries. First-game countdowns, saved series totals, check-in deadlines and replacement records survive restart without duplicate rewards.",
-      "Custom team invitations remain editable while the roster is incomplete; background tournament allocation no longer takes a bot between invitations.",
-      "Updated application assets activate through the existing launcher and cache workflow, with recoverable migrations and stage-specific startup errors.",
-      "Large saved worlds report verified backup and migration stages during desktop startup. Active preparation can finish before authentication; stalled stages remain bounded and identifiable."
-    ],
-    "Removed": [
-      "Messages, conversation generation, conversation tools and connection settings are retired. Phone keeps Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta. Retired data is backed up before removal; bot personalities and combat behavior remain."
+    "Fixed": [
+      "Incomplete tournament state is reset once with a recoverable archive. Completed official history, accepted historical games, earnings and shared progression remain intact; the next official calendar retains its established sequence.",
+      "Tournament restart, no-show and reservation handling no longer waits indefinitely on absent participants or books one bot into simultaneous games. Genuine pool conflicts remain visible.",
+      "Combined profile ratios use unique accepted participation and raw totals; reconnect and repeated result delivery cannot duplicate contributions.",
+      "Weapon Meta range headings correctly identify meters; balance constants, projectile behavior, ratings and existing source statistics are unchanged."
     ]
   },
   "history": [
+    {
+      "version": "1.13.0",
+      "applicationVersion": "1.13.0",
+      "weaponBalance": "9.0",
+      "analyticsSchema": 1,
+      "updateName": "ARENA REFINED",
+      "shellRevision": "arena-refined-2",
+      "channel": "live",
+      "releasedAt": "2026-10-08T13:56:28.705Z",
+      "notes": "ARENA REFINED combines all ten audits: clearer match entry, balanced bot rotation, dimensional rank inspection, consistent meter statistics and scheduled aggregate-kill tournaments. Weapon Balance 9.0 adds the FAL. Accounts, careers and historical records carry forward.",
+      "categories": {
+        "Gameplay": [
+          "Mode entry prepares the match behind a separate loading screen for at least three seconds, then enters the existing pre-match countdown. Cancel and Retry cannot create duplicate matches.",
+          "Four background slots run two Team Deathmatches and two Deathmatches, with 50 persistent bots, fair waiting rotation and a 15-second restart cooldown. Tournament reservations take priority without duplicating bots."
+        ],
+        "Tournaments": [
+          "Skirmish Challenge Tournament runs every three calendar days at 7:30 PM Eastern, following daylight saving and the existing event anchor. Quarterfinals end at 7:53 PM, semifinals at 8:18 PM and the final at 8:59 PM.",
+          "Each scheduled game accepts check-in for 90 seconds inside two minutes of preparation. Fixed starts, roster locks, the first countdown and reconnect checkpoints share the saved schedule. Teams finishing early wait.",
+          "Play all three quarterfinal and semifinal games and all five final games. Aggregate team kills determine advancement; total team damage breaks a tie. Exact damage ties await an explicit ruling. Each game retains its 50-kill target and five-minute limit.",
+          "Absent humans are replaced by eligible persistent bots for the rest of the event; the replacement owns that slot’s payout. Events missed while the local authority is closed are cancelled without results or rewards.",
+          "Connected brackets, sortable team and player leaderboards, schedules, upcoming events and official history use persisted tournament records. Historical formats and custom names remain intact."
+        ],
+        "Profiles": [
+          "Click a 3D ranked emblem to inspect actual Ranked Stats, rating progress and the complete current ladder.",
+          "Combined Stats counts unique casual TDM, casual Deathmatch and Ranked TDM matches once. Ratios use raw totals; official tournaments, custom matches and practice stay separate. Missing historical measurements are identified."
+        ],
+        "Presentation": [
+          "AK47 magazine ribs remain seated throughout rotation and reload. Lobby operators breathe subtly while their separate weapon rotates through a full turn.",
+          "Loadout bars use red through green to compare performance, retain exact numbers and invert lower-is-better values. Combat panels use neutral surfaces while preserving team colors.",
+          "All 26 ranked emblems have shared, dimensional 2.5D assets. Weapon ranges and travel speed display in meters and meters per second without resizing the arena or changing physical range behavior."
+        ],
+        "Weapon Balance 9.0": [
+          "Adds the semi-automatic FAL to the 15-weapon armory, bot selection, familiarity, audio, models, loadouts and statistics. Preferred engagement range is 48.61 m.",
+          "Applies the supplied Balance 9.0 values. The separate Weapon Balance entry lists exact numeric before/after changes. Previous patch telemetry archives once; lifetime statistics, careers and familiarity remain intact."
+        ],
+        "Fixes": [
+          "Upcoming official events no longer disappear at season boundaries. First-game countdowns, saved series totals, check-in deadlines and replacement records survive restart without duplicate rewards.",
+          "Custom team invitations remain editable while the roster is incomplete; background tournament allocation no longer takes a bot between invitations.",
+          "Updated application assets activate through the existing launcher and cache workflow, with recoverable migrations and stage-specific startup errors.",
+          "Large saved worlds report verified backup and migration stages during desktop startup. Active preparation can finish before authentication; stalled stages remain bounded and identifiable."
+        ],
+        "Removed": [
+          "Messages, conversation generation, conversation tools and connection settings are retired. Phone keeps Live Scores, Spectate, Bot Leaderboard and Bot Weapon Meta. Retired data is backed up before removal; bot personalities and combat behavior remain."
+        ]
+      },
+      "databaseSchema": 10
+    },
     {
       "version": "1.12.1",
       "applicationVersion": "1.12.1",
@@ -318,5 +346,6 @@
         ]
       }
     }
-  ]
+  ],
+  "databaseSchema": 11
 }

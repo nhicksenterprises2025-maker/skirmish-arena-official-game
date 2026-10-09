@@ -66,19 +66,19 @@ function leaderboards(t,stats,liveGames=[]){
 function schedule(t,liveGames=[],metadata={},now=Date.now()){
  const value={status:t.kind==='official'?'unconfirmed':'event-time-only',eventStartsAt:t.startsAt,timezone:null,rounds:[],games:[],seriesGames:[],liveGames:liveGames.filter(g=>g.tournamentId===t.id).map(g=>({seriesId:g.seriesId??t.series.find(s=>g.gameId.startsWith(s.id+':game'))?.id??null,gameId:g.gameId,status:g.status,score:g.score,elapsedMs:g.elapsedMs,countdownRemainingMs:g.countdownRemainingMs??null})),message:t.kind==='official'?'The event date is saved. Fixed round windows and check-in times await confirmation.':'Custom event start time is saved. No fixed round timetable is configured.'};
  if(metadata.invalid){value.status='unavailable';value.message='Saved schedule information is unavailable.';return value;}
- if(t.kind!=='official'||!(t.schedulePolicy||metadata.schedule?.policy))return value;
+ if(!(t.schedulePolicy||metadata.schedule?.policy)||t.kind==='custom'&&!t.customTimetable)return value;
  try{
   // This reads a future explicitly persisted policy only. It does not confirm,
   // save or activate the planner's proposed timetable.
   const policy=Schedule.confirmedPolicy(t.schedulePolicy||metadata.schedule.policy),windows=Schedule.gameWindows(t,policy);
   value.status='confirmed';value.timezone=policy.timezone;value.games=windows.map(w=>({...w}));
-  value.rounds=Object.keys(policy.rounds).map(round=>{const group=windows.filter(w=>w.round===round);return {round,startsAt:group[0].checkInOpenAt,endsAt:group.at(-1).latestEndAt};});
-  value.seriesGames=t.series.flatMap(s=>windows.filter(w=>w.round===s.round).map(w=>{
+  value.rounds=Object.keys(policy.rounds).flatMap(round=>{const group=windows.filter(w=>w.round===round);return group.length?[{round,startsAt:Math.min(...group.map(w=>w.checkInOpenAt)),endsAt:Math.max(...group.map(w=>w.latestEndAt)),...(t.customTimetable?{provisional:true}:{})}]:[];});
+  value.seriesGames=t.series.flatMap(s=>windows.filter(w=>(!w.seriesId||w.seriesId===s.id)&&w.round===s.round).map(w=>{
    const gameId=s.id+':game'+w.gameNumber,saved=(s.games||[]).find(g=>g.id===gameId),record=t.scheduling?.games?.[gameId]||metadata.schedule?.gameStates?.[gameId]||{};
    const state=saved?{state:'FINALIZED',conflict:null}:Schedule.windowState(w,now,record);
    const publicConflicts=['GAME_OVERRAN_SCHEDULED_WINDOW','ROSTER_LOCK_MISSED_GAME_START','GAME_START_WINDOW_ELAPSED','PREPARATION_MISSED_GAME_START'];
    return {...w,seriesId:s.id,gameId,state:t.status==='CANCELLED'?'CANCELLED':state.state,checkedIn:!!record.checkIns?.[t.creatorId],rostersLockedAt:record.rostersLockedAt??null,readyAt:record.readyAt??null,startedAt:record.startedAt??null,replacements:record.replacements||[],conflict:state.conflict?(publicConflicts.includes(state.conflict)?state.conflict:'PREPARATION_ERROR'):null};
-  }));value.message='Saved authoritative round windows.';
+  }));value.message=t.customTimetable?'Custom games open check-in when their preceding pairing finishes. Future round times are assigned from actual results.':'Saved authoritative round windows.';
  }catch(error){if(error.code!=='TOURNAMENT_SCHEDULE_CONFLICT')throw error;value.status='conflict';value.timezone=null;value.rounds=[];value.games=[];value.seriesGames=[];value.message='Saved tournament timing is inconsistent and requires correction.';}
  return value;
 }

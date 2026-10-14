@@ -459,7 +459,81 @@
         "normal": "+Z",
         "safeInset": 5
       }
+    },
+    {
+      "name": "foundry_press",
+      "node": "foundry_press",
+      "file": "map-ecosystem.glb",
+      "dimensions": {
+        "x": 128.0,
+        "y": 89.0,
+        "z": 80.0
+      },
+      "castShadow": true,
+      "presentationOnly": true
+    },
+    {
+      "name": "foundry_rack",
+      "node": "foundry_rack",
+      "file": "map-ecosystem.glb",
+      "dimensions": {
+        "x": 160.0,
+        "y": 59.5,
+        "z": 80.0
+      },
+      "castShadow": true,
+      "presentationOnly": true
+    },
+    {
+      "name": "foundry_workbench",
+      "node": "foundry_workbench",
+      "file": "map-ecosystem.glb",
+      "dimensions": {
+        "x": 112.0,
+        "y": 56.0,
+        "z": 64.0
+      },
+      "castShadow": true,
+      "presentationOnly": true
+    },
+    {
+      "name": "relay_mast",
+      "node": "relay_mast",
+      "file": "map-ecosystem.glb",
+      "dimensions": {
+        "x": 112.0,
+        "y": 182.5,
+        "z": 112.0
+      },
+      "castShadow": true,
+      "presentationOnly": true
+    },
+    {
+      "name": "relay_generator",
+      "node": "relay_generator",
+      "file": "map-ecosystem.glb",
+      "dimensions": {
+        "x": 176.0,
+        "y": 62.0,
+        "z": 80.0
+      },
+      "castShadow": true,
+      "presentationOnly": true
+    },
+    {
+      "name": "relay_barrier",
+      "node": "relay_barrier",
+      "file": "map-ecosystem.glb",
+      "dimensions": {
+        "x": 144.0,
+        "y": 60.0,
+        "z": 64.0
+      },
+      "castShadow": true,
+      "presentationOnly": true
     }
   ],
-  "detailGenerator": "Blender 5.2.2 LTS; tools/blender_live_circuit.py"
+  "detailGenerator": "Blender 5.2.2 LTS; tools/blender_live_circuit.py",
+  "mapGenerator": "Blender 5.2.2 LTS; tools/blender_map_ecosystem.py",
+  "mapRevision": "map-ecosystem-1"
 }

@@ -53,7 +53,8 @@
  // Confirmed 2026-10-07: square 2 m² cells, with the existing world unchanged.
  // Every future map declares its own dimensions/calibration here; neither the
  // renderer nor weapon tuning interprets these cells as legacy weapon tiles.
- const MAPS=Object.freeze({'brightfield-blocks':calibrateMap({mapId:'brightfield-blocks',calibrationId:'brightfield-square-2m2-v1',calibrationState:'confirmed',worldWidth:4320,worldHeight:2880,gridColumns:135,gridRows:90,tileAreaSquareMeters:2,tileShape:'square'})});
+ const catalog=typeof module!=='undefined'&&module.exports?require('./map-data.js'):root.SARMaps;
+ const MAPS=Object.freeze(Object.fromEntries(catalog.list().map(map=>[map.id,calibrateMap({mapId:map.id,calibrationId:map.id==='brightfield-blocks'?'brightfield-square-2m2-v1':map.id+'-square-2m2-v1',calibrationState:'confirmed',worldWidth:map.world.w,worldHeight:map.world.h,gridColumns:map.grid.columns,gridRows:map.grid.rows,tileAreaSquareMeters:map.grid.tileAreaM2,tileShape:'square'})])));
  function mapCalibration(mapId){const map=MAPS[mapId];if(!map)throw new RangeError('Unknown map calibration: '+mapId);return map;}
  function worldProvenance(map){scale(map);return Object.freeze({distanceUnit:'world-unit',sourceUnitsId:LEGACY_WEAPON_UNITS.id,legacyWorldUnitsPerTile:LEGACY_WEAPON_UNITS.worldUnitsPerTile,mapId:map.mapId,calibrationId:map.calibrationId,mapCalibration:map});}
  const api=Object.freeze({LEGACY_WEAPON_UNITS,MAPS,mapCalibration,worldProvenance,calibrateMap,legacyWeaponDistanceToWorld,legacyWeaponSpeedToWorldPerSecond,worldDistanceToMeters,metersToWorldDistance,worldSpeedToMetersPerSecond,legacyWeaponDistanceToMeters,legacyWeaponSpeedToMetersPerSecond,legacyFalloffFractionToPercentPerMeter,resolveDistanceMeters,averageDistanceMeters});

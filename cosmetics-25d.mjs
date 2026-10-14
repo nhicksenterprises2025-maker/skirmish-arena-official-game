@@ -5,7 +5,21 @@ import {GLTFLoader} from './vendor/addons/loaders/GLTFLoader.js';
 const manifestURL=new URL('./assets/25d/cosmetics/manifest.json',import.meta.url);
 const records=new Map(),pending=new Map();
 let manifestPromise,clock=0;
+let victoryPromise,victoryPoses;
 const MAX_IDLE_ITEMS=6;
+export async function ensureVictoryPoseAssets(pose){
+  if(!victoryPromise)victoryPromise=fetch(new URL('./assets/25d/cosmetics/victory-poses.json',import.meta.url)).then(async response=>{
+    if(!response.ok)throw new Error('Victory poses unavailable');const data=await response.json();
+    if(data.schema!==1||!data.poses)throw new Error('Victory pose schema unsupported');
+    for(const value of Object.values(data.poses)){
+      const numbers=[value.torsoZ,value.feetSpread,value.footForward,...(value.hands||[]).flat(),...(value.weapon?.mount||[]),value.weapon?.height??0,value.weapon?.angle??0];
+      if(numbers.some(number=>!Number.isFinite(number))||!Array.isArray(value.hands)||value.hands.length!==2||value.hands.some(hand=>hand.length!==3))throw new Error('Victory pose geometry invalid');
+    }
+    victoryPoses=data.poses;
+  }).catch(error=>{victoryPromise=null;throw error;});
+  await victoryPromise;if(!victoryPoses[pose])throw new Error('Victory pose unavailable: '+pose);return victoryPoses[pose];
+}
+export const readyVictoryPose=pose=>victoryPoses?.[pose]||null;
 export function cosmeticKey(value){return value?.id&&value?.operatorId?`${value.id}:${value.operatorId}:${value.styleId||'main'}`:'';}
 async function manifest(){
   if(!manifestPromise)manifestPromise=fetch(manifestURL).then(async response=>{

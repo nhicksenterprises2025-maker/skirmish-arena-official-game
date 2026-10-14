@@ -268,6 +268,10 @@ def build_item(operator,variant,price):
 for operator in PALETTES:
     for variant in ('helmet-off','polar-camo','carbon-camo'):build_item(operator,variant,500)
 for variant,(operator,price,_) in DESIGNS.items():build_item(operator,variant,price)
+# The wardrobe is shared with later collections. Rebuilding this source may
+# replace its own exports, but never retire another editable collection.
+for ident,item in (PREVIOUS or {}).get('cosmetics',{}).items():
+    ITEMS.setdefault(ident,item)
 for i,r in enumerate(ROOTS):r.location=((i%8)*64,(i//8)*80,0)
 bpy.context.scene.unit_settings.system='NONE'
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'overclock-collection.blend'))

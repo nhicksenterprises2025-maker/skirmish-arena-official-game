@@ -39,7 +39,7 @@ async function open(screen){
  await open('loadout');const preview=page.locator('[data-weapon-card="AR-15"] canvas');await preview.click();await page.locator('[data-weapon-card="AR-15"] [data-preview-action="right"]').click();
  await open('operator');const other=page.locator('[data-set-skin="1"]');await other.click();assert.equal(await page.evaluate(()=>SAR.getConfig().skin),1);
  await open('meta');await page.locator('[data-sort-key="kills"]').first().click();assert.ok(await page.locator('[data-sort-key="kills"]').first().textContent());
- await open('phone');const apps=await page.locator('[data-phone-open]').count();assert.equal(apps,4);await page.locator('[data-phone-open="scores"]').click();await page.waitForSelector('.phone-scroll');
+ await open('phone');const apps=await page.locator('[data-phone-open]').count();assert.equal(apps,5);await page.locator('[data-phone-open="scores"]').click();await page.waitForSelector('.phone-scroll');
  await open('store');await page.locator('[data-commerce="inspect"]').first().click();await page.waitForSelector('.commerce-detail');
  await open('shop');const checkout=await page.locator('[data-commerce="checkout"]').all();assert.ok(checkout.length>=6);if(!(await page.evaluate(()=>SARCommerce.getStatus().verified)))assert.ok(await checkout[0].isDisabled());
  await open('profile');await page.evaluate(()=>SAR.openCombinedProfile());await page.waitForSelector('#modalContent[data-view="combined-profile"]');

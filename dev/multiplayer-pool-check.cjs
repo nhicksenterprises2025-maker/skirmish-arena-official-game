@@ -1,0 +1,20 @@
+'use strict';
+// Shipped background allocation/physics with synthetic leases, no account files.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{engine}=require('./simulate.cjs');
+const source=fs.readFileSync(path.join(__dirname,'../game.js'),'utf8').replace(/\}\)\(\);\s*$/,'window.__POOL={covers:backgroundLeaseCovers,hold:holdUnleasedBackgroundSlots,resume:resumeWaitingSlots,slots:backgroundBotSlots};})();');
+const e=engine({},source),{state,SAVE,diagnostics}=e.dev.inspect(),pool=e.context.__POOL;
+e.context.SARCloud.state={account:{id:'owner:pool'}};
+const network={connected:true,background:{required:true,poolOwnerId:'owner:pool',ready:false,validUntil:0,grantedSlots:[]}};e.context.SARMultiplayer={state:()=>network};
+const slots=()=>JSON.parse(JSON.stringify(pool.slots())),grant=()=>Object.assign(network.background,{ready:true,validUntil:e.context.performance.now()+5700,grantedSlots:slots()});
+const positions=()=>JSON.stringify(state.actors.map(a=>[a.profile?.id,a.x,a.y,a.hp])),progress=()=>JSON.stringify([SAVE.playerCareer,SAVE.progression,SAVE.ranked,SAVE.patchArchives.length,diagnostics.completedMatches]);
+const originalProgress=progress(),before=positions();e.step();assert.ok(state.matches.slice(0,4).every(m=>m.status==='waiting'));assert.equal(positions(),before);assert.equal(progress(),originalProgress);
+grant();pool.resume();assert.ok(state.matches.slice(0,4).every(m=>m.status!=='waiting'));assert.ok(state.matches.slice(0,4).every(m=>pool.covers(m)));assert.equal(new Set(slots().flatMap(s=>s.botIds)).size,40);
+console.log('PASS live owner background matches wait for acknowledged whole-slot leases before physics, then resume the existing four slots');
+const first=state.matches[0];network.background.grantedSlots[0].matchId='obsolete-match';assert.equal(pool.covers(first),false);pool.hold();assert.equal(first.status,'waiting');assert.ok(state.matches.slice(1,4).every(m=>m.status!=='waiting'));grant();pool.resume();
+network.background.grantedSlots[0].botIds.pop();assert.equal(pool.covers(first),false);pool.hold();assert.equal(first.status,'waiting');grant();pool.resume();
+console.log('PASS stale match IDs and incomplete rosters cannot authorize a slot; unaffected matches retain their grants');
+e.ui.advance(6000);const expiredPositions=positions();e.step();assert.ok(state.matches.slice(0,4).every(m=>m.status==='waiting'));assert.equal(positions(),expiredPositions);assert.equal(progress(),originalProgress);grant();pool.resume();network.connected=false;pool.hold();assert.ok(state.matches.slice(0,4).every(m=>m.status==='waiting'));network.connected=true;
+console.log('PASS monotonic lease expiry and disconnect stop combat without match completion, rewards or resetting careers');
+for(const actor of first.participants.splice(-2)){actor.match=null;state.idleBots.push(actor);}const proposals=slots();assert.ok(proposals.every(s=>s.botIds.length===10));assert.equal(new Set(proposals.flatMap(s=>s.botIds)).size,40);grant();pool.resume();assert.equal(first.participants.length,10);assert.equal(state.idleBots.length,10);assert.equal(progress(),originalProgress);
+network.background.required=false;assert.ok(state.matches.slice(0,4).every(m=>pool.covers(m)));network.background.required=true;first.eligible=false;assert.equal(pool.covers(first),true);
+console.log('PASS partial waiting slots propose eligible idle bots once; non-owner and isolated practice behavior remains unchanged');

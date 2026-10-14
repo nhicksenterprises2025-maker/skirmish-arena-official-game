@@ -3,6 +3,7 @@ const http=require('node:http');
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
+const gzipReply=require('node:util').promisify(require('node:zlib').gzip);
 const bcrypt=require('bcryptjs');
 const {createDatabase}=require('./db.cjs');
 const {readWorld,refreshWorldSeason,migrateLocalWorld,writeWorld,MAX_WORLD_BYTES,fail}=require('./world.cjs');
@@ -12,6 +13,13 @@ const TournamentReset=require('./tournament-reset.cjs');
 const ProfileParticipations=require('./profile-participations.cjs');
 const Commerce=require('./commerce-catalog.cjs'),Wallet=require('./wallet.cjs');
 const Payments=require('./payments.cjs');
+const Social=require('./social.cjs'),{createMultiplayer}=require('./multiplayer.cjs');
+const UpdateFeed=require('./update-feed.cjs');
+const CloudBootstrap=require('./cloud-bootstrap.cjs');
+const Competitive=require('./competitive-progression.cjs');
+const Mastery=require('./weapon-mastery.cjs');
+const Factions=require('./factions.cjs');
+const Replays=require('./replays.cjs');
 
 const ROOT=path.resolve(__dirname,'..');
 const SESSION_MS=30*24*60*60*1000;
@@ -20,7 +28,23 @@ const audioManifest=JSON.parse(fs.readFileSync(path.join(ROOT,'assets/audio/LICE
 STATIC.add('/mode-entry.js');
 STATIC.add('/profile-stats.js');
 STATIC.add('/distance-units.js');
+STATIC.add('/map-data.js');
+STATIC.add('/mode-rules.js');
+STATIC.add('/competitive-progression.js');
+STATIC.add('/weapon-mastery.js');
+STATIC.add('/faction-identity.js');
+STATIC.add('/factions-ui.js');
+STATIC.add('/factions-ui.css');
+for(const file of ['replay-playback.js','replays-ui.js','replays-ui.css'])STATIC.add('/'+file);
+STATIC.add('/assets/25d/mastery/manifest.json');
+STATIC.add('/assets/25d/mastery/weapon-mastery.glb');
+for(const file of fs.readdirSync(path.join(ROOT,'assets/branding')))if(/^[-a-z0-9]+\.(png|svg)$/.test(file))STATIC.add('/assets/branding/'+file);
+STATIC.add('/assets/25d/map-ecosystem.glb');
+for(const asset of ['multiplayer.js','multiplayer-ui.js','multiplayer-ui.css'])STATIC.add('/'+asset);
 for(const asset of ['commerce.js','commerce.css','refined-ui.css','cosmetics-25d.mjs','assets/25d/cosmetics/manifest.json'])STATIC.add('/'+asset);
+STATIC.add('/victory-presentation.js');
+for(const asset of ['assets/25d/cosmetics/content-manifest.json','assets/25d/cosmetics/victory-poses.json'])STATIC.add('/'+asset);
+for(const item of Commerce.content)if(item.asset)STATIC.add(item.asset);
 // Runtime cosmetic exports only; editable sources remain outside the server.
 const cosmeticManifestFile=path.join(ROOT,'assets/25d/cosmetics/manifest.json');
 if(fs.existsSync(cosmeticManifestFile)){
@@ -94,9 +118,9 @@ function newSession(db,userId,req,res){
   db.prepare('INSERT INTO sessions(token_hash,user_id,created_at,expires_at,last_seen_at) VALUES(?,?,?,?,?)').run(sha(token),userId,now,now+SESSION_MS,now);
   res.setHeader('set-cookie',sessionCookie(token,req));
 }
-function staticFile(req,res,pathname){
+function staticFile(req,res,pathname,db){
   if(req.method!=='GET'&&req.method!=='HEAD')throw fail(405,'Method not allowed');
-  if(!STATIC.has(pathname))throw fail(404,'File not found');
+  if(!STATIC.has(pathname)&&!Mastery.publicAssets(db).includes(pathname))throw fail(404,'File not found');
   const file=path.join(ROOT,pathname==='/'?'index.html':pathname.slice(1));
   if(!fs.existsSync(file))throw fail(404,'This build asset is not installed');
   const info=fs.statSync(file),type=MIME[path.extname(file)]||'application/octet-stream';
@@ -119,14 +143,17 @@ function adminAuthorized(req){
   const a=Buffer.from(secret),b=Buffer.from(String(token));
   return a.length===b.length&&crypto.timingSafeEqual(a,b);
 }
-function createServer({db=createDatabase(),paymentOptions={}}={}){
+function createServer({db=createDatabase(),paymentOptions={},multiplayerOptions={},commerceEnvironment=Wallet.environment()}={}){
+  let replayDownloads=0;
   const runtimeVersion=versionInfo().version;
-  const commerceEnvironment=Wallet.environment();
+  Wallet.environment(commerceEnvironment);Competitive.setEnvironment(db,commerceEnvironment);Mastery.configure(db);for(const asset of Mastery.publicAssets(db))STATIC.add(asset);
   const payments=Payments.createPayments({db,...paymentOptions});
   const limits=new Map();
+  function teamParticipants(user){const party=Social.getParty(db,user.id);if(!party)return [user.id];if(party.leaderId!==user.id)throw fail(403,'The party leader registers the team');if(party.members.length>5||party.members.some(member=>!member.ready))throw fail(409,'A tournament team needs at most five ready party members');return party.members.map(member=>member.id);}
   const server=http.createServer(async(req,res)=>{
     try{
       const requestUrl=new URL(req.url,'http://localhost'),pathname=requestUrl.pathname;
+      if(pathname==='/api/admin/cloud-bootstrap'){await CloudBootstrap.handle(req,res,db);return;}
       // Stripe signatures authenticate this one public endpoint. Preserve the
       // original raw bytes; browser/session write routes still enforce Origin.
       if(pathname==='/api/payments/stripe/webhook'&&req.method==='POST'){
@@ -138,13 +165,14 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
         const html='<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Skirmish Arena — Test checkout</title><body><h1>Return to Skirmish Arena</h1><p>This was a Sandbox test checkout. Return to the Shop and check payment status. This page does not confirm a payment or deliver credits.</p></body></html>';
         res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; frame-ancestors 'none'; base-uri 'none'",'x-content-type-options':'nosniff'});res.end(html);return;
       }
-      if(!pathname.startsWith('/api/')){staticFile(req,res,pathname);return;}
+      if(!pathname.startsWith('/api/')){staticFile(req,res,pathname,db);return;}
       if(pathname==='/api/status'&&req.method==='GET'){json(res,200,{ok:true,version:runtimeVersion,serverNow:Date.now(),databaseSchema:db.prepare('PRAGMA user_version').get().user_version});return;}
       if(pathname==='/api/version'&&req.method==='GET'){json(res,200,{...versionInfo(),serverNow:Date.now()});return;}
       if(['/api/launcher/update','/api/launcher/update.sig'].includes(pathname)&&req.method==='GET'){
         const manifest=path.join(__dirname,'releases',pathname.endsWith('.sig')?'update.json.sig':'update.json');
-        if(!fs.existsSync(manifest)){res.writeHead(204,{'cache-control':'no-store'});res.end();return;}
-        const data=fs.readFileSync(manifest);res.writeHead(200,{'content-type':pathname.endsWith('.sig')?'text/plain; charset=utf-8':'application/json','content-length':data.length,'cache-control':'no-store'});res.end(data);return;
+        const data=fs.existsSync(manifest)?fs.readFileSync(manifest):await UpdateFeed.read(pathname.endsWith('.sig')?'update.json.sig':'update.json');
+        if(!data){res.writeHead(204,{'cache-control':'no-store'});res.end();return;}
+        res.writeHead(200,{'content-type':pathname.endsWith('.sig')?'text/plain; charset=utf-8':'application/json','content-length':data.length,'cache-control':'no-store'});res.end(data);return;
       }
       if(pathname.startsWith('/api/launcher/download/')&&['GET','HEAD'].includes(req.method)){
         let name;try{name=decodeURIComponent(pathname.slice('/api/launcher/download/'.length));}catch{throw fail(400,'Invalid installer name');}
@@ -164,6 +192,7 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
         json(res,200,{authenticated:!!user,account:user?accountJson(db,user):null,serverNow:Date.now(),version:versionInfo().version});return;
       }
       if(pathname==='/api/auth/signup'&&req.method==='POST'){
+        if(CloudBootstrap.pending(db))throw fail(503,'Account migration is being prepared. Please try again shortly.');
         throttle(limits,req,'signup',6,3600000);
         const body=await readBody(req,4096),username=String(body.username||'').trim(),password=body.password;
         if(!validUsername(username))throw fail(400,'Username must be 3–24 letters, numbers, or underscores');
@@ -213,6 +242,32 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
         res.setHeader('set-cookie',expiredCookie(req));json(res,200,{ok:true});return;
       }
       const user=requireSession(db,req);
+      if(pathname==='/api/replays'||pathname.startsWith('/api/replays/')){
+        throttle(limits,req,'replays:'+user.id,60,60000);const download=req.method==='GET'&&/^\/api\/replays\/[^/]+$/.test(pathname)&&!pathname.endsWith('/storage');
+        if(download){throttle(limits,req,'replay-download:'+user.id,10,60000);if(replayDownloads>=2)throw fail(429,'Replay downloads are busy. Try again shortly.');replayDownloads++;}
+        try{const body=req.method==='GET'?{}:await readBody(req,2048),response=Replays.handle({db,user,method:req.method,pathname,body}),sent=download?new Promise(resolve=>{res.once('finish',resolve);res.once('close',resolve);}):null,gzip=(req.headers['accept-encoding']||'').split(',').some(item=>{const [name,...params]=item.trim().split(';');return name==='gzip'&&!params.some(value=>/^q=0(?:\.0+)?$/.test(value.trim()));});
+          if(download&&gzip){const text=JSON.stringify(response.data);if(Buffer.byteLength(text)>64*1024*1024)throw fail(413,'Replay download exceeds its supported size.');const encoded=await gzipReply(text,{level:3});if(res.destroyed)return;res.writeHead(response.status,{'content-type':'application/json; charset=utf-8','content-encoding':'gzip','content-length':encoded.length,'vary':'Accept-Encoding','cache-control':'no-store','x-content-type-options':'nosniff'});res.end(encoded);}
+          else json(res,response.status,response.data);if(sent)await sent;return;
+        }finally{if(download)replayDownloads--;}
+      }
+      if(pathname==='/api/factions'||pathname.startsWith('/api/factions/')){throttle(limits,req,'factions:'+user.id,120,60000);const body=req.method==='GET'?{}:await readBody(req,8192);const response=Factions.handle({db,user,method:req.method,pathname,body,url:requestUrl});if(req.method!=='GET')multiplayer.socialChanged();json(res,response.status,response.data);return;}
+      if(['/api/mastery','/api/mastery/progression'].includes(pathname)&&req.method==='GET'){json(res,200,{mastery:Mastery.snapshot(db,user.id,Date.now(),commerceEnvironment)});return;}
+      if(['/api/mastery/rewards/claim','/api/mastery/rewards/equip'].includes(pathname)&&req.method==='POST'){throttle(limits,req,'mastery:'+user.id,60,60000);const body=await readBody(req,8192),response=pathname.endsWith('/claim')?Mastery.claim(db,user.id,body,Date.now(),commerceEnvironment):Mastery.equip(db,user.id,body,Date.now(),commerceEnvironment);multiplayer.socialChanged();json(res,200,response);return;}
+      if(pathname==='/api/competitive/progression'&&req.method==='GET'){json(res,200,{competitive:Competitive.snapshot(db,user.id,Date.now(),commerceEnvironment)});return;}
+      if(pathname==='/api/competitive/leaderboard'&&req.method==='GET'){json(res,200,Competitive.leaderboard(db,{scope:requestUrl.searchParams.get('scope')||'current'}));return;}
+      if(['/api/competitive/rewards/claim','/api/competitive/rewards/equip'].includes(pathname)&&req.method==='POST'){throttle(limits,req,'competitive:'+user.id,60,60000);const body=await readBody(req,8192),response=pathname.endsWith('/claim')?Competitive.claim(db,user.id,body,Date.now(),commerceEnvironment):Competitive.equip(db,user.id,body,Date.now(),commerceEnvironment);multiplayer.socialChanged();json(res,200,response);return;}
+      if(pathname.startsWith('/api/social/')){
+        throttle(limits,req,'social:'+user.id,180,60000);
+        const body=req.method==='GET'?{}:await readBody(req,16384);
+        const response=Social.handle({db,user,method:req.method,pathname,body,url:requestUrl,now:Date.now()});
+        if(!response)throw fail(404,'Social action not found');if(req.method!=='GET')multiplayer.socialChanged();json(res,response.status,response.data);return;
+      }
+      if(pathname==='/api/multiplayer/state'&&req.method==='GET'){json(res,200,multiplayer.state(user));return;}
+      if(pathname==='/api/multiplayer/voice-config'&&req.method==='GET'){json(res,200,multiplayer.iceConfig());return;}
+      if(pathname==='/api/multiplayer/action'&&req.method==='POST'){
+        throttle(limits,req,'multiplayer:'+user.id,180,60000);const body=await readBody(req,16384);
+        json(res,200,multiplayer.action(user,body.type,body.data||{}));return;
+      }
       Wallet.ensureWallet(db,user.id,commerceEnvironment);
       if(pathname==='/api/commerce/catalog'&&req.method==='GET'){
         Wallet.ensureWallet(db,user.id,commerceEnvironment);
@@ -220,8 +275,8 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
         json(res,200,{...Commerce.catalog(commerceEnvironment),...payments.availability()});return;
       }
       if(pathname==='/api/wallet'&&req.method==='GET'){json(res,200,Wallet.snapshot(db,user.id,commerceEnvironment));return;}
-      if(pathname==='/api/store/purchase'&&req.method==='POST'){throttle(limits,req,'store-purchase',60,60000);json(res,200,Wallet.purchase(db,user.id,await readBody(req,2048),commerceEnvironment));return;}
-      if(pathname==='/api/store/equip'&&req.method==='POST'){json(res,200,Wallet.equip(db,user.id,await readBody(req,2048),commerceEnvironment));return;}
+      if(pathname==='/api/store/purchase'&&req.method==='POST'){throttle(limits,req,'store-purchase',60,60000);const response=Wallet.purchase(db,user.id,await readBody(req,2048),commerceEnvironment);multiplayer.socialChanged();json(res,200,response);return;}
+      if(pathname==='/api/store/equip'&&req.method==='POST'){const response=Wallet.equip(db,user.id,await readBody(req,2048),commerceEnvironment);multiplayer.socialChanged();json(res,200,response);return;}
       if(pathname==='/api/wallet/match-report'&&req.method==='POST'){throttle(limits,req,'wallet-report',120,60000);json(res,202,Wallet.reportMatch(db,user.id,await readBody(req,2048),commerceEnvironment));return;}
       if(pathname==='/api/shop/checkout'&&req.method==='POST'){throttle(limits,req,'checkout:'+user.id,20,60000);json(res,200,await payments.checkout(user.id,await readBody(req,2048)));return;}
       if(pathname==='/api/shop/orders'&&req.method==='GET'){throttle(limits,req,'payment-status:'+user.id,120,60000);json(res,200,payments.list(user.id));return;}
@@ -232,14 +287,15 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
       if(pathname==='/api/world'&&req.method==='GET'){
         const now=Date.now(),world=refreshWorldSeason(db,user.id,now);
         if(world)Circuit.scheduleOfficial(db,user.id,world.save.seasons.current,now);
-        const rows=db.prepare("SELECT id FROM tournaments WHERE user_id=? AND kind IN ('official','custom') AND status NOT IN ('COMPLETED','CANCELLED') AND deleted_at IS NULL AND (status='ACTIVE' OR starts_at<=?) ORDER BY starts_at,id").all(user.id,now+7*60000);
-        const reservations=rows.map(row=>Circuit.prepareReservations(db,user.id,row.id,now)).filter(t=>t.status==='ACTIVE'||t.scheduling?.reservations?.length||t.scheduling?.conflicts?.length);
+        const owner=world?Circuit.officialOwnerId(db,user.id):user.id,rows=db.prepare("SELECT id,user_id FROM tournaments WHERE (user_id=? OR user_id=? AND kind='official') AND kind IN ('official','custom') AND status NOT IN ('COMPLETED','CANCELLED') AND deleted_at IS NULL AND (status='ACTIVE' OR starts_at<=?) ORDER BY starts_at,id").all(user.id,owner,now+7*60000);
+        const reservations=rows.map(row=>Circuit.prepareReservations(db,row.user_id,row.id,now)).filter(t=>t.status==='ACTIVE'||t.scheduling?.reservations?.length||t.scheduling?.conflicts?.length);
         json(res,200,{world,tournamentResetId:db.prepare('SELECT reset_id FROM tournament_state_resets WHERE reset_id=?').get(TournamentReset.RESET_ID)?.reset_id||null,tournamentReservations:reservations.map(t=>tournamentPresentation.publicTournament(t)),serverNow:now});return;
       }
       if(pathname==='/api/world'&&req.method==='PUT'){
         throttle(limits,req,'world',240,60000);
         const body=await readBody(req),baseRevision=Number(body.baseRevision);
         if(!Number.isInteger(baseRevision)||baseRevision<0)throw fail(400,'A cloud revision is required');
+        multiplayer.protectWorld(user,body.save,readWorld(db,user.id)?.save);
         const result=writeWorld(db,user.id,body.save,baseRevision);
         json(res,200,result);return;
       }
@@ -247,6 +303,7 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
         throttle(limits,req,'import',10,3600000);
         const body=await readBody(req);
         const migrated=migrateLocalWorld(body.save);
+        multiplayer.protectWorld(user,migrated,readWorld(db,user.id)?.save);
         const result=writeWorld(db,user.id,migrated,0,{importing:true,originalSave:body.save});
         json(res,201,{...result,save:migrated});return;
       }
@@ -271,22 +328,23 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
         // Resolve an expired season before reading the calendar. The background
         // runtime may not have refreshed its cache yet after a long closure.
         const now=Date.now(),world=refreshWorldSeason(db,user.id,now);if(world)Circuit.scheduleOfficial(db,user.id,world.save.seasons.current,now);
-        const rows=db.prepare('SELECT id FROM tournaments WHERE user_id=? AND deleted_at IS NULL ORDER BY starts_at DESC').all(user.id);
+        const owner=world?Circuit.officialOwnerId(db,user.id):user.id,rows=db.prepare("SELECT id FROM tournaments WHERE (user_id=? OR id IN (SELECT tournament_id FROM tournament_registrations WHERE participant_id=? AND kind='user') OR user_id=? AND kind='official' AND status NOT IN ('COMPLETED','CANCELLED') AND (status='ACTIVE' OR starts_at>=?)) AND deleted_at IS NULL ORDER BY starts_at DESC").all(user.id,user.id,owner,now);
         const events=rows.map(row=>Circuit.getTournament(db,user.id,row.id));
-        json(res,200,{tournaments:events.map(t=>tournamentPresentation.publicTournament(t)),tournamentResetId:db.prepare('SELECT reset_id FROM tournament_state_resets WHERE reset_id=?').get(TournamentReset.RESET_ID)?.reset_id||null,officialHistory:tournamentPresentation.officialHistory(db,events),earnings:db.prepare('SELECT participant_id AS participantId,SUM(amount) AS amount FROM tournament_earnings e JOIN tournaments t ON t.id=e.tournament_id WHERE t.user_id=? GROUP BY participant_id').all(user.id),serverNow:now});return;
+        const earnings=events.length?db.prepare('SELECT e.participant_id AS participantId,SUM(e.amount) AS amount FROM tournament_earnings e JOIN tournaments t ON t.id=e.tournament_id WHERE t.id IN ('+events.map(()=>'?').join(',')+') AND (t.user_id=? OR e.participant_id=?) GROUP BY e.participant_id').all(...events.map(event=>event.id),user.id,user.id):[];
+        json(res,200,{tournaments:events.map(t=>tournamentPresentation.publicTournament(t)),tournamentResetId:db.prepare('SELECT reset_id FROM tournament_state_resets WHERE reset_id=?').get(TournamentReset.RESET_ID)?.reset_id||null,officialHistory:tournamentPresentation.officialHistory(db,events),earnings,serverNow:now});return;
       }
       if(pathname==='/api/tournaments'&&req.method==='POST'){
         const body=await readBody(req,8192),now=Date.now(),t=Circuit.createCustom(db,user.id,body,now);
-        Circuit.registerTeam(db,user.id,t.id,{name:user.username+' Circuit',participantIds:[user.id]},now);json(res,201,{tournament:tournamentPresentation.publicTournament(Circuit.getTournament(db,user.id,t.id))});return;
+        Circuit.registerTeam(db,user.id,t.id,{name:user.username+' Circuit',participantIds:teamParticipants(user)},now);json(res,201,{tournament:tournamentPresentation.publicTournament(Circuit.getTournament(db,user.id,t.id))});return;
       }
       const circuitRoute=pathname.match(/^\/api\/tournaments\/([a-zA-Z0-9-]+)(?:\/(team|invite|start|play|check-in|ready|heartbeat|result))?$/);
       if(circuitRoute){const [,id,action]=circuitRoute,now=Date.now();
         if(req.method==='DELETE'&&!action){const body=await readBody(req,8192),value=Circuit.deleteCustom(db,user.id,id,body.confirmedName,now,adminAuthorized(req));tournamentRuntime.cancel(db,id);json(res,200,value);return;}
-        if(req.method==='GET'&&!action){const t=Circuit.getTournament(db,user.id,id);json(res,200,{...tournamentPresentation.detail(db,t,tournamentRuntime.presentationGames(db,t.id),now),serverNow:now});return;}
+        if(req.method==='GET'&&!action){const t=Circuit.getTournament(db,user.id,id);json(res,200,{...tournamentPresentation.detail(db,t,tournamentRuntime.presentationGames(db,t.id),now,user.id),serverNow:now});return;}
         if(req.method==='POST'){const body=await readBody(req,262144);let value;
-          if(action==='team')value=Circuit.registerTeam(db,user.id,id,{name:body.name,participantIds:[user.id]},now);
+          if(action==='team')value=Circuit.registerTeam(db,user.id,id,{name:body.name,participantIds:teamParticipants(user)},now);
           else if(action==='invite'){const team=Circuit.getTournament(db,user.id,id).teams.find(team=>team.id===body.teamId);if(!team?.participants.some(p=>p.id===user.id))throw fail(403,'You may invite bots to your own team');value=Circuit.inviteBot(db,user.id,id,body,now);}
-          else if(action==='start'){let t=Circuit.getTournament(db,user.id,id);if(t.kind==='custom')value=Circuit.advanceCustom(db,user.id,id,now);else{t=tournamentRuntime.fillBots(db,user.id,t,now);value=Circuit.startTournament(db,user.id,id,now);}}
+          else if(action==='start'){let t=Circuit.getTournament(db,user.id,id);if(t.creatorId!==user.id)throw fail(403,'Only the event owner can start a tournament');if(t.kind==='custom')value=Circuit.advanceCustom(db,user.id,id,now);else{t=tournamentRuntime.fillBots(db,user.id,t,now);value=Circuit.startTournament(db,user.id,id,now);}}
           else if(action==='check-in'){value=Circuit.checkIn(db,user.id,id,{gameId:body.gameId},now);}
           else if(action==='play'){json(res,200,{context:tournamentRuntime.playContext(db,user.id,id,now,body),serverNow:now});return;}
           else if(action==='ready'){json(res,200,{context:tournamentRuntime.ready(db,user.id,id,body,now),serverNow:now});return;}
@@ -322,13 +380,23 @@ function createServer({db=createDatabase(),paymentOptions={}}={}){
       json(res,status,{error:status>=500&&!error.paymentSafe?'Server error':error.message,...(error.code?{code:error.code}:{}),serverNow:Date.now()});
     }
   });
+  const multiplayer=createMultiplayer({server,db,authenticate:req=>session(db,req),originAllowed:req=>!req.headers.origin||req.headers.origin===(process.env.SAR_PUBLIC_ORIGIN||(secureRequest(req)?'https://':'http://')+req.headers.host),options:multiplayerOptions,commerceEnvironment});
+  tournamentRuntime.configureMultiplayer(db,multiplayer.runtime);
   let stopTournaments=()=>{};server.on('listening',()=>{stopTournaments=tournamentRuntime.start(db);payments.verifyConfiguration().catch(error=>{if(error.code!=='CHECKOUT_UNAVAILABLE')console.error('Sandbox checkout unavailable: '+error.code);});});
   server.on('close',()=>{stopTournaments();});
-  return {server,db,payments};
+  return {server,db,payments,multiplayer,stopTournaments:()=>stopTournaments()};
 }
 if(require.main===module){
-  const host=process.env.SAR_HOST||'127.0.0.1',port=Number(process.env.SAR_PORT||8803);
+  const host=process.env.SAR_HOST||'127.0.0.1',port=Number(process.env.SAR_PORT||process.env.PORT||8803);
   const app=createServer();
   app.server.listen(port,host,()=>console.log('Skirmish server listening on '+host+':'+port+' (database schema '+app.db.prepare('PRAGMA user_version').get().user_version+')'));
+  let stopping=false;
+  for(const signal of ['SIGTERM','SIGINT'])process.on(signal,()=>{
+    if(stopping)return;stopping=true;
+    app.stopTournaments();
+    const deadline=setTimeout(()=>{console.error('Server shutdown exceeded its drain window; persisted checkpoints remain recoverable.');process.exit(1);},10000);deadline.unref();
+    const httpClosed=new Promise((resolve,reject)=>app.server.close(error=>error?reject(error):resolve()));
+    void(async()=>{try{await Promise.all([httpClosed,app.multiplayer.close()]);app.db.close();clearTimeout(deadline);process.exit(0);}catch(error){console.error('Server shutdown:',error.stack);process.exit(1);}})();
+  });
 }
 module.exports={createServer};

@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "blender": "5.2.2 LTS",
+  "reopened": "assets/25d/cosmetics/cosmetic-content.blend",
+  "operators": 10,
+  "identityAttachmentTransforms": true,
+  "proof": "assets/25d/cosmetics/content-operators-proof.png",
+  "scope": "editable exported head/torso construction; playable rig checked by dev/cosmetic-content-assets-check.mjs"
+}

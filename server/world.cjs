@@ -337,17 +337,19 @@ function validateModeScopes(world,previous){
   for(const [weapon,row] of Object.entries(patch.meta))for(const key of META_TOTALS)reconcile(count(samples.map(s=>s.meta[weapon]),key),row[key],'AI revision and balance samples');
   for(const key of ['completedMatches','observedSeconds'])reconcile(count(samples,key),patch[key],'AI revision and patch totals');
  }
- const dm=world.modeStats?.deathmatch,prior=old?.modeStats?.deathmatch;
- if(prior&&!dm)throw fail(409,'Deathmatch history was removed');if(!dm)return;
- if(!isRecord(dm.bots)||!isRecord(dm.meta)||!Array.isArray(dm.recentMatches))throw fail(400,'Invalid Deathmatch record');
- validateCareer(dm.player,'weapons');for(const [name,career] of Object.entries(dm.bots)){if(!world.bots[name])throw fail(400,'Unknown Deathmatch identity');validateCareer(career,'weaponUsage');}
+ for(const mode of ['deathmatch','gun-game','domination','hardpoint']){const label=require('../match-modes.js').get(mode).label;
+ const dm=world.modeStats?.[mode],prior=old?.modeStats?.[mode];
+ if(prior&&!dm)throw fail(409,label+' history was removed');if(!dm)continue;
+ if(!isRecord(dm.bots)||!isRecord(dm.meta)||!Array.isArray(dm.recentMatches))throw fail(400,'Invalid '+label+' record');
+ validateCareer(dm.player,'weapons');for(const [name,career] of Object.entries(dm.bots)){if(!world.bots[name])throw fail(400,'Unknown '+label+' identity');validateCareer(career,'weaponUsage');}
  counters(dm,['completedMatches'],['completedMatches']);
- const careers=[dm.player,...Object.values(dm.bots)];reconcile(count(careers,'games'),dm.completedMatches*10,'Deathmatch games');
- const ids=new Set();for(const result of dm.recentMatches){if(result.mode!=='deathmatch'||result.sessionType!=='standard'||result.eligible!==true||!result.matchId||ids.has(result.matchId)||result.rows?.length!==10)throw fail(400,'Invalid Deathmatch result identity');ids.add(result.matchId);const former=prior?.recentMatches.find(r=>r.matchId===result.matchId);if(former&&!isDeepStrictEqual(former,result))throw fail(409,'Finalized Deathmatch result changed');}
+ const careers=[dm.player,...Object.values(dm.bots)];reconcile(count(careers,'games'),dm.completedMatches*10,label+' games');
+ const ids=new Set();for(const result of dm.recentMatches){if(result.mode!==mode||result.sessionType!=='standard'||result.eligible!==true||!result.matchId||ids.has(result.matchId)||result.rows?.length!==10)throw fail(400,'Invalid '+label+' result identity');ids.add(result.matchId);const former=prior?.recentMatches.find(r=>r.matchId===result.matchId);if(former&&!isDeepStrictEqual(former,result))throw fail(409,'Finalized Deathmatch result changed');}
  for(const row of Object.values(dm.meta))validateMeta(row);
- for(const [careerKey,metaKey] of [['kills','kills'],['deaths','deaths'],['damage','damage'],['taken','damage'],['shots','shots'],['hits','hits'],['headshots','headshots'],['timeAlive','equippedTime']])reconcile(count(careers,careerKey),count(Object.values(dm.meta),metaKey),'Deathmatch career and weapon measurements');
- for(const [weapon,row] of Object.entries(dm.meta))for(const [key,alias] of [['kills','k'],['deaths','d'],['damage','damage'],['shots','shots'],['hits','hits'],['headshots','headshots'],['equippedTime','equippedTime']])reconcile(row[key],count([dm.player.weapons[weapon],...Object.values(dm.bots).map(c=>c.weaponUsage[weapon])],alias),'Deathmatch per-weapon measurements');
- if(prior){monotonic(dm,prior,['completedMatches'],'Deathmatch completions');for(const [name,career] of [['@player',dm.player],...Object.entries(dm.bots)]){const before=name==='@player'?prior.player:prior.bots[name];if(before){monotonic(career,before,CAREER_TOTALS.concat('timePlayed'),'Deathmatch career');const key=name==='@player'?'weapons':'weaponUsage';for(const [w,row] of Object.entries(before[key]))monotonic(career[key][w],row,WEAPON_TOTALS.concat('games'),'Deathmatch weapon history');}}for(const name of Object.keys(prior.bots))if(!dm.bots[name])throw fail(409,'Deathmatch bot history was removed');for(const [w,row] of Object.entries(prior.meta))monotonic(dm.meta[w],row,META_TOTALS,'Deathmatch meta');}
+ for(const [careerKey,metaKey] of [['kills','kills'],['deaths','deaths'],['damage','damage'],['taken','damage'],['shots','shots'],['hits','hits'],['headshots','headshots'],['timeAlive','equippedTime']])reconcile(count(careers,careerKey),count(Object.values(dm.meta),metaKey),label+' career and weapon measurements');
+ for(const [weapon,row] of Object.entries(dm.meta))for(const [key,alias] of [['kills','k'],['deaths','d'],['damage','damage'],['shots','shots'],['hits','hits'],['headshots','headshots'],['equippedTime','equippedTime']])reconcile(row[key],count([dm.player.weapons[weapon],...Object.values(dm.bots).map(c=>c.weaponUsage[weapon])],alias),label+' per-weapon measurements');
+ if(prior){monotonic(dm,prior,['completedMatches'],label+' completions');for(const [name,career] of [['@player',dm.player],...Object.entries(dm.bots)]){const before=name==='@player'?prior.player:prior.bots[name];if(before){monotonic(career,before,CAREER_TOTALS.concat('timePlayed'),label+' career');const key=name==='@player'?'weapons':'weaponUsage';for(const [w,row] of Object.entries(before[key]))monotonic(career[key][w],row,WEAPON_TOTALS.concat('games'),label+' weapon history');}}for(const name of Object.keys(prior.bots))if(!dm.bots[name])throw fail(409,label+' bot history was removed');for(const [w,row] of Object.entries(prior.meta))monotonic(dm.meta[w],row,META_TOTALS,label+' meta');}
+ }
 }
 
 function writeWorld(db,userId,world,baseRevision,{importing=false,originalSave=null}={}){
@@ -355,6 +357,7 @@ function writeWorld(db,userId,world,baseRevision,{importing=false,originalSave=n
   if(previous&&importing)throw fail(409,'This account already has cloud progress');
   if((previous?.revision||0)!==baseRevision)throw fail(409,'Cloud save changed on another session','REVISION_CONFLICT');
   const saveJson=validateWorld(world,previous),revision=baseRevision+1;
+  if(world.config?.skin!==undefined){const index=world.config.skin,operator=require('./commerce-catalog.cjs').operators[index];if(!Number.isInteger(index)||!operator)throw fail(400,'Choose a registered operator','UNKNOWN_OPERATOR');if(operator.requiresCosmeticId)require('./wallet.cjs').operatorAppearance(db,userId,index,require('./competitive-progression.cjs').environmentFor(db));}
   validateRewardOwnership(userId,world,previous?.save);
   validateTournamentProgression(db,userId,world,previous?.save);
   db.exec('BEGIN IMMEDIATE');

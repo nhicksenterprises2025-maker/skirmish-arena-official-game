@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "blender": "5.2.2 LTS",
+  "weaponCount": 15,
+  "badgeCount": 40,
+  "classes": [
+    "rifle",
+    "smg",
+    "shotgun",
+    "marksman",
+    "sniper",
+    "lmg",
+    "sidearm",
+    "burst"
+  ],
+  "tiers": [
+    1,
+    3,
+    5,
+    7,
+    10
+  ],
+  "triangles": 40160,
+  "meshes": 151,
+  "glbBytes": 1986464,
+  "glbSha256": "4d15426891e2f2b95c2ede0eb562e681ebc66a19db877212b9eb700a0013f0b1",
+  "source": "editable named components in weapon-mastery.blend; live registry and configurable badge tiers read via Node",
+  "contract": "mastery only; centered Y-up +Z service crests; four shared PBR materials; maximum four draws; no decoder or texture dependencies"
+}

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "overclock-cosmetics-d2fbb63447a9",
+  "version": "cosmetic-content-a166f33e0f12",
   "generator": "Blender 5.2.2 LTS; tools/blender_overclock_cosmetics.py",
   "coordinateContract": "+X forward / +Y up / game units / existing torso attachment",
   "cosmetics": {
@@ -1078,6 +1078,366 @@
       },
       "lobbyPose": "monarch",
       "editableSource": "assets/25d/cosmetics/overclock-collection.blend"
+    },
+    "field-ranger.signature": {
+      "operatorId": "field-ranger",
+      "name": "Field Ranger",
+      "verified": true,
+      "priceAC": 500,
+      "tier": "basic",
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/field-ranger.signature.glb",
+          "node": "field_ranger_signature__main",
+          "palette": {
+            "body": "#72806a",
+            "vest": "#3d4c3b",
+            "accent": "#c6b489",
+            "pants": "#53614c",
+            "skin": "#b98768",
+            "build": 1
+          },
+          "attachments": {
+            "head": "field_ranger_signature__main__head",
+            "torso": "field_ranger_signature__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 932,
+          "sha256": "7f62801ee9b86c93e3d0fee7ff1a3cc20e214ac309d4cee8ef83af349fe4e218",
+          "bytes": 77780
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "construction": {
+        "parts": 16,
+        "connectedParts": 16,
+        "toleranceWorld": 0.3
+      }
+    },
+    "metro-unit.signature": {
+      "operatorId": "metro-unit",
+      "name": "Metro Unit",
+      "verified": true,
+      "priceAC": 500,
+      "tier": "basic",
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/metro-unit.signature.glb",
+          "node": "metro_unit_signature__main",
+          "palette": {
+            "body": "#65727b",
+            "vest": "#33444b",
+            "accent": "#c4d0cb",
+            "pants": "#3a4b54",
+            "skin": "#825944",
+            "build": 1
+          },
+          "attachments": {
+            "head": "metro_unit_signature__main__head",
+            "torso": "metro_unit_signature__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1064,
+          "sha256": "6cc3a3936087e1f6bea70cd79e0cda1a2b3a89049312e76088e68e0f2ec05b81",
+          "bytes": 87736
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "construction": {
+        "parts": 19,
+        "connectedParts": 19,
+        "toleranceWorld": 0.3
+      }
+    },
+    "frontier.signature": {
+      "operatorId": "frontier",
+      "name": "Frontier",
+      "verified": true,
+      "priceAC": 1000,
+      "tier": "detailed",
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/frontier.signature.glb",
+          "node": "frontier_signature__main",
+          "palette": {
+            "body": "#a68b64",
+            "vest": "#514b3e",
+            "accent": "#dfc791",
+            "pants": "#685d49",
+            "skin": "#c79270",
+            "build": 1
+          },
+          "attachments": {
+            "head": "frontier_signature__main__head",
+            "torso": "frontier_signature__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 1020,
+          "sha256": "ff9ff04f554fd70d7984a3b780f0ec12cf231f7419b7489b0e52b39d9d1c27cf",
+          "bytes": 85032
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "construction": {
+        "parts": 18,
+        "connectedParts": 18,
+        "toleranceWorld": 0.3
+      }
+    },
+    "sentinel.signature": {
+      "operatorId": "sentinel",
+      "name": "Sentinel",
+      "verified": true,
+      "priceAC": 1000,
+      "tier": "detailed",
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/sentinel.signature.glb",
+          "node": "sentinel_signature__main",
+          "palette": {
+            "body": "#6d8580",
+            "vest": "#2c4b47",
+            "accent": "#afc3b1",
+            "pants": "#405b56",
+            "skin": "#9f7356",
+            "build": 1
+          },
+          "attachments": {
+            "head": "sentinel_signature__main__head",
+            "torso": "sentinel_signature__main__torso"
+          },
+          "meshes": 9,
+          "triangles": 736,
+          "sha256": "aa404ca5dd91d02592f53c31e1d7b2cdff447b67b86188d528028e3e4543380a",
+          "bytes": 62496
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "construction": {
+        "parts": 14,
+        "connectedParts": 14,
+        "toleranceWorld": 0.3
+      }
+    },
+    "nightfall.signature": {
+      "operatorId": "nightfall",
+      "name": "Nightfall",
+      "verified": true,
+      "priceAC": 1500,
+      "tier": "cool-detailed",
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/nightfall.signature.glb",
+          "node": "nightfall_signature__main",
+          "palette": {
+            "body": "#313d45",
+            "vest": "#1c2d35",
+            "accent": "#7fb0af",
+            "pants": "#26333a",
+            "skin": "#c09072",
+            "build": 1
+          },
+          "attachments": {
+            "head": "nightfall_signature__main__head",
+            "torso": "nightfall_signature__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 844,
+          "sha256": "d9510359ff95d4e0023fbc243864e24d093adc0f8a0668946b089d6e94b9d1f5",
+          "bytes": 70472
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "construction": {
+        "parts": 14,
+        "connectedParts": 14,
+        "toleranceWorld": 0.3
+      }
+    },
+    "hazard.signature": {
+      "operatorId": "hazard",
+      "name": "Hazard",
+      "verified": true,
+      "priceAC": 1500,
+      "tier": "cool-detailed",
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/hazard.signature.glb",
+          "node": "hazard_signature__main",
+          "palette": {
+            "body": "#b7a563",
+            "vest": "#404844",
+            "accent": "#e6d49a",
+            "pants": "#68725d",
+            "skin": "#76513f",
+            "build": 1
+          },
+          "attachments": {
+            "head": "hazard_signature__main__head",
+            "torso": "hazard_signature__main__torso"
+          },
+          "meshes": 8,
+          "triangles": 932,
+          "sha256": "5af0d84f9a85e3efd0d23270fb701b9c434d9b2505a6a07d6c75087427481cc6",
+          "bytes": 77072
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "construction": {
+        "parts": 16,
+        "connectedParts": 16,
+        "toleranceWorld": 0.3
+      }
+    },
+    "vector.signature": {
+      "operatorId": "vector",
+      "name": "Vector",
+      "verified": true,
+      "priceAC": 1500,
+      "tier": "cool-detailed",
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/vector.signature.glb",
+          "node": "vector_signature__main",
+          "palette": {
+            "body": "#b9c5bb",
+            "vest": "#526761",
+            "accent": "#709d89",
+            "pants": "#4c635b",
+            "skin": "#ab7859",
+            "build": 1
+          },
+          "attachments": {
+            "head": "vector_signature__main__head",
+            "torso": "vector_signature__main__torso"
+          },
+          "meshes": 9,
+          "triangles": 780,
+          "sha256": "2e0b2751d12cc2c93b3ce71f55a8caf9a1da6ae0a6e9d1c557742334e3c6dd1f",
+          "bytes": 66924
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "construction": {
+        "parts": 15,
+        "connectedParts": 15,
+        "toleranceWorld": 0.3
+      }
+    },
+    "obsidian.signature": {
+      "operatorId": "obsidian",
+      "name": "Obsidian",
+      "verified": true,
+      "priceAC": 2500,
+      "tier": "premium",
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/obsidian.signature.glb",
+          "node": "obsidian_signature__main",
+          "palette": {
+            "body": "#2b3034",
+            "vest": "#171e21",
+            "accent": "#ac9475",
+            "pants": "#222c2e",
+            "skin": "#93664d",
+            "build": 1
+          },
+          "attachments": {
+            "head": "obsidian_signature__main__head",
+            "torso": "obsidian_signature__main__torso"
+          },
+          "meshes": 10,
+          "triangles": 832,
+          "sha256": "08745f520d6a6352da60858f0812b0d3c39796c1815004745afddff3fd9b40c1",
+          "bytes": 71164
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "construction": {
+        "parts": 17,
+        "connectedParts": 17,
+        "toleranceWorld": 0.3
+      }
+    },
+    "aegis-prime.signature": {
+      "operatorId": "aegis-prime",
+      "name": "Aegis Prime",
+      "verified": true,
+      "priceAC": 2500,
+      "tier": "premium",
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/aegis-prime.signature.glb",
+          "node": "aegis_prime_signature__main",
+          "palette": {
+            "body": "#bfc7b9",
+            "vest": "#707d6a",
+            "accent": "#d6bd77",
+            "pants": "#586755",
+            "skin": "#bc8663",
+            "build": 1
+          },
+          "attachments": {
+            "head": "aegis_prime_signature__main__head",
+            "torso": "aegis_prime_signature__main__torso"
+          },
+          "meshes": 12,
+          "triangles": 824,
+          "sha256": "1436b100537e7a22f810261a90ab3b50cda23a419150078ac823f57076ebb116",
+          "bytes": 71108
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "construction": {
+        "parts": 16,
+        "connectedParts": 16,
+        "toleranceWorld": 0.3
+      }
+    },
+    "specter.signature": {
+      "operatorId": "specter",
+      "name": "Specter",
+      "verified": true,
+      "priceAC": 2500,
+      "tier": "premium",
+      "styles": {
+        "main": {
+          "file": "assets/25d/cosmetics/specter.signature.glb",
+          "node": "specter_signature__main",
+          "palette": {
+            "body": "#4c5952",
+            "vest": "#273a34",
+            "accent": "#a8c5ab",
+            "pants": "#32483e",
+            "skin": "#825e49",
+            "build": 1
+          },
+          "attachments": {
+            "head": "specter_signature__main__head",
+            "torso": "specter_signature__main__torso"
+          },
+          "meshes": 7,
+          "triangles": 812,
+          "sha256": "1b3bb2301347a133acdc044b9038207794a665eca1efb3c7e3b5025023cb2bb1",
+          "bytes": 68012
+        }
+      },
+      "lobbyPose": null,
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "construction": {
+        "parts": 14,
+        "connectedParts": 14,
+        "toleranceWorld": 0.3
+      }
     }
   }
 }

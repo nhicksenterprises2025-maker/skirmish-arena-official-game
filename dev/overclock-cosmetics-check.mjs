@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import * as THREE from '../vendor/three.module.js';
 import {buildOperator,animateOperator,poseUnarmedShowcase,ensureModelAssets,ensureCosmeticAssets,cosmeticDiagnostics,disposeModel,WEAPON_VISUALS,setOperatorPresentation} from '../models-25d.mjs';
 const url=new URL('../assets/25d/cosmetics/manifest.json',import.meta.url),manifest=JSON.parse(await fs.readFile(url,'utf8'));
+const collection=Object.entries(manifest.cosmetics).filter(([,item])=>item.editableSource==='assets/25d/cosmetics/overclock-collection.blend');
 const operators=['urban-assault','woodland-scout','desert-runner','blue-strike','crimson-guard','steel-recon','ranger-elite','night-ops'];
 const fetchOriginal=globalThis.fetch,randomOriginal=Math.random,fetched=[];
 globalThis.ProgressEvent=class extends Event{constructor(type,fields){super(type);Object.assign(this,fields);}};
@@ -11,12 +12,12 @@ globalThis.fetch=async request=>{const u=new URL(typeof request==='string'?reque
 let checks=0,appearanceCount=0,poseCount=0,maxMeshes=0,maxTriangles=0,maxBaseMeshes=0,maxBaseTriangles=0;
 const pass=message=>{checks++;console.log('PASS '+message);};
 try{
- assert.equal(Object.keys(manifest.cosmetics).length,35);await ensureModelAssets();
+ assert.equal(collection.length,35);await ensureModelAssets();
  assert(!fetched.some(path=>path.includes('/cosmetics/')),'Wardrobe loaded at boot');
  const blend=await fs.readFile(new URL('../assets/25d/cosmetics/overclock-collection.blend',import.meta.url));assert(blend.subarray(0,7).toString()==='BLENDER'||blend.readUInt32LE(0)===0xfd2fb528,'Editable Blender source format');
  pass('35 canonical products, editable Blender source, no wardrobe load with base assets');
  Math.random=()=>{throw new Error('Cosmetic presentation consumed gameplay randomness');};
- for(const [id,item] of Object.entries(manifest.cosmetics)){
+ for(const [id,item] of collection){
   assert(id.startsWith(item.operatorId+'.'));assert(operators.includes(item.operatorId));
   const bytes=await fs.readFile(new URL('../'+item.styles.main.file,import.meta.url));
   assert.equal(bytes.toString('utf8',0,4),'glTF');
@@ -53,7 +54,7 @@ try{
   }
  }
  assert.equal(appearanceCount,38);pass('38 exported styles: exact hashes, decoder-free compact geometry and finished head height');
- pass(poseCount+' actual rig poses: all 14 weapons, idle/run/sprint/ADS/fire/reload/death, unchanged anchors and snapshots');
+ pass(poseCount+' actual rig poses: all '+Object.keys(WEAPON_VISUALS).length+' weapons, idle/run/sprint/ADS/fire/reload/death, unchanged anchors and snapshots');
  await assert.rejects(ensureCosmeticAssets({id:'blue-strike.black-ice',operatorId:'night-ops',styleId:'main'}),/incompatible/);
  await assert.rejects(ensureCosmeticAssets({id:'blue-strike.black-ice',operatorId:'blue-strike',styleId:'invented'}),/incompatible/);
  const s={id:'blue-strike.black-ice',operatorId:'blue-strike',styleId:'main'},start=fetched.length;

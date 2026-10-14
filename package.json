@@ -1,6 +1,6 @@
 {
   "name": "skirmish-arena-reimagined",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "private": true,
   "description": "Skirmish Arena game and persistent account server",
   "engines": {
@@ -28,10 +28,19 @@
     "test:live-circuit": "node dev/live-circuit-tournament-check.cjs && node dev/live-circuit-profile-check.cjs && node dev/audio-identity-check.cjs && node dev/live-circuit-assets-check.mjs",
     "test:release": "node launcher/scripts/backend-bundle-check.cjs && node dev/updater-lifecycle-check.cjs",
     "test:arena-refined-profile-historical": "node dev/arena-refined-profile-preservation-check.cjs",
-    "test:arena-refined-scheduled-client": "node dev/arena-refined-scheduled-client-check.cjs && node dev/arena-refined-tournament-xp-ack-check.cjs && node dev/arena-refined-scheduled-browser-check.cjs"
+    "test:arena-refined-scheduled-client": "node dev/arena-refined-scheduled-client-check.cjs && node dev/arena-refined-tournament-xp-ack-check.cjs && node dev/arena-refined-scheduled-browser-check.cjs",
+    "test:mastery": "node dev/mastery-telemetry-check.cjs && node --test server/tests/weapon-mastery.test.cjs server/tests/mastery-client-cache.test.cjs && node dev/weapon-mastery-assets-check.mjs",
+    "test:mastery:ui": "node dev/mastery-ui-check.cjs && node dev/weapon-mastery-badges-browser-check.cjs",
+    "test:factions": "node --test server/tests/factions.test.cjs && node dev/faction-identity-check.cjs",
+    "test:factions:ui": "node dev/factions-ui-check.cjs && node dev/faction-identity-browser-check.cjs",
+    "test:replays": "node --test server/tests/replays.test.cjs && node dev/replay-playback-check.cjs",
+    "test:replays:ui": "node dev/replays-ui-check.cjs && node dev/replay-renderer-browser-check.cjs",
+    "test:cosmetic-content": "node --test server/tests/cosmetic-content.test.cjs && node dev/cosmetic-content-assets-check.mjs && node dev/cosmetic-content-poses-check.mjs",
+    "test:cosmetic-content:ui": "node dev/cosmetic-content-ui-check.cjs"
   },
   "dependencies": {
     "bcryptjs": "3.0.3",
-    "stripe": "23.0.0"
+    "stripe": "23.0.0",
+    "ws": "8.22.0"
   }
 }

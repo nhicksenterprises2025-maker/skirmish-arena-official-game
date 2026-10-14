@@ -4,9 +4,15 @@ const CACHE_NAME = `sar-shell-${APP_VERSION}-${self.SARBuild.shellRevision||'liv
 const CORE = ['./index.html', './styles.css', './game.js', './cloud.js', './mode-entry.js', './phone-ui.js', './phone-ui.css', './fullscreen.js', './audio.js', './assets/audio/LICENSES.json', './renderer-25d.mjs', './environment-25d.mjs', './models-25d.mjs', './inspect-25d.mjs', './asset-loader-25d.mjs', './vendor/three.module.js', './vendor/three.core.js', './vendor/addons/loaders/GLTFLoader.js', './vendor/addons/utils/BufferGeometryUtils.js', './vendor/addons/utils/SkeletonUtils.js', './assets/25d/manifest.json', './assets/25d/brightfield-props.glb', './updater.js', './manifest.webmanifest', './app-icon.svg'];
 CORE.push('./theme.css','./skyline.css','./phone-apps.css','./skyline-tournaments.css','./phone-apps.js','./team-presentation.js','./exit-game.js','./assets/branding/wordmark.svg','./assets/branding/wordmark-mono.svg','./assets/branding/monogram.svg','./assets/branding/monogram-mono.svg','./assets/branding/app-256.png','./assets/branding/app-512.png','./match-modes.js','./progression.js','./boot.js','./boot.css','./tactical-instinct.js','./desktop-launch.html','./build-meta.js','./tournaments-ui.js','./assets/25d/live-circuit-details.glb');
 CORE.push('./fonts.css','./blue-circuit.css','./assets/fonts/Inter-Variable.ttf','./assets/fonts/Oxanium-Variable.ttf','./assets/fonts/Inter-OFL.txt','./assets/fonts/Oxanium-OFL.txt','./assets/fonts/manifest.json','./assets/25d/ranks/manifest.json','./assets/25d/ranks/blue-circuit-ranks.glb');
-const COSMETIC_MANIFEST='./assets/25d/cosmetics/manifest.json';
-CORE.push('./profile-stats.js','./distance-units.js');
+const COSMETIC_MANIFEST='./assets/25d/cosmetics/manifest.json',CONTENT_MANIFEST='./assets/25d/cosmetics/content-manifest.json';
+CORE.push('./profile-stats.js','./map-data.js','./distance-units.js','./mode-rules.js','./assets/25d/map-ecosystem.glb');
+CORE.push('./multiplayer.js','./multiplayer-ui.js','./multiplayer-ui.css');
+CORE.push('./competitive-progression.js');
+CORE.push('./weapon-mastery.js','./assets/25d/mastery/manifest.json','./assets/25d/mastery/weapon-mastery.glb');
+CORE.push('./faction-identity.js','./factions-ui.js','./factions-ui.css');
+CORE.push('./replay-playback.js','./replays-ui.js','./replays-ui.css');
 CORE.push('./commerce.js','./commerce.css','./refined-ui.css','./cosmetics-25d.mjs',COSMETIC_MANIFEST);
+CORE.push('./victory-presentation.js',CONTENT_MANIFEST,'./assets/25d/cosmetics/victory-poses.json');
 const OPTIONAL=CORE.filter(path=>path.startsWith('./assets/')&&path!==COSMETIC_MANIFEST);
 const ESSENTIAL=CORE.filter(path=>!OPTIONAL.includes(path));
 const shellUrls = new Set(CORE.map(path => new URL(path, self.registration.scope).href));
@@ -15,6 +21,7 @@ function cosmeticFiles(manifest){
   for(const item of Object.values(manifest?.cosmetics||{}))for(const style of Object.values(item.styles||{})){
     if(/^assets\/25d\/cosmetics\/[a-z0-9.-]+\.glb$/.test(style.file)&&/^[a-f0-9]{64}$/.test(style.sha256))files.set(new URL(style.file,self.registration.scope).href,style.sha256);
   }
+  for(const asset of Object.values(manifest?.content||{}))if(/^assets\/25d\/cosmetics\/(?:icons|banners)\/[a-z0-9-]+\.png$/.test(asset.file)&&/^[a-f0-9]{64}$/.test(asset.sha256))files.set(new URL(asset.file,self.registration.scope).href,asset.sha256);
   return files;
 }
 let warming;
@@ -62,14 +69,15 @@ self.addEventListener('fetch', event => {
   const audio=url.pathname.startsWith(scope.pathname+'assets/audio/')&&/\.(wav|ogg)$/.test(url.pathname)&&!url.pathname.includes('/source/');
   const rankThumbnail=url.pathname.startsWith(scope.pathname+'assets/25d/ranks/')&&/\/[a-z-]+\.png$/.test(url.pathname);
   const cosmetic=url.pathname.startsWith(scope.pathname+'assets/25d/cosmetics/')&&/\/[a-z0-9.-]+\.glb$/.test(url.pathname);
-  if (!navigation && !shellUrls.has(canonical.href) && !audio && !rankThumbnail && !cosmetic) return;
+  const cosmeticArt=url.pathname.startsWith(scope.pathname+'assets/25d/cosmetics/')&&/\/(?:icons|banners)\/[a-z0-9-]+\.png$/.test(url.pathname);
+  if (!navigation && !shellUrls.has(canonical.href) && !audio && !rankThumbnail && !cosmetic && !cosmeticArt) return;
   event.respondWith((async () => {
     // Releases are immutable: never combine fresh HTML with stale JS or CSS.
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(navigation ? new URL('./index.html', scope).href : canonical.href);
     if(cached)return cached;
-    if(cosmetic){
-      const description=await cache.match(new URL(COSMETIC_MANIFEST,scope));
+    if(cosmetic||cosmeticArt){
+      const description=await cache.match(new URL(cosmeticArt?CONTENT_MANIFEST:COSMETIC_MANIFEST,scope));
       const expected=description&&cosmeticFiles(await description.json()).get(canonical.href);
       if(!expected)return fetch(request);
       const response=await fetch(request);

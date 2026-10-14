@@ -4,7 +4,7 @@ const {createDatabase}=require('../db.cjs'),{writeWorld,readWorld}=require('../w
 const root=path.resolve(__dirname,'../..'),runtimeFile=path.join(root,'server/tournament-runtime.cjs'),runtimeSource=fs.readFileSync(runtimeFile,'utf8'),archive=require('./fixtures/arena-refined-pre-profile-sources.json');
 const copy=v=>JSON.parse(JSON.stringify(v)),hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 function writeFiles(directory,legacy){
- for(const file of ['dev/simulate.cjs','game.js','progression.js','tactical-instinct.js','match-modes.js','team-presentation.js','profile-stats.js','distance-units.js']){
+ for(const file of ['dev/simulate.cjs','game.js','progression.js','tactical-instinct.js','match-modes.js','team-presentation.js','profile-stats.js','distance-units.js','map-data.js','mode-rules.js','weapon-mastery.js']){
   let bytes;if(legacy&&archive.files[file]){const record=archive.files[file];bytes=zlib.inflateSync(Buffer.from(record.deflate,'base64'));assert.equal(bytes.length,record.bytes);assert.equal(hash(bytes),record.sha256);}else bytes=fs.readFileSync(path.join(root,file));
   const output=path.join(directory,file);fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,bytes);
  }
@@ -14,7 +14,11 @@ function fixtureRuntime(directory){
  // archived engine/helpers, including its normal checkpoint/finalizer paths.
  const filename=path.join(root,'server/.isolated-profile-checkpoint-'+crypto.randomUUID()+'.cjs'),instance=new Module(filename,module);instance.filename=filename;instance.paths=Module._nodeModulePaths(path.dirname(filename));
  let source=runtimeSource.replace("require('../dev/simulate.cjs')",'require('+JSON.stringify(path.join(directory,'dev/simulate.cjs'))+')').replace("const gamePath=path.join(__dirname,'../game.js');",'const gamePath='+JSON.stringify(path.join(directory,'game.js'))+';').replace("path.join(__dirname,'..',file)",'path.join('+JSON.stringify(directory)+',file)');
- if(hash(fs.readFileSync(path.join(directory,'dev/simulate.cjs')))===archive.files['dev/simulate.cjs'].sha256)source=source.replace("'team-presentation.js','distance-units.js']","'team-presentation.js']");
+ if(hash(fs.readFileSync(path.join(directory,'dev/simulate.cjs')))===archive.files['dev/simulate.cjs'].sha256){
+  // These helpers did not exist in the captured pre-profile engine. Produce
+  // its genuine historical dependency list, rather than a current checkpoint.
+  const current=source;source=source.replace("'team-presentation.js','distance-units.js','map-data.js','mode-rules.js','weapon-mastery.js']","'team-presentation.js']");assert.notEqual(source,current);
+ }
  assert.notEqual(source,runtimeSource);instance._compile(source,filename);return instance.exports;
 }
 function fixture(){

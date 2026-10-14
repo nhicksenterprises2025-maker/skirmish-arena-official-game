@@ -5,7 +5,9 @@
     ['scores','Live Scores','<path d="M4 18V9h4v9M10 18V4h4v14M16 18v-7h4v7"/>'],
     ['spectate','Spectate','<path d="m9 5 10 7-10 7V5Z"/>'],
     ['bots','Bot Leaderboard','<path d="M8 3h8v8a4 4 0 0 1-8 0V3ZM8 6H4v3a4 4 0 0 0 4 4m8-7h4v3a4 4 0 0 1-4 4m-4 2v6m-4 0h8"/>'],
-    ['botmeta','Bot Weapon Meta','<path d="M4 4v16h16M8 15l4-6 4 3 4-7"/>']
+    ['botmeta','Bot Weapon Meta','<path d="M4 4v16h16M8 15l4-6 4 3 4-7"/>'],
+    ['factions','Factions','<path d="M12 3 3 7v6c0 5 9 8 9 8s9-3 9-8V7l-9-4Z M8 10h8m-8 4h6"/>'],
+    ['friends','Friends','<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.87M16 3a4 4 0 0 1 0 8M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/>']
   ];
   const appTitles=Object.fromEntries(apps.map(([id,title])=>[id,title.toUpperCase()]));
   let phoneView='home',phoneModule;

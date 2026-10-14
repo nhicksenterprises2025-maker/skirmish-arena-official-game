@@ -61,8 +61,10 @@ function startDesktopService(){
     if(stopping)return;stopping=true;
     console.log('Desktop backend shutting down safely: '+reason);
     control.close();
+    app.stopTournaments();
     const deadline=setTimeout(()=>{app.server.closeAllConnections();for(const socket of sockets)socket.destroy();},5000);deadline.unref();
-    await new Promise(resolve=>app.server.close(resolve));
+    const httpClosed=new Promise((resolve,reject)=>app.server.close(error=>error?reject(error):resolve()));
+    await Promise.all([httpClosed,app.multiplayer.close()]);
     // Allow existing close handlers to settle before checkpointing the account DB.
     await new Promise(resolve=>setImmediate(resolve));
     try{app.db.exec('PRAGMA wal_checkpoint(TRUNCATE)');app.db.close();closed=true;}

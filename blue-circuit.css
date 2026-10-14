@@ -102,6 +102,77 @@
 .profile-rank-ladder span{display:block;margin-top:4px;font:400 11px/1.45 var(--font-body);color:var(--sky-muted-light);font-variant-numeric:tabular-nums}
 .profile-rank-ladder .current-rank{background:var(--sky-panel-light);box-shadow:inset 2px 0 var(--sky-link)}
 .profile-rank-back{margin-bottom:18px}
+.hero-card button.lobby-progression{background:transparent;text-align:left;text-transform:none;cursor:pointer;border-bottom:0;border-inline:0}
+.hero-card button.lobby-progression:hover{border-top-color:var(--sky-accent)}
+.hero-card button.lobby-progression:focus-visible{outline:2px solid var(--sky-accent);outline-offset:5px}
+.account-xp-track{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0;margin:20px 0;font-variant-numeric:tabular-nums}
+.account-xp-track li{padding:16px 12px;border-bottom:1px solid var(--sky-border);min-width:0}
+.account-xp-track li>div{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.account-xp-track strong{font:600 14px/1.4 var(--font-display)}
+.account-xp-track span,.account-xp-track small{font:400 11px/1.5 var(--font-body);color:var(--sky-muted-light)}
+.account-xp-track p{margin:8px 0 4px;font-size:13px}
+.account-xp-track [data-level-state="current"]{background:var(--sky-panel-light);box-shadow:inset 2px 0 var(--sky-accent)}
+.account-xp-track [data-level-state="completed"] span{color:var(--sky-accent)}
+.competitive-actions{margin:24px 0;flex-wrap:wrap}
+.competitive-bests{grid-template-columns:repeat(2,minmax(0,1fr));margin:20px 0}
+.competitive-bests strong{font-size:17px!important;line-height:1.5}
+.competitive-table{overflow:auto;max-width:100%;margin:16px 0 26px}
+.competitive-table table{width:100%;font-variant-numeric:tabular-nums}
+.competitive-table th,.competitive-table td{white-space:normal;vertical-align:middle}
+.competitive-table small{display:block;margin-top:5px;color:var(--sky-muted-light)}
+.competitive-table [aria-current="true"]{background:var(--sky-panel-light)}
+.leaderboard-rank{display:inline-block;width:36px;height:42px;vertical-align:middle;margin-right:7px}
+.competitive-error{color:var(--sky-warning,#d59a76);font-size:13px;line-height:1.6}
+.competitive-error:empty{display:none}
+.ranked-reward-track section{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 0;border-bottom:1px solid var(--sky-border)}
+.ranked-reward-track h3{margin:8px 0;font-size:18px}
+.ranked-reward-track p{margin:6px 0;font-size:13px;color:var(--sky-muted-light)}
+.reward-state{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:0 0 auto;max-width:45%;text-align:right}
+.reward-state strong{font-size:12px}
+.reward-state small{font-size:12px;color:var(--sky-muted-light)}
+.ranked-transition{font-weight:600;color:var(--sky-accent)}
+.ranked-identity{position:relative;margin:18px 0;min-width:0}
+.ranked-identity:empty{display:none}
+.ranked-profile-banner{display:block;width:100%;height:120px;object-fit:contain;object-position:center;background:var(--arena-stage);border:1px solid var(--sky-border)}
+.ranked-profile-icon{display:block;width:60px;height:60px;object-fit:contain;margin:12px 0}
+.ranked-reward-image{display:block;width:100%;max-width:180px;height:78px;object-fit:contain;object-position:left;margin-bottom:12px}
+.ranked-pose-preview{display:block;width:180px;height:150px;margin-bottom:12px}
+.ranked-mastery{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--sky-muted-light)}
+.ranked-mastery .rank-badge{width:35px;height:42px}
+.weapon-mastery-card{display:grid;grid-template-columns:1fr auto;gap:8px 12px;width:100%;margin:12px 0 16px;padding:12px;text-align:left;font-size:11px;background:var(--sky-panel-light);border:1px solid var(--sky-border);font-variant-numeric:tabular-nums}
+.weapon-mastery-card strong{font-size:11px}
+.weapon-mastery-card progress{grid-column:1/-1;width:100%;height:5px;accent-color:var(--sky-accent)}
+.mastery-select{display:flex;align-items:center;gap:16px;margin:18px 0 24px;font-size:12px}
+.mastery-select select{min-width:180px;max-width:100%}
+.mastery-overview{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:30px;align-items:center;margin:20px 0 28px}
+.mastery-overview .weapon-preview{height:220px;width:100%}
+.mastery-overview h3{font-size:30px;margin:10px 0 18px}
+.mastery-overview p,.mastery-overview small{color:var(--sky-muted-light);font-size:12px;line-height:1.6}
+.mastery-overview dl{margin:24px 0 16px}
+.mastery-overview dt{color:var(--sky-muted-light);font-size:11px}
+.mastery-overview dd{margin:8px 0;font-size:22px;font-variant-numeric:tabular-nums}
+.mastery-progress{display:block;width:100%;height:8px;accent-color:var(--sky-accent)}
+.mastery-stats{grid-template-columns:repeat(3,minmax(0,1fr));margin:18px 0 28px}
+.mastery-challenges{margin:18px 0 28px}
+.mastery-challenges section{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,.35fr);align-items:center;gap:20px;padding:18px 0;border-bottom:1px solid var(--sky-border)}
+.mastery-challenges h4{margin:0 0 8px;font-size:15px}
+.mastery-challenges p{margin:0;color:var(--sky-muted-light);font-size:12px;line-height:1.5}
+.mastery-challenges strong,.mastery-challenges span{display:block;font-size:12px;font-variant-numeric:tabular-nums}
+.mastery-challenges span{margin:6px 0;color:var(--sky-muted-light);font-size:11px}
+.mastery-challenges progress{width:100%;height:5px;accent-color:var(--sky-accent)}
+.mastery-badges{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin:18px 0 24px}
+.mastery-badge{display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 6px;text-align:center;background:var(--arena-stage);border:1px solid var(--sky-border);min-width:0}
+.mastery-badge canvas{width:100%;height:auto;aspect-ratio:1}
+.mastery-badge.locked canvas{opacity:.5}
+.mastery-badge h4{margin:0;font-size:13px}
+.mastery-badge strong,.mastery-badge span,.mastery-badge small{font-size:10px;line-height:1.5}
+.mastery-badge small{color:var(--sky-muted-light)}
+.mastery-badge button{font-size:11px;padding:7px 10px;min-height:34px}
+@media(max-width:700px){.mastery-overview{grid-template-columns:1fr;gap:18px}.mastery-badges{grid-template-columns:repeat(3,minmax(0,1fr))}.mastery-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.mastery-challenges section{grid-template-columns:1fr;gap:12px}}
+.ranked-victory{display:flex;align-items:center;gap:20px;padding:16px 0;border-bottom:1px solid var(--sky-border)}
+.ranked-victory canvas{width:180px;height:150px;--sky-panel-light:var(--arena-stage);background:var(--arena-stage)}
+.ranked-victory span{font-size:12px;color:var(--sky-muted-light)}
+@media(max-width:600px){.competitive-bests{grid-template-columns:1fr}.profile-progression dl{flex-wrap:wrap}.ranked-reward-track section{align-items:flex-start}.reward-state{max-width:40%}}
 
 @media(max-width:1050px){
   .hero-card .lobby-progress-panels{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:14px}

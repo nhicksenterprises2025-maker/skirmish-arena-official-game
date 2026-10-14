@@ -1,14 +1,15 @@
 'use strict';
 const Stats=require('../profile-stats.js');
 
-// Read accepted games owned by the authenticated account. Tournament summaries
+// Read only the authenticated participant's accepted games, including shared
+// official events administered by another account. Tournament summaries
 // remain isolated; no career, reward, ELO, earnings or telemetry is written.
 function official(db,userId){
  const rows=db.prepare(`SELECT m.id,m.series_id,m.result_json,m.completed_at,t.id AS tournament_id,t.bracket_json
   FROM tournament_matches m JOIN tournaments t ON t.id=m.tournament_id
-  WHERE t.user_id=? AND t.kind='official' AND t.deleted_at IS NULL
+  WHERE t.kind='official' AND t.deleted_at IS NULL
   AND EXISTS (SELECT 1 FROM json_each(m.result_json,'$.stats') p WHERE json_extract(p.value,'$.participantId')=?)
-  ORDER BY m.completed_at,m.id`).all(userId,userId);
+  ORDER BY m.completed_at,m.id`).all(userId);
  const records=[],summaries=new Map();
  function add(row){
   const game=JSON.parse(row.result_json),state=JSON.parse(row.bracket_json);
@@ -19,15 +20,20 @@ function official(db,userId){
  for(const row of rows)add(row);
  function summary(id,raw){const games=JSON.parse(raw).games;if(Number.isSafeInteger(games)&&games>=0)summaries.set(id,Math.max(summaries.get(id)||0,games));}
  for(const row of db.prepare(`SELECT s.tournament_id,s.stats_json FROM tournament_stats s JOIN tournaments t ON t.id=s.tournament_id
-  WHERE t.user_id=? AND t.kind='official' AND t.deleted_at IS NULL AND s.participant_id=?`).all(userId,userId)
+  WHERE t.kind='official' AND t.deleted_at IS NULL AND s.participant_id=?`).all(userId)
  )summary(row.tournament_id,row.stats_json);
  // The explicit one-time tournament reset archives accepted unfinished official
  // games before removing their active graph. They are still completed match
  // contributions, with their exact original IDs and immutable per-player rows.
  if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='tournament_reset_archives'").get()){
-  for(const row of db.prepare('SELECT tournament_id,snapshot_json FROM tournament_reset_archives WHERE user_id=?').all(userId)){
+  for(const row of db.prepare(`SELECT tournament_id,user_id,snapshot_json FROM tournament_reset_archives a
+   WHERE a.user_id=? OR EXISTS (SELECT 1 FROM json_each(a.snapshot_json,'$.matches') m
+    JOIN json_each(json_extract(m.value,'$.result_json'),'$.stats') p
+    WHERE json_extract(p.value,'$.participantId')=?)
+   OR EXISTS (SELECT 1 FROM json_each(a.snapshot_json,'$.stats') s
+    WHERE json_extract(s.value,'$.participant_id')=?)`).all(userId,userId,userId)){
    const archived=JSON.parse(row.snapshot_json),event=archived.event;
-   if(event?.kind!=='official'||event.user_id!==userId||event.id!==row.tournament_id)continue;
+   if(event?.kind!=='official'||event.user_id!==row.user_id||event.id!==row.tournament_id)continue;
    for(const game of archived.matches||[])if(game.tournament_id===event.id)add({...game,bracket_json:event.bracket_json});
    for(const stat of archived.stats||[])if(stat.participant_id===userId)summary(event.id,stat.stats_json);
   }

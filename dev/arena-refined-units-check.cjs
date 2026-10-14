@@ -23,7 +23,7 @@ try {
   assert.deepEqual(U.LEGACY_WEAPON_UNITS,{id:'legacy-weapon-tile-70wu-v1',worldUnitsPerTile:70});
   assert.ok(Object.isFrozen(U));assert.ok(Object.isFrozen(U.LEGACY_WEAPON_UNITS));
   assert.throws(()=>{U.LEGACY_WEAPON_UNITS.worldUnitsPerTile=32;},TypeError);
-  const context=vm.createContext({window:{}});vm.runInContext(fs.readFileSync(path.join(root,'distance-units.js'),'utf8'),context);
+  const context=vm.createContext({window:{}});vm.runInContext(fs.readFileSync(path.join(root,'map-data.js'),'utf8'),context);vm.runInContext(fs.readFileSync(path.join(root,'distance-units.js'),'utf8'),context);
   assert.deepEqual(Object.keys(context.window.SARUnits).sort(),Object.keys(U).sort());
   assert.equal(context.window.SARUnits.legacyWeaponDistanceToWorld(3.5),245);
  });

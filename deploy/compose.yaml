@@ -1,0 +1,81 @@
+name: skirmish-arena
+
+services:
+  game:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    # One SQLite writer and one authoritative match scheduler. Never scale this.
+    container_name: skirmish-arena-server
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 20s
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      SAR_HOST: "0.0.0.0"
+      SAR_PORT: "8803"
+      SAR_DB_PATH: /data/skirmish.sqlite
+      SAR_PUBLIC_ORIGIN: "https://${SAR_PUBLIC_HOST:?Set SAR_PUBLIC_HOST to the real DNS hostname}"
+      SAR_TRUST_PROXY: "1"
+      SAR_REQUIRE_TRUSTED_HISTORY: "1"
+      SAR_BOT_OWNER_ID: "${SAR_BOT_OWNER_ID:?Set the existing canonical roster account ID}"
+      SAR_CLOUD_BOOTSTRAP_TOKEN: "${SAR_CLOUD_BOOTSTRAP_TOKEN:?Set a private bootstrap token before the first start}"
+      SAR_UPDATE_FEED_BASE: "${SAR_UPDATE_FEED_BASE:?Set the existing public HTTPS signed release directory}"
+      SAR_STUN_URL: "${SAR_STUN_URL:-}"
+      SAR_TURN_URLS: "${SAR_TURN_URLS:-}"
+      SAR_TURN_SECRET: "${SAR_TURN_SECRET:-}"
+    # No published port: only the trusted proxy reaches Node.
+    expose:
+      - "8803"
+    volumes:
+      - game-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:8803/api/status',{signal:AbortSignal.timeout(3000)})
+          .then(async response=>{const body=await response.json();if(!response.ok||body.ok!==true)process.exit(1);})
+          .catch(error=>{console.error(error.message);process.exit(1);});
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  proxy:
+    image: caddy:2-alpine
+    container_name: skirmish-arena-proxy
+    restart: unless-stopped
+    depends_on:
+      game:
+        condition: service_healthy
+    environment:
+      SAR_PUBLIC_HOST: "${SAR_PUBLIC_HOST:?Set SAR_PUBLIC_HOST to the real DNS hostname}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  game-data:
+    name: skirmish-arena-data
+  caddy-data:
+    name: skirmish-arena-caddy-data
+  caddy-config:
+    name: skirmish-arena-caddy-config

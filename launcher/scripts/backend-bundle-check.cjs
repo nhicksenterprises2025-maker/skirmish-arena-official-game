@@ -18,6 +18,11 @@ assert.ok(shell.includes('desktop-entry.html'),'Fresh native bootstrap entry mus
 assert.ok(shell.includes('phone-ui.js')&&shell.includes('phone-ui.css'),'Retained Phone shell must ship');
 assert.ok(shell.includes('mode-entry.js'),'Required match-entry controller must ship');
 assert.ok(shell.includes('profile-stats.js'),'Shared profile projection must ship');
+assert.ok(shell.includes('weapon-mastery.js'),'Shared mastery rules must ship');
+assert.ok(['faction-identity.js','factions-ui.js','factions-ui.css'].every(file=>shell.includes(file)),'Factions logo rules and UI must ship');
+assert.ok(['replay-playback.js','replays-ui.js','replays-ui.css'].every(file=>shell.includes(file)),'Replay player and browser must ship');
+assert.ok(['victory-presentation.js','assets/25d/cosmetics/content-manifest.json','assets/25d/cosmetics/victory-poses.json'].every(file=>shell.includes(file)),'Cosmetic content and victory poses must ship');
+assert.ok(shell.includes('assets/25d/mastery/manifest.json')&&shell.includes('assets/25d/mastery/weapon-mastery.glb'),'Dimensional mastery badges must ship');
 assert.ok(shell.includes('distance-units.js'),'Confirmed map calibration and conversions must ship');
 assert.equal(integrity['mode-entry.js'],crypto.createHash('sha256').update(fs.readFileSync(path.join(bundle,'mode-entry.js'))).digest('hex'),'Match-entry controller must be verified before installed startup');
 for(const retired of ['ai-ui.js','ai-ui.css','server/offline-bridge.cjs','server/local-ai.cjs']){

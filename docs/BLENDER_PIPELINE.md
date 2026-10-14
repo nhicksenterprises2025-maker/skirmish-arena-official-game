@@ -1,5 +1,40 @@
 # FIELDCRAFT local Blender content pipeline
 
+The current operator/icon/banner collection and its actual Blender rebuild,
+shared attachment contract and validation are documented in
+[COSMETIC-CONTENT-ASSETS.md](COSMETIC-CONTENT-ASSETS.md). The exporter preserves
+earlier wardrobe entries; runtime packages include declared exports only.
+
+## Map ecosystem library
+
+`map-data.js` retains Brightfield Blocks unchanged and declares Foundry Crossing
+(3,072 × 2,304 world units) and Relay Fields (5,120 × 3,072). Both use explicit
+32-world-unit square cells of 2 m², matching Brightfield's confirmed physical
+meter scale. These hidden geographic cells never replace legacy weapon units.
+
+`tools/blender_map_ecosystem.py` authors six ground-centered map templates:
+foundry press, stock rack, workbench, relay mast, generator, and concrete barrier.
+The editable source is `assets/25d/map-ecosystem.blend`; runtime uses
+`map-ecosystem.glb` through the existing shared loader and spatial instancing.
+The actual Blender 5.2.2 LTS export contains 25 material meshes, 2,748 triangles,
+and 217,120 bytes. Collision, navigation, spawns and cover remain authoritative
+in the shared map layout; templates fit those footprints instead of changing
+simulation positions. Workshop roofs use the existing occupant cutaway system.
+Relay masts are visual landmarks, with no walkable elevation added.
+
+After rebuilding the prop/detail libraries above, append the map library last:
+
+```powershell
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background --factory-startup --python .\tools\blender_map_ecosystem.py
+node .\tools\blender_validate.mjs
+node --test .\dev\map-assets-check.mjs
+```
+
+The map exporter updates only its own manifest entries. Editable sources and
+build reports remain in the project; only the decoder-free GLB enters installed
+runtime assets. No external models, commercial map layouts, textures, or model
+generation service are used.
+
 This is an asset pipeline inside the existing game. Assets never alter collision,
 weapon balance, accounts, save data, careers, or telemetry. Operators, weapons and
 their previews use the existing 2.5D renderer. Missing required art has a clear

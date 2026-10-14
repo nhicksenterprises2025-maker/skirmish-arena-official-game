@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Skirmish Arena — 1.14.0 ARENA REFINED</title>
+  <title>Skirmish Arena — 1.15.0 ARENA REFINED</title>
   <meta name="theme-color" content="#0B1712" />
   <meta name="application-name" content="Skirmish Arena" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -20,6 +20,9 @@
   <link rel="stylesheet" href="blue-circuit.css" />
   <link rel="stylesheet" href="commerce.css" />
   <link rel="stylesheet" href="refined-ui.css" />
+  <link rel="stylesheet" href="multiplayer-ui.css" />
+  <link rel="stylesheet" href="factions-ui.css" />
+  <link rel="stylesheet" href="replays-ui.css" />
 </head>
 <body>
   <script src="boot.js"></script>
@@ -29,7 +32,7 @@
   <div id="menu" class="screen visible">
     <div class="hero-card glass">
       <div class="lobby-command">
-      <div class="eyebrow home-edition"><i class="dot live"></i> VERSION 1.14.0 <span>08 OCT / 2026</span></div>
+      <div class="eyebrow home-edition"><i class="dot live"></i> VERSION 1.15.0 <span>14 OCT / 2026</span></div>
       <div class="lobby-brand-row"><h1><img class="brand-wordmark" src="assets/branding/wordmark.svg" alt="SKIRMISH ARENA"></h1></div>
       
       <div class="menu-grid">
@@ -40,11 +43,12 @@
         <button data-action="shop">SHOP</button><button data-action="quit-game">EXIT GAME</button>
       </div>
       <div class="lobby-progress-panels" aria-label="Your progression">
-        <section id="lobbyProgression" class="lobby-progression" aria-label="Account level"></section>
+        <button id="lobbyProgression" class="lobby-progression" data-action="account-progression" aria-label="View account level and XP progression"></button>
         <section id="lobbyRanked" class="lobby-ranked" aria-label="Ranked progression"></section>
       </div>
       <button id="lobbyCredits" class="lobby-credits" data-action="store" aria-label="Arena Credits balance. Open Store"><span>ARENA CREDITS</span><strong>— AC</strong></button>
-      <div class="lobby-build"><span id="sarBuildLabel">BUILD 1.14.0</span><span id="sarUpdateStatus" role="status" aria-live="polite"></span></div>
+      <section id="multiplayerParty" class="mp-party" aria-label="Online party"></section>
+      <div class="lobby-build"><span id="sarBuildLabel">BUILD 1.15.0</span><span id="sarUpdateStatus" role="status" aria-live="polite"></span></div>
       <div id="queueStatus" class="queue-status hidden">
         <strong>STARTING MATCH</strong>
         <span id="queueDetail">An instant player slot is always available. Your 5v5 starts immediately.</span>
@@ -92,12 +96,13 @@
 
   <div id="hud" class="hud hidden">
     <div class="topbar glass thin match-hud">
-      <div><span class="label">MAP</span><strong>BRIGHTFIELD BLOCKS</strong></div>
+      <div><span class="label">MAP</span><strong id="hudMap">BRIGHTFIELD BLOCKS</strong></div>
       <div><span class="label">MODE</span><strong id="hudModeLabel">5V5 TDM</strong></div>
       <div><span id="hudScoreHeading" class="label">SCORE</span><strong id="teamScoreLabel">0 — 0</strong></div>
       <div><span class="label">TARGET</span><strong id="hudTargetLabel">60 KILLS</strong></div>
       <div><span class="label">TIME</span><strong id="uptimeLabel">00:00</strong></div>
     </div>
+    <div id="modeObjectiveHud" class="mode-objective-hud glass hidden" aria-label="Mode objective status"></div>
     <div id="killfeed" class="killfeed"></div>
     <div class="player-hud glass combat-hud">
       <div class="hp-line"><span class="label">HEALTH</span><strong id="hpText">250</strong></div>
@@ -126,6 +131,7 @@
       <div><span class="label">TIME</span><strong id="spectateClock">05:00</strong></div>
       <div><span class="label">WEAPON</span><strong id="spectateWeapon">AR-15</strong></div>
     </div>
+    <div id="spectatorObjectiveHud" class="mode-objective-hud glass hidden" aria-label="Spectated mode objective status"></div>
     <div class="spectate-help glass spectate-controls">
       <div class="observer-matches" aria-label="Active matches"><span>LIVE</span><button data-spectator-match="0" aria-label="Watch match 1">01</button><button data-spectator-match="1" aria-label="Watch match 2">02</button><button data-spectator-match="2" aria-label="Watch match 3">03</button><button data-spectator-match="3" aria-label="Watch match 4">04</button></div>
       <button data-spectator="previous-bot" title="Left arrow">Previous Bot</button><button data-spectator="next-bot" title="Right arrow">Next Bot</button>
@@ -154,14 +160,25 @@
   <script src="team-presentation.js"></script>
   <script src="exit-game.js"></script>
   <script src="build-meta.js"></script>
+  <script src="mode-rules.js"></script>
   <script src="match-modes.js"></script>
   <script src="progression.js"></script>
+  <script src="competitive-progression.js"></script>
+  <script src="weapon-mastery.js"></script>
   <script src="profile-stats.js"></script>
+  <script src="map-data.js"></script>
   <script src="distance-units.js"></script>
   <script src="tactical-instinct.js"></script>
   <script src="tournaments-ui.js"></script>
   <script src="cloud.js"></script>
+  <script src="multiplayer.js"></script>
+  <script src="multiplayer-ui.js"></script>
+  <script src="faction-identity.js"></script>
+  <script src="factions-ui.js"></script>
+  <script src="replay-playback.js"></script>
+  <script src="replays-ui.js"></script>
   <script src="commerce.js"></script>
+  <script src="victory-presentation.js"></script>
   <script src="updater.js"></script>
 </body>
 </html>

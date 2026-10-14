@@ -14,8 +14,16 @@ const error=(message,status=400)=>Object.assign(new Error(message),{status});
 const decode=text=>JSON.parse(text||'{}');
 const id=()=>crypto.randomUUID();
 const transact=(db,fn)=>{db.exec('BEGIN IMMEDIATE');try{const value=fn();db.exec('COMMIT');return value;}catch(e){db.exec('ROLLBACK');throw e;}};
+function officialOwnerId(db,userId){
+ const owner=process.env.SAR_BOT_OWNER_ID;if(!owner)return userId;
+ if(!db.prepare('SELECT 1 FROM worlds w JOIN users u ON u.id=w.user_id WHERE w.user_id=? AND u.disabled_at IS NULL').get(owner))throw error('The shared official roster is unavailable',503);return owner;
+}
+function sharedOfficial(db,value,userId){
+ const owner=process.env.SAR_BOT_OWNER_ID,creator=value.user_id||value.creatorId,at=value.starts_at??value.startsAt;
+ return !!owner&&creator===owner&&value.kind==='official'&&!['COMPLETED','CANCELLED'].includes(value.status)&&(value.status==='ACTIVE'||at>=Date.now())&&!!db.prepare('SELECT 1 FROM worlds w JOIN users u ON u.id=w.user_id WHERE w.user_id=? AND u.disabled_at IS NULL').get(userId);
+}
 function getTournament(db,userId,tournamentId){
- const row=db.prepare('SELECT * FROM tournaments WHERE user_id=? AND id=?').get(userId,tournamentId);if(!row)throw error('Tournament not found',404);if(row.deleted_at)throw error('Custom tournament was deleted',410);
+ const row=db.prepare('SELECT * FROM tournaments WHERE id=?').get(tournamentId);if(!row||row.user_id!==userId&&!db.prepare("SELECT 1 FROM tournament_registrations WHERE tournament_id=? AND participant_id=? AND kind='user'").get(tournamentId,userId)&&!sharedOfficial(db,row,userId))throw error('Tournament not found',404);if(row.deleted_at)throw error('Custom tournament was deleted',410);
  const state=decode(row.bracket_json),metadata=decode(row.metadata_json);
  return {id:row.id,canDelete:row.kind==='custom',creatorId:row.user_id,name:row.name,kind:row.kind,seasonId:row.season_id,startsAt:row.starts_at,status:row.status,createdAt:row.created_at,...state,...(metadata.schedulePolicy?{schedulePolicy:metadata.schedulePolicy,schedule:metadata.schedule,...(metadata.customTimetable?{customTimetable:true,customPreparationStartsAt:metadata.customPreparationStartsAt}:{} )}:{}),...(metadata.scheduling?{scheduling:metadata.scheduling}:{}),rulesetId:state.rulesetId||LEGACY_RULESET,teams:state.teams||[],series:state.series||[],placements:state.placements||[],earnings:state.earnings||[],invites:state.invites||[]};
 }
@@ -25,6 +33,7 @@ function create(db,userId,{name,startsAt,kind,seasonId=null},now,tournamentId=id
  return getTournament(db,userId,tournamentId);
 }
 function scheduleOfficial(db,userId,season,now=Date.now()){
+ const owner=officialOwnerId(db,userId);if(owner!==userId){const world=require('./world.cjs').refreshWorldSeason(db,owner,now);if(!world)throw error('The shared official roster is unavailable',503);userId=owner;season=world.save.seasons.current;}
  return Lifecycle.reconcileOfficial(db,userId,season,now,create);
 }
 function createCustom(db,userId,options,now=Date.now()){
@@ -32,9 +41,15 @@ function createCustom(db,userId,options,now=Date.now()){
  if(!name||!Number.isFinite(startsAt)||startsAt<now-60000||startsAt>now+365*86400000)throw error('Enter a name and a valid start time');
  return create(db,userId,{name,startsAt,kind:'custom'},now);
 }
-function participant(db,userId,participantId){
+function participant(db,userId,participantId,botOwner=userId){
  if(participantId===userId)return {id:userId,kind:'user',name:db.prepare('SELECT username FROM users WHERE id=?').get(userId)?.username||'YOU'};
- const row=db.prepare('SELECT name,power,form,personality_json FROM bots WHERE user_id=? AND bot_id=?').get(userId,participantId);if(!row)throw error('Unknown participant');return {id:participantId,kind:'bot',name:row.name,power:row.power};
+ const human=db.prepare('SELECT id,username FROM users WHERE id=? AND disabled_at IS NULL').get(participantId);
+ if(human){
+  const sameParty=db.prepare('SELECT 1 FROM mp_party_members a JOIN mp_party_members b ON b.party_id=a.party_id JOIN mp_parties p ON p.id=a.party_id WHERE a.user_id=? AND b.user_id=? AND p.leader_id=? AND a.ready=1 AND b.ready=1 AND p.queue_status IN (\'idle\',\'queued\')').get(userId,participantId,userId);
+  if(!sameParty||db.prepare('SELECT 1 FROM mp_blocks WHERE (user_id=? AND blocked_id=?) OR (user_id=? AND blocked_id=?)').get(userId,participantId,participantId,userId))throw error('Tournament humans must be ready, unblocked members of your party',403);
+  return {id:human.id,kind:'user',name:human.username};
+ }
+ const row=db.prepare('SELECT name,power,form,personality_json FROM bots WHERE user_id=? AND bot_id=?').get(botOwner,participantId);if(!row)throw error('Unknown participant');return {id:participantId,kind:'bot',name:row.name,power:row.power};
 }
 function commitment(db,userId,participantId,excluding){return Lifecycle.externalReservations(db,userId,excluding).has(participantId);}
 function decision(db,userId,tournament,botId){
@@ -44,26 +59,27 @@ function decision(db,userId,tournament,botId){
  return {accepted:score>=.37,reason:score>=.37?'Ready to compete':'Passing on this event'};
 }
 function registerTeam(db,userId,tournamentId,{name,participantIds},now=Date.now()){
- return transact(db,()=>{const t=getTournament(db,userId,tournamentId);if(!['REGISTRATION','ANNOUNCED','UPCOMING'].includes(t.status)||t.teams.length>=8)throw error('Registration is closed',409);
+ return transact(db,()=>{const t=getTournament(db,userId,tournamentId);if(t.creatorId!==userId&&!sharedOfficial(db,t,userId))throw error('Only the event owner can register a team',403);if(!['REGISTRATION','ANNOUNCED','UPCOMING'].includes(t.status)||t.teams.length>=8)throw error('Registration is closed',409);
+ const party=db.prepare('SELECT p.leader_id FROM mp_parties p JOIN mp_party_members m ON m.party_id=p.id WHERE m.user_id=?').get(userId);if(party&&party.leader_id!==userId)throw error('The party leader registers the team',403);
  const ids=Array.isArray(participantIds)?participantIds:[];name=String(name||'').trim().replace(/[<>]/g,'').slice(0,40);
  if(!name||!ids.length||ids.length>5||new Set(ids).size!==ids.length)throw error('A team needs 1–5 unique participants');
- const booked=new Set(t.teams.flatMap(team=>team.participants.map(p=>p.id))),people=ids.map(value=>participant(db,userId,value));
- for(const p of people){if(booked.has(p.id)||commitment(db,userId,p.id,t.id))throw error('Participant is already committed',409);if(p.kind==='bot'&&!decision(db,userId,t,p.id).accepted)throw error(p.name+' declined this event',409);}
+ const booked=new Set(t.teams.flatMap(team=>team.participants.map(p=>p.id))),people=ids.map(value=>participant(db,userId,value,t.creatorId));
+ for(const p of people){if(p.kind==='user'&&!db.prepare('SELECT 1 FROM worlds WHERE user_id=?').get(p.id))throw error('Every human must finish loading an authenticated saved world before registration',409);if(booked.has(p.id)||commitment(db,t.creatorId,p.id,t.id)||p.kind==='user'&&db.prepare("SELECT 1 FROM mp_participations p JOIN mp_matches m ON m.id=p.match_id WHERE p.user_id=? AND m.status NOT IN ('ended','cancelled')").get(p.id))throw error('Participant is already committed',409);if(p.kind==='bot'&&!decision(db,t.creatorId,t,p.id).accepted)throw error(p.name+' declined this event',409);}
  const team={id:id(),seed:t.teams.length+1,name,participants:people};t.teams.push(team);db.prepare('INSERT INTO tournament_teams(id,tournament_id,name,seed) VALUES(?,?,?,?)').run(team.id,t.id,name,team.seed);
  for(const p of people){db.prepare('INSERT INTO tournament_registrations(tournament_id,team_id,participant_id,kind) VALUES(?,?,?,?)').run(t.id,team.id,p.id,p.kind);}return put(db,t,now);
  });
 }
 function inviteBot(db,userId,tournamentId,{teamId,botId},now=Date.now()){
- return transact(db,()=>{const t=getTournament(db,userId,tournamentId),team=t.teams.find(team=>team.id===teamId);if(!team||!['REGISTRATION','UPCOMING'].includes(t.status)||team.participants.length>=5)throw error('This team cannot accept another invite');
+ return transact(db,()=>{const t=getTournament(db,userId,tournamentId),team=t.teams.find(team=>team.id===teamId);if(t.creatorId!==userId&&(!sharedOfficial(db,t,userId)||!team?.participants.some(p=>p.id===userId&&p.kind==='user')||db.prepare('SELECT p.leader_id FROM mp_parties p JOIN mp_party_members m ON m.party_id=p.id WHERE m.user_id=?').get(userId)?.leader_id!==userId))throw error('Only the event owner or its registered party leader can invite tournament bots',403);if(!team||!['REGISTRATION','UPCOMING'].includes(t.status)||team.participants.length>=5)throw error('This team cannot accept another invite');
  const known=t.invites.find(value=>value.teamId===teamId&&value.botId===botId);if(known)return t;
- const already=t.teams.some(team=>team.participants.some(p=>p.id===botId)),answer=already?{accepted:false,reason:'Already on a team'}:decision(db,userId,t,botId),state=answer.accepted?'ACCEPTED':'DECLINED';
+ const already=t.teams.some(team=>team.participants.some(p=>p.id===botId)),answer=already?{accepted:false,reason:'Already on a team'}:decision(db,t.creatorId,t,botId),state=answer.accepted?'ACCEPTED':'DECLINED';
  const invite={teamId,botId,state,reason:answer.reason,decidedAt:now};t.invites.push(invite);db.prepare('INSERT INTO tournament_invites VALUES(?,?,?,?,?,?)').run(t.id,teamId,botId,state,answer.reason,now);
- if(answer.accepted){const p=participant(db,userId,botId);team.participants.push(p);db.prepare('INSERT INTO tournament_registrations VALUES(?,?,?,?)').run(t.id,teamId,botId,'bot');}
+ if(answer.accepted){const p=participant(db,userId,botId,t.creatorId);team.participants.push(p);db.prepare('INSERT INTO tournament_registrations VALUES(?,?,?,?)').run(t.id,teamId,botId,'bot');}
  return put(db,t,now);
  });
 }
 function startTournament(db,userId,tournamentId,now=Date.now()){
- const existing=getTournament(db,userId,tournamentId);if(now>=existing.startsAt&&!['ACTIVE','COMPLETED','CANCELLED'].includes(existing.status))Lifecycle.completeTeams(db,userId,tournamentId,now);
+ const existing=getTournament(db,userId,tournamentId);if(existing.creatorId!==userId)throw error('Only the event owner can start a tournament',403);if(now>=existing.startsAt&&!['ACTIVE','COMPLETED','CANCELLED'].includes(existing.status))Lifecycle.completeTeams(db,userId,tournamentId,now);
  return transact(db,()=>{const t=getTournament(db,userId,tournamentId);if(t.status==='ACTIVE'||t.status==='COMPLETED')return t;
  if(t.status==='CANCELLED')throw error('A cancelled tournament cannot restart',409);
  if(t.series.some(s=>s.games?.length))throw error('A tournament with recorded games cannot restart',409);
@@ -79,8 +95,9 @@ function startTournament(db,userId,tournamentId,now=Date.now()){
 }
 function metrics(t,teamId){let games=0,kills=0,damage=0;for(const s of t.series.filter(s=>s.teamIds.includes(teamId)))for(const g of s.games){games+=g.winnerTeamId===teamId?1:-1;const ours=new Set((g.teams||t.teams).find(team=>team.id===teamId).participants.map(p=>p.id));for(const p of g.stats){const sign=ours.has(p.participantId)?1:-1;kills+=sign*p.kills;damage+=sign*p.damage;}}return {games,kills,damage,seed:t.teams.find(team=>team.id===teamId).seed};}
 function rankPlacements(t){const final=t.series.find(s=>s.round==='FINAL');if(!final?.winnerTeamId)return [];const ranked=[final.winnerTeamId,final.teamIds.find(value=>value!==final.winnerTeamId)];for(const round of ['SF','QF']){const losers=t.series.filter(s=>s.round===round).map(s=>s.teamIds.find(value=>value!==s.winnerTeamId));losers.sort((a,b)=>{const x=metrics(t,a),y=metrics(t,b);return y.games-x.games||y.kills-x.kills||y.damage-x.damage||x.seed-y.seed;});ranked.push(...losers);}return ranked.map((teamId,i)=>({teamId,placement:i+1,...metrics(t,teamId)}));}
-function recordGame(db,userId,tournamentId,seriesId,result,now=Date.now()){
+function recordGame(db,userId,tournamentId,seriesId,result,now=Date.now(),{masteryAuthority=null}={}){
  return transact(db,()=>{const t=getTournament(db,userId,tournamentId);
+ if(t.creatorId!==userId)throw error('Only the authoritative event owner can finalize a game',403);
  if(!result||typeof result.id!=='string'||!result.id||result.id.length>160)throw error('Invalid resolved game identity');
  const recorded=db.prepare('SELECT series_id FROM tournament_matches WHERE id=? AND tournament_id=?').get(result.id,t.id);
  if(recorded){if(recorded.series_id!==seriesId)throw error('This result belongs to a different series',409);return t;}
@@ -98,8 +115,10 @@ function recordGame(db,userId,tournamentId,seriesId,result,now=Date.now()){
   const winner=result.score[0]>result.score[1]?0:result.score[1]>result.score[0]?1:null;
   if(winner===null||series.teamIds[winner]!==result.winnerTeamId)throw error('The resolved game winner must match its team kills');
  }
- const game={...result,completedAt:now,...(scheduled?{teams:roster}:{}),...(aggregate?{seriesId:series.id,round:series.round,gameNumber:series.games.length+1,teamIds:[...series.teamIds],teamKills:[...result.score],rulesetId:AGGREGATE_RULESET}:{})};series.games.push(game);series.wins[series.teamIds.indexOf(result.winnerTeamId)]++;
+ const game={...result,masteryAuthority:masteryAuthority==='server-simulation'?'server-simulation':null,completedAt:now,...(scheduled?{teams:roster}:{}),...(aggregate?{seriesId:series.id,round:series.round,gameNumber:series.games.length+1,teamIds:[...series.teamIds],teamKills:[...result.score],rulesetId:AGGREGATE_RULESET}:{})};series.games.push(game);series.wins[series.teamIds.indexOf(result.winnerTeamId)]++;
  db.prepare('INSERT INTO tournament_matches VALUES(?,?,?,?,?)').run(result.id,t.id,seriesId,JSON.stringify(game),now);
+ require('./weapon-mastery.cjs').applyOfficial(db,game,t,roster);
+ require('./factions.cjs').applyOfficial(db,game,t,roster);
  for(const s of result.stats){const prior=decode(db.prepare('SELECT stats_json FROM tournament_stats WHERE tournament_id=? AND participant_id=?').get(t.id,s.participantId)?.stats_json);prior.games=(prior.games||0)+1;for(const key of ['kills','deaths','assists','damage','shots','hits','headshots'])prior[key]=(prior[key]||0)+s[key];prior.weaponStats||={};for(const [weapon,values] of Object.entries(s.weaponStats||{})){prior.weaponStats[weapon]||={};for(const [key,n] of Object.entries(values))if(Number.isFinite(n))prior.weaponStats[weapon][key]=(prior.weaponStats[weapon][key]||0)+n;}db.prepare('INSERT INTO tournament_stats VALUES(?,?,?) ON CONFLICT(tournament_id,participant_id) DO UPDATE SET stats_json=excluded.stats_json').run(t.id,s.participantId,JSON.stringify(prior));}
  let advancement=null;
  if(aggregate){
@@ -138,4 +157,4 @@ function deleteCustom(db,userId,tournamentId,confirmedName,now=Date.now(),author
   return {id:row.id,deleted:true,deletedAt:now};
  });
 }
-module.exports={deleteCustom,INTERVAL,PAYOUTS,AGGREGATE_RULESET,LEGACY_RULESET,isAggregateSeries,canPlaySeries,scheduleOfficial,createCustom,getTournament,registerTeam,inviteBot,startTournament,recordGame,rankPlacements,decision,...Object.fromEntries(['prepareReservations','completeTeams','configureOfficialSchedule','advanceCustom','advanceScheduled','checkIn','gameRoster','markScheduledPrepared','claimScheduledGame','renewScheduledGame','markScheduledStarted','markScheduledError'].map(key=>[key,Lifecycle[key]]))};
+module.exports={deleteCustom,INTERVAL,PAYOUTS,AGGREGATE_RULESET,LEGACY_RULESET,isAggregateSeries,canPlaySeries,officialOwnerId,sharedOfficial,scheduleOfficial,createCustom,getTournament,registerTeam,inviteBot,startTournament,recordGame,rankPlacements,decision,...Object.fromEntries(['prepareReservations','completeTeams','configureOfficialSchedule','advanceCustom','advanceScheduled','checkIn','gameRoster','markScheduledPrepared','claimScheduledGame','renewScheduledGame','markScheduledStarted','markScheduledError'].map(key=>[key,Lifecycle[key]]))};

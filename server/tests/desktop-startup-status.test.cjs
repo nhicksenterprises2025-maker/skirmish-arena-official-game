@@ -71,7 +71,7 @@ async function launch(dir,options={}){
  return {child,exited,databasePath,origin,nonce,marker:path.join(dir,'desktop-startup.json'),...instrument,get stdout(){return stdout;},get stderr(){return stderr;}};
 }
 async function until(check,timeout=30000){const end=Date.now()+timeout;while(Date.now()<end){if(await check())return;await delay(50);}throw Error('Fixture startup did not reach the expected stage');}
-async function ready(app){await until(()=>fs.existsSync(path.join(path.dirname(app.marker),'desktop-service.json')));const response=await fetch(app.origin+'/api/status');assert.equal(response.status,200);assert.equal((await response.json()).databaseSchema,LATEST_DB_SCHEMA);}
+async function ready(app){await until(()=>{if(app.child.exitCode!==null){const stage=fs.existsSync(app.marker)?JSON.parse(fs.readFileSync(app.marker)).stage:'before marker',firstError=app.stderr.split(/\r?\n/).find(line=>/^Error:/.test(line))||'No error line recorded';throw Error('Fixture backend exited '+app.child.exitCode+' at '+stage+': '+firstError.replace(/never-log-[^\s]+/g,'[fixture private value]'));}return fs.existsSync(path.join(path.dirname(app.marker),'desktop-service.json'));});const response=await fetch(app.origin+'/api/status');assert.equal(response.status,200);assert.equal((await response.json()).databaseSchema,LATEST_DB_SCHEMA);}
 async function stop(app){
  if(app.child.exitCode!==null)return;
  try{
@@ -96,7 +96,7 @@ test('real schema8 retirement reports verified snapshot/export stages and binds 
  try{
   app=await launch(dir);await ready(app);
   const rows=fs.readFileSync(app.trace,'utf8').trim().split('\n').map(JSON.parse),stages=rows.map(row=>row.stage);
-  for(const stage of ['opening-database','snapshot','snapshot-verify','archive','archive-verify','migration-9','migration-10','migration-11','listening','ready'])assert(stages.includes(stage),stage);
+  for(const stage of ['opening-database','snapshot','snapshot-verify','archive','archive-verify','migration-9','migration-10','migration-11','migration-12','migration-13','migration-14','listening','ready'])assert(stages.includes(stage),stage);
   assert(stages.indexOf('snapshot')<stages.indexOf('snapshot-verify'));assert(stages.indexOf('archive')<stages.indexOf('archive-verify'));assert(stages.lastIndexOf('migration-9')>stages.indexOf('archive-verify'));assert(stages.indexOf('migration-10')<stages.indexOf('ready'));
   for(const row of rows){assert.equal(row.schema,1);assert.equal(row.pid,app.child.pid);assert.equal(row.attempt,app.nonce);assert.equal(row.databasePath,path.resolve(app.databasePath));assert.equal(row.nodeExecutable,path.resolve(process.execPath));assert.equal(row.entryPath,ENTRY);assert.equal(row.origin,app.origin);assert(row.updatedAt>=row.stageStartedAt);assert(!/never-log|controlToken|password|recovery|session_token/i.test(JSON.stringify(row)));if(row.artifactPath){assert.equal(path.dirname(row.artifactPath),dir);assert(path.basename(row.artifactPath).startsWith('fixture.sqlite.pre-'));}}
   assert(rows.every(row=>row.startedAt===rows[0].startedAt),'attempt start never resets across stages');
@@ -132,13 +132,14 @@ test('an existing schema10 desktop reports verified recovery and schema11 reset 
  try{
   // Reconstruct the immediately previous released table set in an isolated DB.
   const db=require('../db.cjs').createDatabase(file);
+  require('./fixtures/remove-empty-multiplayer-schema.cjs')(db);
   db.exec('DROP TABLE tournament_reset_archives; DROP TABLE tournament_state_resets; DROP TABLE tournament_schedule_anchors; DELETE FROM save_migrations WHERE version=11; PRAGMA user_version=10');
   db.exec('CREATE TABLE startup_preserved_fixture(id TEXT PRIMARY KEY,value TEXT NOT NULL)');db.prepare('INSERT INTO startup_preserved_fixture VALUES(?,?)').run('saved','unchanged');db.close();
   first=await launch(dir);await ready(first);const stages=fs.readFileSync(first.trace,'utf8').trim().split('\n').map(line=>JSON.parse(line).stage);
   for(const stage of ['snapshot','snapshot-verify','migration-11','listening','ready'])assert(stages.includes(stage),stage);
   assert(!stages.includes('archive')&&!stages.includes('migration-9'),'retired data must not be migrated again');
   assert(stages.indexOf('migration-11')>stages.indexOf('snapshot-verify'));await stop(first);
-  let raw=new DatabaseSync(file,{readOnly:true});try{assert.equal(raw.prepare('PRAGMA user_version').get().user_version,11);assert.equal(raw.prepare('SELECT value FROM startup_preserved_fixture').get().value,'unchanged');assert.equal(raw.prepare('SELECT COUNT(*) n FROM tournament_state_resets').get().n,1);assert.equal(raw.prepare('SELECT COUNT(*) n FROM save_migrations WHERE version=11').get().n,1);}finally{raw.close();}
+  let raw=new DatabaseSync(file,{readOnly:true});try{assert.equal(raw.prepare('PRAGMA user_version').get().user_version,LATEST_DB_SCHEMA);assert.equal(raw.prepare('SELECT value FROM startup_preserved_fixture').get().value,'unchanged');assert.equal(raw.prepare('SELECT COUNT(*) n FROM tournament_state_resets').get().n,1);assert.equal(raw.prepare('SELECT COUNT(*) n FROM save_migrations WHERE version=11').get().n,1);assert.equal(raw.prepare('SELECT COUNT(*) n FROM save_migrations WHERE version=12').get().n,1);}finally{raw.close();}
   fs.unlinkSync(first.trace);second=await launch(dir);await ready(second);const reopened=fs.readFileSync(second.trace,'utf8').trim().split('\n').map(line=>JSON.parse(line).stage);assert(!reopened.includes('snapshot')&&!reopened.includes('migration-11'));
   raw=new DatabaseSync(file,{readOnly:true});try{assert.equal(raw.prepare('SELECT COUNT(*) n FROM tournament_state_resets').get().n,1);assert.equal(raw.prepare('SELECT value FROM startup_preserved_fixture').get().value,'unchanged');assert.deepEqual(raw.prepare('PRAGMA foreign_key_check').all(),[]);}finally{raw.close();}
  }finally{if(first)await stop(first);if(second)await stop(second);cleanup(dir);}

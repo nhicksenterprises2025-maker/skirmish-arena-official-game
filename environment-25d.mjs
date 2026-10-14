@@ -46,10 +46,10 @@ function freezeEnvironmentTransforms(group){
 }
 
 export function buildEnvironment(scene,snapshot){
-  const {world,geometry}=snapshot,root=new THREE.Group();root.name='Brightfield Blocks';scene.add(root);
+  const {world,geometry}=snapshot,theme=snapshot.map?.theme||'neighborhood',industrial=theme==='foundry'||theme==='relay',root=new THREE.Group();root.name=snapshot.map?.name||'Brightfield Blocks';scene.add(root);
   const staticRoot=new THREE.Group();root.add(staticRoot);const batch=new StaticBatch(staticRoot),houses=[],trees=[],assetSlots=[];
   const grassTex=texture('grass'),asphaltTex=texture('road');
-  const grass=new THREE.MeshStandardMaterial({color:0xa4b58b,map:grassTex,roughness:1});grassTex.repeat.set((world.w+1500)/360,(world.h+1500)/360);
+  const grass=new THREE.MeshStandardMaterial({color:theme==='foundry'?0xa6a590:theme==='relay'?0xb4bc8d:0xa4b58b,map:grassTex,roughness:1});grassTex.repeat.set((world.w+1500)/360,(world.h+1500)/360);
   const ground=cube(root,world.w+1800,4,world.h+1800,grass,world.w/2,-4,world.h/2);ground.castShadow=false;
   const asphalt=new THREE.MeshStandardMaterial({color:0x919b95,map:asphaltTex,roughness:.95});asphaltTex.repeat.set(6,3);
   const roadPoint=(x,z)=>geometry.roads.some(r=>x>=r.x&&x<=r.x+r.w&&z>=r.y&&z<=r.y+r.h);
@@ -87,14 +87,14 @@ export function buildEnvironment(scene,snapshot){
     const horizontal=s.w>s.h;
     for(let p=0;p<(horizontal?s.w:s.h);p+=48)batch.box(horizontal?.8:s.w,.25,horizontal?s.h:.8,0x929d85,s.x+(horizontal?p:s.w/2),2,s.y+(horizontal?s.h/2:p));
   }
-  const tones=[0xa8b397,0x9badb1,0xc1ab86,0xaca99b],roofTones=[0x627064,0x657779,0x897a62,0x777969];
+  const tones=theme==='foundry'?[0xa1a996,0x889c91,0xb3a58a,0x8f9994]:theme==='relay'?[0xa9b8a3,0x899e97,0xb9b49b,0x92a28f]:[0xa8b397,0x9badb1,0xc1ab86,0xaca99b],roofTones=[0x627064,0x657779,0x897a62,0x777969];
   for(const floor of geometry.floors){
     const base=new THREE.Group(),roof=new THREE.Group(),wallRoot=new THREE.Group(),fadeMaterials=[];root.add(base,wallRoot,roof);
     cube(base,floor.w,5,floor.h,0xc7c5ae,floor.x+floor.w/2,2,floor.y+floor.h/2);
     cube(base,floor.w-42,1,floor.h-42,tones[floor.tone%4],floor.x+floor.w/2,5,floor.y+floor.h/2);
-    // Plank seams and a central woven rug reveal the walkable interior when cut away.
-    for(let x=floor.x+26;x<floor.x+floor.w-22;x+=32)batch.box(.6,.4,floor.h-44,0x8c9783,x,5.7,floor.y+floor.h/2);
-    batch.box(floor.w*.34,.5,floor.h*.34,0x6f8578,floor.x+floor.w/2,5.8,floor.y+floor.h/2);
+    // Quiet surface seams make revealed rooms readable without creating obstacles.
+    for(let x=floor.x+26;x<floor.x+floor.w-22;x+=industrial?96:32)batch.box(.6,.4,floor.h-44,0x8c9783,x,5.7,floor.y+floor.h/2);
+    if(!industrial)batch.box(floor.w*.34,.5,floor.h*.34,0x6f8578,floor.x+floor.w/2,5.8,floor.y+floor.h/2);
     const colour=tones[floor.tone%4],upperMat=transparentCopy(material(colour)),trimMat=transparentCopy(material(colours.trim)),glass=transparentCopy(material(0x476762,.36));
     fadeMaterials.push(upperMat,trimMat,glass);
     for(const solid of geometry.solids.filter(s=>s.kind==='building'&&s.owner===floor.id)){
@@ -128,6 +128,13 @@ export function buildEnvironment(scene,snapshot){
     // Gabled roof made from an actual triangular profile, with ridge and tile courses.
     const roofMat=transparentCopy(material(roofTones[floor.tone%4])),roofMats=[roofMat];
     const w=floor.w+24,d=floor.h+24,x=floor.x+floor.w/2,z=floor.y+floor.h/2,eave=101,rise=54;
+    if(industrial){
+      cube(roof,w,8,d,roofMat,x,eave+4,z);
+      const trim=transparentCopy(material(0xc5c8b0));roofMats.push(trim);
+      for(const side of [-1,1]){cube(roof,w+2,7,4,trim,x,eave+10,z+side*d/2);cube(roof,4,7,d+2,trim,x+side*w/2,eave+10,z);}
+      for(let p=-w/2+24;p<w/2;p+=48)cube(roof,1,1,d-10,roofMat,x+p,eave+8.5,z);
+      cube(roof,46,13,36,roofMat,x-w*.24,eave+14,z-d*.16);cube(roof,50,2,40,trim,x-w*.24,eave+21,z-d*.16);
+    }else{
     const shape=new THREE.Shape();shape.moveTo(-w/2,0);shape.lineTo(w/2,0);shape.lineTo(0,rise);shape.closePath();
     const roofGeo=new THREE.ExtrudeGeometry(shape,{depth:d,bevelEnabled:false,steps:1});roofGeo.translate(x,eave,z-d/2);
     mesh(roof,roofGeo,roofMat,0,0,0);
@@ -153,6 +160,7 @@ export function buildEnvironment(scene,snapshot){
         cube(wallRoot,porchExit.dx?5.3:5,7,porchExit.dy?5.3:5,glass,lx+porchExit.dx*.3,77,lz+porchExit.dy*.3);
       }
     }
+    }
     mergeFixedGroup(wallRoot);mergeFixedGroup(roof);mergeFixedGroup(base);
     for(const exit of floor.exits||[]){
       batch.box(exit.dx?46:132,5,exit.dy?46:132,0xb8bda5,exit.x+exit.dx*24,3,exit.y+exit.dy*24);
@@ -163,7 +171,7 @@ export function buildEnvironment(scene,snapshot){
     }
     houses.push({floor,roof,wallRoot,roofMats,fadeMaterials,opacity:1});
     // Low flowerbeds are ground dressing, outside doors and existing collision.
-    for(let p=45;p<floor.w-38;p+=32){const px=floor.x+p,pz=floor.y+floor.h+34;
+    for(let p=45;!industrial&&p<floor.w-38;p+=32){const px=floor.x+p,pz=floor.y+floor.h+34;
       if((floor.exits||[]).some(e=>Math.hypot(e.x-px,e.y-pz)<99)||roadPoint(px,pz))continue;
       batch.box(26,1,14,0x8e936a,px,1,pz);batch.box(27,2.5,1.6,0x929781,px,1.8,pz+8);for(let j=0;j<3;j++)batch.add(new THREE.IcosahedronGeometry(2.4,0),material(j===1?0xc99569:0xd7c993),px-7+j*7,3,pz);
     }
@@ -176,7 +184,11 @@ export function buildEnvironment(scene,snapshot){
   for(const solid of geometry.solids){
     if(solid.kind==='building')continue;
     const cx=solid.type==='circle'?solid.x:solid.x+solid.w/2,cz=solid.type==='circle'?solid.y:solid.y+solid.h/2;
-    if(solid.kind==='tree'){
+    if(solid.asset&&solid.type==='rect'){
+      const fallback=new THREE.Group();root.add(fallback);const heights={foundry_press:89,foundry_rack:59.5,foundry_workbench:56,relay_mast:182.5,relay_generator:62,relay_barrier:60},height=heights[solid.asset]||56;
+      cube(fallback,solid.w,height,solid.h,0x8f9e8b,cx,height/2,cz);
+      assetSlots.push({name:solid.asset,x:cx,z:cz,width:solid.w,depth:solid.h,rotation:solid.w<solid.h?Math.PI/2:0,rotateFootprint:true,fallback});
+    }else if(solid.kind==='tree'){
       const t=new THREE.Group();root.add(t);const canopy=new THREE.Group();t.add(canopy);
       cube(t,13,49,13,0x75664c,cx,25,cz);
       const leaf=transparentCopy(material(0x4e7c44)),leaf2=transparentCopy(material(0x698c48));
@@ -214,6 +226,12 @@ export function buildEnvironment(scene,snapshot){
   // so following a player to the edge never exposes a flat unfinished rectangle.
   for(const o of geometry.outerWorld||[]){
     if(o.kind==='house'){batch.box(o.w,85,o.h,tones[o.tone%4],o.x+o.w/2,43,o.y+o.h/2);batch.box(o.w+18,14,o.h+18,roofTones[o.tone%4],o.x+o.w/2,94,o.y+o.h/2);}
+    else if(o.kind==='industrial'||o.kind==='relay'){
+      const x=o.x+o.w/2,z=o.y+o.h/2;batch.box(o.w,105,o.h,tones[o.tone%4],x,52.5,z);batch.box(o.w+12,8,o.h+12,roofTones[o.tone%4],x,109,z);
+      for(let p=40;p<o.w-30;p+=96)batch.box(48,30,2,0x627a70,o.x+p,61,o.y-.5);
+      for(const side of [-1,1])batch.box(5,9,o.h+15,0xbfc4ad,x+side*(o.w/2+5),116,z);
+      if(o.kind==='relay')assetSlots.push({name:'relay_mast',x,z,scale:1.3});
+    }
     else if(o.kind==='tree')batch.add(new THREE.IcosahedronGeometry(o.r,1),material(0x537c48),o.x,66,o.y);
     else if(o.kind==='car')batch.box(o.w,29,o.h,0x7e9185,o.x+o.w/2,15,o.y+o.h/2);
   }
@@ -236,7 +254,8 @@ export function buildEnvironment(scene,snapshot){
     for(const slot of assetSlots){const d=library.dimensions(slot.name);if(!d)continue;
       const scale=slot.scale||1,key=slot.name+':'+Math.floor(slot.x/1000)+':'+Math.floor(slot.z/1000);
       if(!grouped.has(key))grouped.set(key,{name:slot.name,placements:[]});
-      grouped.get(key).placements.push({x:slot.x,y:0,z:slot.z,rotationY:slot.rotation||0,scale:{x:slot.width?slot.width/d.x:scale,y:slot.width?Math.min(slot.width/d.x,slot.depth/d.z):scale,z:slot.depth?slot.depth/d.z:scale}});
+      const rotated=slot.rotateFootprint&&slot.rotation,w=rotated?slot.depth:slot.width,depth=rotated?slot.width:slot.depth;
+      grouped.get(key).placements.push({x:slot.x,y:0,z:slot.z,rotationY:slot.rotation||0,scale:{x:w?w/d.x:scale,y:w?Math.min(w/d.x,depth/d.z):scale,z:depth?depth/d.z:scale}});
       if(slot.fallback){root.remove(slot.fallback);slot.fallback.traverse(o=>{if(o.geometry)o.geometry.dispose();});}installed++;
     }
     for(const {name,placements} of grouped.values()){

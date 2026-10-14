@@ -1,0 +1,6 @@
+{$SAR_PUBLIC_HOST} {
+    encode zstd gzip
+    # Caddy preserves Host, handles WebSocket upgrades, and replaces untrusted
+    # incoming X-Forwarded-* headers. Node is not publicly reachable.
+    reverse_proxy game:8803
+}

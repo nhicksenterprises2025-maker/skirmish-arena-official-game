@@ -63,7 +63,7 @@ function leaderboards(t,stats,liveGames=[]){
  });
  return {teamLeaderboard,playerLeaderboard};
 }
-function schedule(t,liveGames=[],metadata={},now=Date.now()){
+function schedule(t,liveGames=[],metadata={},now=Date.now(),viewerId=t.creatorId){
  const value={status:t.kind==='official'?'unconfirmed':'event-time-only',eventStartsAt:t.startsAt,timezone:null,rounds:[],games:[],seriesGames:[],liveGames:liveGames.filter(g=>g.tournamentId===t.id).map(g=>({seriesId:g.seriesId??t.series.find(s=>g.gameId.startsWith(s.id+':game'))?.id??null,gameId:g.gameId,status:g.status,score:g.score,elapsedMs:g.elapsedMs,countdownRemainingMs:g.countdownRemainingMs??null})),message:t.kind==='official'?'The event date is saved. Fixed round windows and check-in times await confirmation.':'Custom event start time is saved. No fixed round timetable is configured.'};
  if(metadata.invalid){value.status='unavailable';value.message='Saved schedule information is unavailable.';return value;}
  if(!(t.schedulePolicy||metadata.schedule?.policy)||t.kind==='custom'&&!t.customTimetable)return value;
@@ -77,14 +77,14 @@ function schedule(t,liveGames=[],metadata={},now=Date.now()){
    const gameId=s.id+':game'+w.gameNumber,saved=(s.games||[]).find(g=>g.id===gameId),record=t.scheduling?.games?.[gameId]||metadata.schedule?.gameStates?.[gameId]||{};
    const state=saved?{state:'FINALIZED',conflict:null}:Schedule.windowState(w,now,record);
    const publicConflicts=['GAME_OVERRAN_SCHEDULED_WINDOW','ROSTER_LOCK_MISSED_GAME_START','GAME_START_WINDOW_ELAPSED','PREPARATION_MISSED_GAME_START'];
-   return {...w,seriesId:s.id,gameId,state:t.status==='CANCELLED'?'CANCELLED':state.state,checkedIn:!!record.checkIns?.[t.creatorId],rostersLockedAt:record.rostersLockedAt??null,readyAt:record.readyAt??null,startedAt:record.startedAt??null,replacements:record.replacements||[],conflict:state.conflict?(publicConflicts.includes(state.conflict)?state.conflict:'PREPARATION_ERROR'):null};
+   return {...w,seriesId:s.id,gameId,state:t.status==='CANCELLED'?'CANCELLED':state.state,checkedIn:!!record.checkIns?.[viewerId],rostersLockedAt:record.rostersLockedAt??null,readyAt:record.readyAt??null,startedAt:record.startedAt??null,replacements:record.replacements||[],conflict:state.conflict?(publicConflicts.includes(state.conflict)?state.conflict:'PREPARATION_ERROR'):null};
   }));value.message=t.customTimetable?'Custom games open check-in when their preceding pairing finishes. Future round times are assigned from actual results.':'Saved authoritative round windows.';
  }catch(error){if(error.code!=='TOURNAMENT_SCHEDULE_CONFLICT')throw error;value.status='conflict';value.timezone=null;value.rounds=[];value.games=[];value.seriesGames=[];value.message='Saved tournament timing is inconsistent and requires correction.';}
  return value;
 }
-function presentation(t,stats,liveGames=[],metadata={},now=Date.now()){return {...leaderboards(t,stats,liveGames),schedule:schedule(t,liveGames,metadata,now),history:history(t,metadata)};}
+function presentation(t,stats,liveGames=[],metadata={},now=Date.now(),viewerId=t.creatorId){return {...leaderboards(t,stats,liveGames),schedule:schedule(t,liveGames,metadata,now,viewerId),history:history(t,metadata)};}
 function stats(db,id){return db.prepare('SELECT participant_id AS participantId,stats_json AS stats FROM tournament_stats WHERE tournament_id=?').all(id).map(row=>({...row,stats:JSON.parse(row.stats)}));}
 function metadata(db,id){try{const value=JSON.parse(db.prepare('SELECT metadata_json FROM tournaments WHERE id=?').get(id)?.metadata_json||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{invalid:true};}catch(error){if(!(error instanceof SyntaxError))throw error;return {invalid:true};}}
-function detail(db,t,liveGames=[],now=Date.now()){const rows=stats(db,t.id);return {tournament:publicTournament(t),stats:rows,presentation:presentation(t,rows,liveGames,metadata(db,t.id),now)};}
+function detail(db,t,liveGames=[],now=Date.now(),viewerId=t.creatorId){const rows=stats(db,t.id);return {tournament:publicTournament(t),stats:rows,presentation:presentation(t,rows,liveGames,metadata(db,t.id),now,viewerId)};}
 function officialHistory(db,events){return events.filter(t=>t.kind==='official'&&t.status==='COMPLETED').map(t=>history(t,metadata(db,t.id)));}
 module.exports={OFFICIAL_TITLE,displayName,publicTournament,history,leaderboards,schedule,presentation,detail,officialHistory};

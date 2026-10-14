@@ -1,30 +1,119 @@
 {
-  "version": "1.14.0",
-  "applicationVersion": "1.14.0",
+  "version": "1.15.0",
+  "applicationVersion": "1.15.0",
   "weaponBalance": "9.0",
   "analyticsSchema": 1,
   "updateName": "ARENA REFINED",
-  "shellRevision": "arena-refined-3",
+  "shellRevision": "arena-refined-cosmetics-1",
   "channel": "live",
-  "releasedAt": "2026-10-08T23:47:45.984Z",
-  "notes": "A unified dark-green interface, reliable tournament autofill and no-show recovery, broader bot weapon sampling, and Combined Stats including official tournament games. Weapon Balance 9.0 and existing account progress remain intact.",
+  "releasedAt": "2026-10-14T06:00:08.808Z",
+  "notes": "Shared multiplayer, three arenas, progression, Factions, replays and an expanded cosmetic collection. Weapon Balance 9.0 and existing account progress remain intact.",
   "categories": {
+    "Fixed": [
+      "Bots stop initiating fire immediately when their observed opponent moves behind cover or dies, while preserving last-seen memory and reaction time.",
+      "Bots use a loaded sidearm when their primary has no ammunition or reserve, including longer engagements.",
+      "Dash and reload wait for the authoritative match start, preventing countdown actions from carrying into combat.",
+      "The in-game crosshair remains white in both hipfire and ADS under the current theme.",
+      "Old tournament simulation checkpoints retain their reviewed compatible progression helpers after the multiplayer update.",
+      "Party changes and blocking cancel obsolete queued groups through both socket and HTTP controls; unavailable saved worlds or invalid loadouts cannot enter a shared match.",
+      "Multiplayer acknowledgements remain reliable under snapshot backpressure, and ended matches reduce presentation traffic.",
+      "Delayed connections cannot restore another account's party, chat or statistics; queue entry synchronizes the selected loadout first.",
+      "Live background matches and shared human matches reserve the same persistent bot pool; stale or disconnected background slots wait safely before resuming.",
+      "Offline practice preserves lifetime careers, weapon statistics and bot learning, including time played and equipment counters.",
+      "Server restarts drain multiplayer connections and save match checkpoints before closing account storage.",
+      "Shared official tournaments use one authoritative calendar and persistent bot roster, with eligible human-team entry and private participant earnings.",
+      "Resolved hit feedback belongs to each human shooter and preserves combined shotgun damage regardless of the server owner's display preference.",
+      "Solo mode selection, shared custom-match entry and queue errors work through existing multiplayer controls.",
+      "Player models and labels disappear when authoritative visibility hides them; spectator views retain full match visibility.",
+      "Ended background slots select a fresh matching map revision on restart instead of reusing the prior arena revision.",
+      "Party voice connects when players enable it together and safely reconnects after microphone sessions change.",
+      "Random Custom slots select available persistent bots without double-booking active matches.",
+      "Operator models refresh the correct identity, palette and team when actor slots are reused between matches.",
+      "Installed startup recognizes the new saved map settings migration and retains bounded progress diagnostics.",
+      "Custom objective/tier setup does not create persistent career scopes or return session actors to the permanent waiting pool.",
+      "Gun Game weapon switching, stale projectiles, abandonment and tied placements obey the authoritative tier progression.",
+      "Play Again retains the completed mode, and objective team colors follow the current player or spectator perspective.",
+      "Configured limited-time games retain separate career and weapon scopes; XP-only events do not enter Combined Stats or permanent-mode seasons.",
+      "Custom controls and spectator entry remain responsive, and shared mode preparation hydrates actual tier/objective state before entry.",
+      "Authenticated Ranked reward claims and equipped selections survive reconnect/restart without duplicate items or Arena Credits. Account Level, competitive Rank and unique Combined Stats stay separate.",
+      "Configured reward artwork loads correctly, and owned Ranked appearances remain selectable even after leaving the Store sale catalog.",
+      "Saved-account startup recognizes the Ranked migration and retains clear progress through a verified, recoverable update.",
+      "Ranked resets remain server-owned; account save uploads cannot fabricate rating or reward eligibility.",
+      "Trusted account exports from older schemas remain compatible with new Ranked records, preserving historical progress during migration.",
+      "Replay recording avoids match-time save pauses, preserves match navigation and each player's equipped appearance, and recovers interrupted captures safely. Closing a loading replay cannot reopen it over the lobby.",
+      "Results present the actual winning Deathmatch operator or winning team and MVP using their recorded appearances and selected victory poses. All operators retain identical gameplay hitboxes and no cosmetic changes combat statistics."
+    ],
     "New": [
-      "Combined Stats includes accepted official tournament games alongside TDM, Deathmatch and Ranked, counting each match once. Custom, practice and test sessions remain excluded."
+      "Human Team Deathmatch, Deathmatch, Ranked TDM and Ranked Deathmatch use separate shared-server queues and authoritative combat/results.",
+      "Persistent lobby parties support ready states, leader queue controls, invitations and reconnect.",
+      "Phone Friends adds player search, requests, privacy-aware presence, party invitations and blocking.",
+      "Human party, match and team chat includes mute, block and report controls. Deathmatch has no team chat.",
+      "Opt-in party/team voice supports push-to-talk, peer mute/volume and supported audio-device selection.",
+      "Foundry Crossing adds compact workshops, short crossings and flanking routes; Relay Fields adds longer lanes, covered crossings and relay landmarks. Brightfield Blocks remains permanent.",
+      "Separate casual, ranked, tournament, limited-time and custom map pools support seasonal rotation without removing historical maps.",
+      "Casual queues offer a short pre-match map vote; custom matches can select any eligible arena.",
+      "Gun Game advances through every current weapon tier; a final-tier kill wins, with explicit timeout ties and reconnect preservation.",
+      "Domination adds A/B/C capture objectives; Hardpoint adds a scheduled rotating scoring area across all three arenas.",
+      "A configurable limited-time mode framework supports active dates, map pools, team size, rules, allowed loadouts and independent XP/stat eligibility. No seasonal event is activated.",
+      "Custom supports every permanent mode while preserving session-only statistics.",
+      "Click Account Level to inspect the authoritative Levels 1–50 track, current XP, next-level requirement and lifetime XP.",
+      "Ranked inspection adds rating history, season/career best, completed season ranks and server-verified leaderboards while preserving the current 26-rank ladder and dimensional emblems.",
+      "Configured Ranked reward tracks support profile icons, banners, victory poses, operator appearances, weapon badges and explicitly configured Arena Credits, with persistent claim and ownership states.",
+      "Every registered weapon has independent Levels 1–10 mastery, resolved combat progression, configured challenges and cosmetic tier badges. Loadout opens the per-weapon mastery record.",
+      "Factions adds persistent social membership, Owner/Officer/Member roles, curated configurable logos, applications, invitations and faction profiles.",
+      "Completed eligible matches can be watched from Profile Replays with recorded match-era maps, loadouts and combat outcomes.",
+      "Ten distinct operators: two Basic, two Detailed, three Cool Detailed and three Premium. Obsidian, Aegis Prime and Specter cost 2,500 Arena Credits each.",
+      "Twelve profile icons, eight profile banners and six victory poses. Quiet Confidence is owned by default; other cosmetics require ownership."
     ],
     "Improved": [
-      "A shared dark-green presentation brings clearer model stages, controls, stat groups, tables and release history to Loadout, Operators, Phone, Weapon Meta, Tournaments, Store, Shop, Profiles and Settings.",
-      "Tournament rosters fill open positions with eligible persistent bots. Advance reservations let their background games finish before check-in, and absent humans receive a saved replacement at the deadline.",
-      "Bot weapon exploration uses actual samples from both background modes, with bounded opportunities for underused primaries and sidearms. Playstyle, familiarity and proven performance still influence each choice."
-    ],
-    "Fixed": [
-      "Incomplete tournament state is reset once with a recoverable archive. Completed official history, accepted historical games, earnings and shared progression remain intact; the next official calendar retains its established sequence.",
-      "Tournament restart, no-show and reservation handling no longer waits indefinitely on absent participants or books one bot into simultaneous games. Genuine pool conflicts remain visible.",
-      "Combined profile ratios use unique accepted participation and raw totals; reconnect and repeated result delivery cannot duplicate contributions.",
-      "Weapon Meta range headings correctly identify meters; balance constants, projectile behavior, ratings and existing source statistics are unchanged."
+      "Shared-server snapshots reuse the existing arena simulation, weapons, renderer and mode-specific HUD. Casual and custom matches retain eligible persistent bot fill.",
+      "Server result receipts preserve historical progress and apply new XP, ELO and completion credits once. Custom matches remain excluded.",
+      "Loading, reconnect and duplicate connection handling preserve one participant and one completed result.",
+      "Existing TDM and Deathmatch profile tabs, Ranked and Combined Stats, bot records and Weapon Meta include unique authoritative results without rewriting historical saves. Accepted records stay cached for offline inspection.",
+      "Eligible casual bot matches preserve weapon familiarity and career growth; later matches consume the same persistent identities and learned performance.",
+      "Every arena shares authoritative collision, navigation, safe TDM/Deathmatch spawns, spectator views and a detailed minimap/full-map view with consistent meter distances.",
+      "Map identities, revisions and unit metadata persist with match results and checkpoints; rotation avoids immediate repeats when multiple arenas are eligible.",
+      "Objective-mode bots distribute attacks and defenders, contest points and rotate early while keeping their existing personalities and visibility rules.",
+      "Mode-specific objective markers, minimaps, spectator displays, score/tier HUD and separate profile records show actual match state. Ranked remains exclusive to TDM and Deathmatch.",
+      "Ranked result screens show promotions and demotions with before/after ranks. Onboarding explains the existing rating system; Ranked remains TDM and Deathmatch only.",
+      "Ranked seasons preserve final records and support explicitly configured carry, reset or soft-reset policies without introducing a default rating reset.",
+      "Mastery progress and cosmetic claims are verified once from eligible authoritative results; Custom, practice, replay and debug sessions are excluded. Account XP, Ranked rating, bot familiarity and weapon balance remain separate.",
+      "Faction tags and logos appear in profiles and parties. Verified faction activity uses eligible unique results without combat bonuses; permissions, confirmations, invite blocking and reports protect membership.",
+      "Replay playback includes pause, restart, scrubbing, speed controls, player follow and tactical cameras; storage limits and favorites protect available disk space. Playback awards no progress or currency.",
+      "The Store separates operators, profile icons, banners and victory poses, with a link to earned weapon mastery badges. Inspection never grants ownership."
     ]
   },
+  "databaseSchema": 17,
+  "aiRevision": "gameplay-quality-1",
   "history": [
+    {
+      "version": "1.14.0",
+      "applicationVersion": "1.14.0",
+      "weaponBalance": "9.0",
+      "analyticsSchema": 1,
+      "updateName": "ARENA REFINED",
+      "shellRevision": "arena-refined-3",
+      "channel": "live",
+      "releasedAt": "2026-10-08T23:47:45.984Z",
+      "notes": "A unified dark-green interface, reliable tournament autofill and no-show recovery, broader bot weapon sampling, and Combined Stats including official tournament games. Weapon Balance 9.0 and existing account progress remain intact.",
+      "categories": {
+        "New": [
+          "Combined Stats includes accepted official tournament games alongside TDM, Deathmatch and Ranked, counting each match once. Custom, practice and test sessions remain excluded."
+        ],
+        "Improved": [
+          "A shared dark-green presentation brings clearer model stages, controls, stat groups, tables and release history to Loadout, Operators, Phone, Weapon Meta, Tournaments, Store, Shop, Profiles and Settings.",
+          "Tournament rosters fill open positions with eligible persistent bots. Advance reservations let their background games finish before check-in, and absent humans receive a saved replacement at the deadline.",
+          "Bot weapon exploration uses actual samples from both background modes, with bounded opportunities for underused primaries and sidearms. Playstyle, familiarity and proven performance still influence each choice."
+        ],
+        "Fixed": [
+          "Incomplete tournament state is reset once with a recoverable archive. Completed official history, accepted historical games, earnings and shared progression remain intact; the next official calendar retains its established sequence.",
+          "Tournament restart, no-show and reservation handling no longer waits indefinitely on absent participants or books one bot into simultaneous games. Genuine pool conflicts remain visible.",
+          "Combined profile ratios use unique accepted participation and raw totals; reconnect and repeated result delivery cannot duplicate contributions.",
+          "Weapon Meta range headings correctly identify meters; balance constants, projectile behavior, ratings and existing source statistics are unchanged."
+        ]
+      },
+      "databaseSchema": 11
+    },
     {
       "version": "1.13.0",
       "applicationVersion": "1.13.0",
@@ -347,5 +436,12 @@
       }
     }
   ],
-  "databaseSchema": 11
+  "multiplayerRevision": "human-multiplayer-1",
+  "mapRevision": "map-ecosystem-1",
+  "modeRulesRevision": "mode-expansion-1",
+  "competitiveProgressionRevision": "competitive-progression-1",
+  "masteryRevision": "mastery-1",
+  "factionsRevision": "factions-1",
+  "replayRevision": "replays-1",
+  "cosmeticContentRevision": "cosmetic-content-1"
 }

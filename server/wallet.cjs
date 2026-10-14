@@ -18,24 +18,34 @@ function ensureWallet(db,userId,env,now=Date.now()){
 function snapshot(db,userId,env=environment()){
   const row=ensureWallet(db,userId,env);
   const entitlements=db.prepare('SELECT cosmetic_id AS cosmeticId,purchased_at AS purchasedAt FROM cosmetic_entitlements WHERE user_id=? AND environment=? ORDER BY purchased_at,cosmetic_id').all(userId,env);
-  const equipped=Object.fromEntries(db.prepare('SELECT operator_id AS operatorId,cosmetic_id AS cosmeticId,style_id AS styleId FROM cosmetic_equipment WHERE user_id=? AND environment=? ORDER BY operator_id').all(userId,env).map(({operatorId,...selection})=>[operatorId,selection]));
+  const equipped=Object.fromEntries(db.prepare("SELECT operator_id AS operatorId,cosmetic_id AS cosmeticId,style_id AS styleId FROM cosmetic_equipment WHERE user_id=? AND environment=? AND operator_id NOT LIKE 'content:%' ORDER BY operator_id").all(userId,env).map(({operatorId,...selection})=>[operatorId,selection]));
+  if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='ranked_reward_claims'").get()){for(const row of db.prepare('SELECT payload_json,claimed_at FROM ranked_reward_claims WHERE user_id=? AND environment=?').all(userId,env)){const reward=JSON.parse(row.payload_json);if(reward.type==='operator-appearance'&&!entitlements.some(e=>e.cosmeticId===reward.payload.cosmeticId))entitlements.push({cosmeticId:reward.payload.cosmeticId,purchasedAt:row.claimed_at,source:'ranked-reward'});}for(const row of db.prepare("SELECT type,selection_json FROM ranked_reward_equipment WHERE user_id=? AND environment=? AND type LIKE 'operator-appearance:%'").all(userId,env))equipped[row.type.slice('operator-appearance:'.length)]=JSON.parse(row.selection_json);}
   const pending=db.prepare("SELECT COALESCE(SUM(units),0) AS units,COUNT(*) AS count FROM ac_match_reports WHERE user_id=? AND environment=? AND status='PENDING_VALIDATION'").get(userId,env);
-  return {accountId:userId,environment:env,balanceUnits:row.balance_units,entitlements,equipped,pendingEarnUnits:pending.units,pendingEarnCount:pending.count,earningStatus:'validation-required'};
+  for(const item of Catalog.content)if(!item.defaultOwned&&!entitlements.some(e=>e.cosmeticId===item.id)){const reward=contentReward(db,userId,env,item);if(reward)entitlements.push({cosmeticId:item.id,purchasedAt:reward.purchasedAt,source:'earned-reward'});}
+  const defaultEntitlements=Catalog.content.filter(item=>item.defaultOwned).map(item=>({cosmeticId:item.id,source:'default'}));
+  return {accountId:userId,environment:env,balanceUnits:row.balance_units,entitlements,defaultEntitlements,equipped,equippedContent:contentSelections(db,userId,env),pendingEarnUnits:pending.units,pendingEarnCount:pending.count,earningStatus:'validation-required'};
 }
+function contentSelections(db,userId,env=environment()){
+  const result={};for(const row of db.prepare("SELECT cosmetic_id,updated_at FROM cosmetic_equipment WHERE user_id=? AND environment=? AND operator_id LIKE 'content:%'").all(userId,env)){const item=Catalog.content.find(item=>item.id===row.cosmetic_id);if(item)result[item.type]={cosmeticId:item.id,...(item.asset?{asset:item.asset}:{pose:item.pose}),updatedAt:row.updated_at};}
+  for(const table of ['ranked_reward_equipment','weapon_mastery_equipment'])if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(table))for(const row of db.prepare("SELECT type,reward_id,selection_json,updated_at FROM "+table+" WHERE user_id=? AND environment=? AND type IN ('profile-icon','profile-banner','victory-pose')").all(userId,env)){const p=JSON.parse(row.selection_json);if(!result[row.type]||row.updated_at>=result[row.type].updatedAt)result[row.type]={cosmeticId:Catalog.content.find(item=>item.type===row.type&&(item.asset===p.asset&&p.asset||item.pose===p.pose&&p.pose))?.id||null,rewardId:row.reward_id,...p,updatedAt:row.updated_at};}
+  result['victory-pose']??={cosmeticId:'victory-pose.quiet-confidence',pose:'quiet-confidence',updatedAt:0};return result;
+}
+function contentReward(db,id,env,item){for(const table of ['ranked_reward_claims','weapon_mastery_claims'])if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(table))for(const row of db.prepare('SELECT reward_id,payload_json,claimed_at FROM '+table+' WHERE user_id=? AND environment=?').all(id,env)){const reward=JSON.parse(row.payload_json);if(reward.type===item.type&&(item.asset&&reward.payload?.asset===item.asset||item.pose&&reward.payload?.pose===item.pose))return {table,rewardId:row.reward_id,reward,purchasedAt:row.claimed_at};}return null;}
+function publicSelections(db,id,env=environment()){return Object.fromEntries(Object.entries(contentSelections(db,id,env)).map(([type,value])=>[type==='profile-icon'?'profileIcon':type==='profile-banner'?'profileBanner':'victoryPose',value]));}
 function atomic(db,action){db.exec('BEGIN IMMEDIATE');try{const result=action();db.exec('COMMIT');return result;}catch(error){db.exec('ROLLBACK');throw error;}}
 const orderJson=row=>({id:row.id,requestId:row.request_id,cosmeticId:row.cosmetic_id,priceUnits:row.price_units,status:row.status});
 function purchase(db,userId,body,env=environment()){
   onlyFields(body,['cosmeticId','requestId']);
   if(typeof body.requestId!=='string'||!/^[a-zA-Z0-9:_-]{8,128}$/.test(body.requestId))throw fail(400,'A stable purchase request identifier is required','INVALID_REQUEST_ID');
-  const item=Catalog.cosmetics.find(item=>item.id===body.cosmeticId);
+  const item=Catalog.findProduct(body.cosmeticId);
   if(!item)throw fail(404,'Cosmetic not found','UNKNOWN_COSMETIC');
   ensureWallet(db,userId,env);
   return atomic(db,()=>{
     const old=db.prepare('SELECT * FROM cosmetic_orders WHERE user_id=? AND environment=? AND request_id=?').get(userId,env,body.requestId);
     if(old){if(old.cosmetic_id!==item.id)throw fail(409,'That request identifies a different purchase','REQUEST_CONFLICT');return {order:orderJson(old),wallet:snapshot(db,userId,env),replayed:true};}
-    if(db.prepare('SELECT 1 FROM cosmetic_entitlements WHERE user_id=? AND environment=? AND cosmetic_id=?').get(userId,env,item.id))throw fail(409,'You already own this cosmetic','ALREADY_OWNED');
+    if(item.defaultOwned||db.prepare('SELECT 1 FROM cosmetic_entitlements WHERE user_id=? AND environment=? AND cosmetic_id=?').get(userId,env,item.id)||require('./competitive-progression.cjs').appearanceOwned(db,userId,env,item.id)||item.type!=='operator-appearance'&&contentReward(db,userId,env,item))throw fail(409,'You already own this cosmetic','ALREADY_OWNED');
     if(item.saleStatus!=='active')throw fail(409,'This appearance is no longer offered for sale','COSMETIC_RETIRED');
-    if(!Catalog.assetReadiness()[item.id])throw fail(409,'This cosmetic is not available yet','COSMETIC_UNAVAILABLE');
+    if(!(item.type==='operator-appearance'?Catalog.assetReadiness()[item.id]:Catalog.contentReadiness()[item.id]))throw fail(409,'This cosmetic is not available yet','COSMETIC_UNAVAILABLE');
     const wallet=ensureWallet(db,userId,env);
     if(wallet.balance_units<item.priceUnits)throw fail(409,'Not enough Arena Credits','INSUFFICIENT_CREDITS');
     const now=Date.now(),id=crypto.randomUUID(),ledgerId=crypto.randomUUID();
@@ -46,30 +56,52 @@ function purchase(db,userId,body,env=environment()){
   });
 }
 function equip(db,userId,body,env=environment()){
-  onlyFields(body,['cosmeticId','operatorId','styleId']);
+  onlyFields(body,['cosmeticId','operatorId','styleId','type']);
+  if(body.type!==undefined)return equipContent(db,userId,body,env);
   if(!Catalog.operators.some(op=>op.id===body.operatorId))throw fail(400,'Choose a known operator','UNKNOWN_OPERATOR');
   ensureWallet(db,userId,env);
   return atomic(db,()=>{
+    const rewardStorage=!!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='ranked_reward_equipment'").get();if(rewardStorage)db.prepare('DELETE FROM ranked_reward_equipment WHERE user_id=? AND environment=? AND type=?').run(userId,env,'operator-appearance:'+body.operatorId);
     if(body.cosmeticId===null){
+      if(Catalog.operators.find(op=>op.id===body.operatorId)?.requiresCosmeticId)throw fail(403,'This operator requires its owned appearance','NOT_OWNED');
       if(body.styleId!==undefined&&body.styleId!=='main')throw fail(400,'The base operator has no paid style','INVALID_STYLE');
       db.prepare('DELETE FROM cosmetic_equipment WHERE user_id=? AND environment=? AND operator_id=?').run(userId,env,body.operatorId);
     }else{
       const item=Catalog.cosmetics.find(item=>item.id===body.cosmeticId),styleId=body.styleId||'main';
       if(!item||item.operatorId!==body.operatorId)throw fail(400,'Cosmetic does not fit this operator','OPERATOR_MISMATCH');
       if(!item.styles.some(style=>style.id===styleId))throw fail(400,'Style is not included','INVALID_STYLE');
-      if(!db.prepare('SELECT 1 FROM cosmetic_entitlements WHERE user_id=? AND environment=? AND cosmetic_id=?').get(userId,env,item.id))throw fail(403,'This account does not own the cosmetic','NOT_OWNED');
-      db.prepare('INSERT INTO cosmetic_equipment(user_id,environment,operator_id,cosmetic_id,style_id,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(user_id,environment,operator_id) DO UPDATE SET cosmetic_id=excluded.cosmetic_id,style_id=excluded.style_id,updated_at=excluded.updated_at').run(userId,env,body.operatorId,item.id,styleId,Date.now());
+      const purchased=db.prepare('SELECT 1 FROM cosmetic_entitlements WHERE user_id=? AND environment=? AND cosmetic_id=?').get(userId,env,item.id),rewardId=require('./competitive-progression.cjs').appearanceOwned(db,userId,env,item.id);if(!purchased&&!rewardId)throw fail(403,'This account does not own the cosmetic','NOT_OWNED');
+      if(purchased)db.prepare('INSERT INTO cosmetic_equipment(user_id,environment,operator_id,cosmetic_id,style_id,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(user_id,environment,operator_id) DO UPDATE SET cosmetic_id=excluded.cosmetic_id,style_id=excluded.style_id,updated_at=excluded.updated_at').run(userId,env,body.operatorId,item.id,styleId,Date.now());else{db.prepare('DELETE FROM cosmetic_equipment WHERE user_id=? AND environment=? AND operator_id=?').run(userId,env,body.operatorId);db.prepare('INSERT INTO ranked_reward_equipment(user_id,environment,type,reward_id,selection_json,updated_at) VALUES(?,?,?,?,?,?)').run(userId,env,'operator-appearance:'+body.operatorId,rewardId,JSON.stringify({cosmeticId:item.id,styleId}),Date.now());}
     }
     return {wallet:snapshot(db,userId,env)};
   });
+}
+function equipContent(db,userId,body,env){
+  if(!['profile-icon','profile-banner','victory-pose'].includes(body.type)||body.operatorId!==undefined||body.styleId!==undefined&&body.styleId!=='main')throw fail(400,'Choose a known cosmetic category','INVALID_COSMETIC_TYPE');
+  const item=Catalog.content.find(item=>item.id===body.cosmeticId&&item.type===body.type);if(!item)throw fail(400,'Cosmetic does not fit this category','COSMETIC_TYPE_MISMATCH');
+  ensureWallet(db,userId,env);return atomic(db,()=>{
+    const purchased=db.prepare('SELECT 1 FROM cosmetic_entitlements WHERE user_id=? AND environment=? AND cosmetic_id=?').get(userId,env,item.id),reward=!purchased?contentReward(db,userId,env,item):null;
+    if(!item.defaultOwned&&!purchased&&!reward)throw fail(403,'This account does not own the cosmetic','NOT_OWNED');
+    const now=Math.max(Date.now(),(contentSelections(db,userId,env)[body.type]?.updatedAt||0)+1);
+    if(item.defaultOwned){db.prepare('DELETE FROM cosmetic_equipment WHERE user_id=? AND environment=? AND operator_id=?').run(userId,env,'content:'+body.type);db.prepare('DELETE FROM ranked_reward_equipment WHERE user_id=? AND environment=? AND type=?').run(userId,env,body.type);}
+    else if(purchased)db.prepare('INSERT INTO cosmetic_equipment(user_id,environment,operator_id,cosmetic_id,style_id,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(user_id,environment,operator_id) DO UPDATE SET cosmetic_id=excluded.cosmetic_id,style_id=excluded.style_id,updated_at=excluded.updated_at').run(userId,env,'content:'+body.type,item.id,'main',now);
+    else {const table=reward.table.replace('_claims','_equipment');db.prepare('INSERT INTO '+table+'(user_id,environment,type,reward_id,selection_json,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(user_id,environment,type) DO UPDATE SET reward_id=excluded.reward_id,selection_json=excluded.selection_json,updated_at=excluded.updated_at').run(userId,env,item.type,reward.rewardId,JSON.stringify(reward.reward.payload),now);}
+    return {wallet:snapshot(db,userId,env)};
+  });
+}
+function operatorAppearance(db,id,skinIndex,env=environment()){
+  const op=Catalog.operators[skinIndex];if(!op)throw fail(400,'Choose a registered operator','UNKNOWN_OPERATOR');const wallet=snapshot(db,id,env),owns=cosmeticId=>wallet.entitlements.some(entitlement=>entitlement.cosmeticId===cosmeticId);
+  if(op.requiresCosmeticId&&!owns(op.requiresCosmeticId))throw fail(403,'This account does not own the selected operator','NOT_OWNED');
+  const selection=wallet.equipped[op.id]||(op.requiresCosmeticId?{cosmeticId:op.requiresCosmeticId,styleId:'main'}:null),item=Catalog.cosmetics.find(item=>item.id===selection?.cosmeticId&&item.operatorId===op.id);
+  return item&&owns(item.id)&&item.styles.some(style=>style.id===selection.styleId)?{id:item.id,cosmeticId:item.id,operatorId:op.id,styleId:selection.styleId}:null;
 }
 
 // Rates are shared by report interpretation and the internal validation adapter.
 // Consistent XP records prove neither human input nor server-observed completion.
 function rewardForParticipation(receipt,userId){
   if(!receipt||receipt.participantId!==userId||receipt.participantType==='bot'||receipt.type==='bot'||receipt.spectating===true||receipt.cancelled===true||receipt.completed===false||receipt.practice!==false||receipt.eligible!==true)return 0;
-  if(receipt.kind==='standard'&&receipt.sessionType==='standard'&&['tdm','deathmatch'].includes(receipt.mode))return 100;
-  if(receipt.kind==='ranked'&&receipt.sessionType==='ranked'&&receipt.mode==='tdm')return 150;
+  if(receipt.kind==='standard'&&receipt.sessionType==='standard'&&require('../progression.js').STANDARD_MODES.includes(receipt.mode))return 100;
+  if(receipt.kind==='ranked'&&receipt.sessionType==='ranked'&&['tdm','deathmatch'].includes(receipt.mode))return 150;
   return 0;
 }
 const reportJson=row=>({matchId:row.match_id,units:row.units,status:row.status});
@@ -98,7 +130,11 @@ function reportMatch(db,userId,body,env=environment()){
 // sandbox wallets until a future server-owned result validator is implemented.
 function settleVerifiedMatch(db,userId,matchId,validatedParticipation,env=environment()){
   environment(env);
-  if(env!=='test')throw fail(503,'Server-validated match rewards are not configured','RESULT_VALIDATION_UNAVAILABLE');
+  if(env!=='test'){
+    const accepted=db.prepare('SELECT result_json FROM mp_results WHERE match_id=? AND user_id=? AND applied_at>0').get(matchId,userId);
+    const record=accepted?JSON.parse(accepted.result_json):null;
+    if(validatedParticipation?.authority!=='server-multiplayer'||!record||record.participantId!==userId||record.kind!==validatedParticipation.kind||record.sessionType!==validatedParticipation.sessionType||record.mode!==validatedParticipation.mode||record.eligible!==true||record.practice!==false||record.abandoned)throw fail(503,'Server-validated match rewards are not configured','RESULT_VALIDATION_UNAVAILABLE');
+  }
   if(typeof matchId!=='string'||!matchId.startsWith('match:')||matchId.length>200)throw fail(400,'Invalid match identity','INVALID_MATCH_ID');
   const units=rewardForParticipation(validatedParticipation,userId);
   if(!units||validatedParticipation.completed!==true||validatedParticipation.participantType!=='human'||validatedParticipation.activeParticipation!==true)return {credited:false,wallet:snapshot(db,userId,env)};
@@ -119,4 +155,4 @@ function checkout(db,userId,body,env=environment()){
   ensureWallet(db,userId,env);
   return {available:false,code:'CHECKOUT_UNAVAILABLE',error:'Money checkout is not available yet. No payment was taken.',environment:env};
 }
-module.exports={environment,onlyFields,ensureWallet,snapshot,purchase,equip,rewardForParticipation,reportMatch,settleVerifiedMatch,checkout};
+module.exports={environment,onlyFields,ensureWallet,snapshot,purchase,equip,contentSelections,publicSelections,operatorAppearance,rewardForParticipation,reportMatch,settleVerifiedMatch,checkout};

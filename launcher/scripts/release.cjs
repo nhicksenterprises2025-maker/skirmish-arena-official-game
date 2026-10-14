@@ -21,12 +21,14 @@ const bytes = fs.readFileSync(artifact);
 const filename = path.basename(artifact);
 const releaseDirectory = path.resolve(outputArg);
 fs.mkdirSync(releaseDirectory, {recursive: true});
+const downloadUrl=process.env.SAR_RELEASE_DOWNLOAD_BASE?new URL(encodeURIComponent(filename),process.env.SAR_RELEASE_DOWNLOAD_BASE.replace(/\/$/,'')+'/'):new URL('/api/launcher/download/' + encodeURIComponent(filename), origin);
+if(downloadUrl.protocol!=='https:'&&!(downloadUrl.protocol==='http:'&&loopback&&downloadUrl.origin===origin.origin)||downloadUrl.username||downloadUrl.password||downloadUrl.search||downloadUrl.hash)throw Error('Use a public HTTPS installer download directory, or the same loopback fixture.');
 const manifest = {
   version: configuration.version,
   notes: JSON.parse(fs.readFileSync(path.join(root, '../version.json'), 'utf8')).notes,
   pub_date: new Date().toISOString(),
   platforms: {'windows-x86_64': {
-    url: new URL('/api/launcher/download/' + encodeURIComponent(filename), origin).href,
+    url: downloadUrl.href,
     signature: fs.readFileSync(artifact + '.sig', 'utf8').trim(),
     size: bytes.length,
     sha256: crypto.createHash('sha256').update(bytes).digest('hex')

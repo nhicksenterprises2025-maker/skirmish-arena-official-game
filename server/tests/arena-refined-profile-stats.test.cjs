@@ -30,7 +30,7 @@ test('Unique ordinary participation excludes unauthorised official XP-only evide
 });
 test('Ranked includes only ranked-eligible records; current rank/rating receipts and formulas remain separate',()=>{
  const world=fixture(),before=clone(world.ranked),p=project(world,{kind:'ranked'});
- assert.equal(p.totals.games,1);assert.equal(p.totals.kills,2);assert.equal(p.ratios.accuracy,.4);assert.deepEqual(p.policy.included,['Ranked TDM']);
+ assert.equal(p.totals.games,1);assert.equal(p.totals.kills,2);assert.equal(p.ratios.accuracy,.4);assert.deepEqual(p.policy.included,['Ranked TDM','Ranked Deathmatch']);
  assert.deepEqual(world.ranked,before);XP.validate(world.progression);XP.validateRanked(world.ranked);
 });
 test('Saved season boundaries filter completion timestamps, never simulation time or current rank',()=>{

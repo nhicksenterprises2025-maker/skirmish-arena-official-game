@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "revision": "victory-poses-1",
+  "contract": "Presentation-only existing articulated rig; world units; hands from weapon grip anchors for armed poses.",
+  "poses": {
+    "quiet-confidence": {"torsoZ": -0.025, "feetSpread": 9, "footForward": 0, "hands": [[7,14,-17.5],[11,26,13]]},
+    "arms-folded": {"torsoZ": 0, "feetSpread": 9, "footForward": 0, "hands": [[16,36,8],[18,40,-8]]},
+    "champion-stance": {"torsoZ": 0.035, "feetSpread": 11, "footForward": 3, "hands": [[14,28,-14],[14,28,14]]},
+    "weapon-rest": {"torsoZ": 0, "feetSpread": 9, "footForward": 0, "hands": [[0,0,0],[0,0,0]], "weapon": {"mount": [2,-2,0], "height": 30, "angle": -0.32}},
+    "tactical-ready": {"torsoZ": 0, "feetSpread": 12, "footForward": 0, "hands": [[0,0,0],[0,0,0]], "weapon": {"mount": [14,0,0], "height": 35, "angle": 0}},
+    "over-the-shoulder": {"torsoZ": 0, "feetSpread": 9, "footForward": 0, "hands": [[0,0,0],[0,0,0]], "weapon": {"mount": [-7,3,20], "height": 35, "angle": 0.9}},
+    "black-ice": {"torsoZ": 0, "feetSpread": 9, "footForward": 0, "hands": [[9,27,-14],[9,27,14]], "bend": [-1,-0.2,0.4]},
+    "aegis": {"torsoZ": 0, "feetSpread": 9, "footForward": 0, "hands": [[12,24,-4],[12,24,4]], "bend": [-1,-0.2,0.4]},
+    "monarch": {"torsoZ": 0, "feetSpread": 9, "footForward": 0, "hands": [[7,14,-16],[9,32,16]], "bend": [-1,-0.2,0.4]}
+  }
+}

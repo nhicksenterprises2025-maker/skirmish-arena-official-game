@@ -1,0 +1,336 @@
+{
+  "schema": 1,
+  "version": "cosmetic-content-04a2fe443e83",
+  "generator": "Blender 5.2.2 LTS; tools/blender_cosmetic_content.py",
+  "content": {
+    "ridge-watch": {
+      "kind": "profile-icon",
+      "name": "Ridge Watch",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/ridge-watch.png",
+      "bytes": 75626,
+      "sha256": "b1589ca8e401a031eea44671858a1ea86df8dc09f804960017d64583bbb5c499",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "ridge_watch",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "metro-mark": {
+      "kind": "profile-icon",
+      "name": "Metro Mark",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/metro-mark.png",
+      "bytes": 78421,
+      "sha256": "40e8862f225e16feccd9907e60caf342ff11149117447e9f4be85a33ff5c781b",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "metro_mark",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "frontier-star": {
+      "kind": "profile-icon",
+      "name": "Frontier Star",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/frontier-star.png",
+      "bytes": 77166,
+      "sha256": "0d2d5fbaf98ae66b75bedbfefcf00f0f41d62279d42bb370380d2733bbf8ba32",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "frontier_star",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "sentinel-eye": {
+      "kind": "profile-icon",
+      "name": "Sentinel Eye",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/sentinel-eye.png",
+      "bytes": 76222,
+      "sha256": "51f2a8a9b739d7e357fc3cd770d8052a884c5f98579d1920f88f6294c0fbd11d",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "sentinel_eye",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "nightfall-moon": {
+      "kind": "profile-icon",
+      "name": "Nightfall Moon",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/nightfall-moon.png",
+      "bytes": 75845,
+      "sha256": "36d12c4487a95a7f216acaf77cff749ca0a5a0f2528fc12fac23c16fccb1e9a5",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "nightfall_moon",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "hazard-chevron": {
+      "kind": "profile-icon",
+      "name": "Hazard Chevron",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/hazard-chevron.png",
+      "bytes": 76196,
+      "sha256": "bf76282560e972692b5566a00b454a29960de673bbb7e3153f40d4d4a3a46a8e",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "hazard_chevron",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "vector-cross": {
+      "kind": "profile-icon",
+      "name": "Vector Cross",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/vector-cross.png",
+      "bytes": 76832,
+      "sha256": "4fd99b615d89a52287c8b5ec8489f8a2c276b26cdfdd282a1ba99c2372b6eff5",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "vector_cross",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "obsidian-shard": {
+      "kind": "profile-icon",
+      "name": "Obsidian Shard",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/obsidian-shard.png",
+      "bytes": 76320,
+      "sha256": "a6261a2764d5d8d47b0b079b759bee1cfcd6499cfde67033c720434f8026c81b",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "obsidian_shard",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "aegis-shield": {
+      "kind": "profile-icon",
+      "name": "Aegis Shield",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/aegis-shield.png",
+      "bytes": 75592,
+      "sha256": "dcc4b78b3fb6effec88664e032eb32cafa008f02116e0cb61ab3d0f565f8dc36",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "aegis_shield",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "specter-mask": {
+      "kind": "profile-icon",
+      "name": "Specter Mask",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/specter-mask.png",
+      "bytes": 75697,
+      "sha256": "d83ac705d5426107f8050715d74cd5e561b517717848bc37d00c61be2876c9f3",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "specter_mask",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "arena-laurel": {
+      "kind": "profile-icon",
+      "name": "Arena Laurel",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/arena-laurel.png",
+      "bytes": 81659,
+      "sha256": "19d73e1cf48dffcb688d3c44919645afc8024e352d660b2f12db2edd7fd0f7c4",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "arena_laurel",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "precision-ring": {
+      "kind": "profile-icon",
+      "name": "Precision Ring",
+      "verified": true,
+      "file": "assets/25d/cosmetics/icons/precision-ring.png",
+      "bytes": 75539,
+      "sha256": "13cdf747a5bde533bea813967593219fca58ba8e4e595f12935856f8266b6a2e",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "precision_ring",
+      "dimensions": {
+        "width": 256,
+        "height": 256
+      }
+    },
+    "field-line": {
+      "kind": "profile-banner",
+      "name": "Field Line",
+      "verified": true,
+      "file": "assets/25d/cosmetics/banners/field-line.png",
+      "bytes": 145841,
+      "sha256": "cbc432b020315c8ced1894082833c31db07cf91494818554f9837a229749fc36",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "field_line",
+      "dimensions": {
+        "width": 768,
+        "height": 192
+      }
+    },
+    "metro-grid": {
+      "kind": "profile-banner",
+      "name": "Metro Grid",
+      "verified": true,
+      "file": "assets/25d/cosmetics/banners/metro-grid.png",
+      "bytes": 146221,
+      "sha256": "9df54c730656e203807c48679101980e7dc16dcf9bb83697bd486317c6bc9f11",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "metro_grid",
+      "dimensions": {
+        "width": 768,
+        "height": 192
+      }
+    },
+    "frontier-dusk": {
+      "kind": "profile-banner",
+      "name": "Frontier Dusk",
+      "verified": true,
+      "file": "assets/25d/cosmetics/banners/frontier-dusk.png",
+      "bytes": 160015,
+      "sha256": "c2a5c3e42dd9a3ce26512c362f4269a502b6fb9c7b9c0b644da91135ff18c177",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "frontier_dusk",
+      "dimensions": {
+        "width": 768,
+        "height": 192
+      }
+    },
+    "sentinel-wall": {
+      "kind": "profile-banner",
+      "name": "Sentinel Wall",
+      "verified": true,
+      "file": "assets/25d/cosmetics/banners/sentinel-wall.png",
+      "bytes": 150626,
+      "sha256": "6db324f90896df200ff6143f47346f06f1b50e49c4635b5027530b37bfeccb6f",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "sentinel_wall",
+      "dimensions": {
+        "width": 768,
+        "height": 192
+      }
+    },
+    "nightfall-horizon": {
+      "kind": "profile-banner",
+      "name": "Nightfall Horizon",
+      "verified": true,
+      "file": "assets/25d/cosmetics/banners/nightfall-horizon.png",
+      "bytes": 144336,
+      "sha256": "71e6e8451a0625ada14f59723e2d7ba95f9fb7b2969bc2522df849f6d1060644",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "nightfall_horizon",
+      "dimensions": {
+        "width": 768,
+        "height": 192
+      }
+    },
+    "hazard-stripe": {
+      "kind": "profile-banner",
+      "name": "Hazard Stripe",
+      "verified": true,
+      "file": "assets/25d/cosmetics/banners/hazard-stripe.png",
+      "bytes": 163822,
+      "sha256": "fb2f3f3e9b0a2b3a191fef46722cec5b3e24ad4600f5482d0e05f188d8b4191b",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "hazard_stripe",
+      "dimensions": {
+        "width": 768,
+        "height": 192
+      }
+    },
+    "vector-flow": {
+      "kind": "profile-banner",
+      "name": "Vector Flow",
+      "verified": true,
+      "file": "assets/25d/cosmetics/banners/vector-flow.png",
+      "bytes": 156147,
+      "sha256": "21ccd6a18c6553d2911518947f0c110d10e3037f6ec42bded48f95cd8e13f852",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "vector_flow",
+      "dimensions": {
+        "width": 768,
+        "height": 192
+      }
+    },
+    "obsidian-facet": {
+      "kind": "profile-banner",
+      "name": "Obsidian Facet",
+      "verified": true,
+      "file": "assets/25d/cosmetics/banners/obsidian-facet.png",
+      "bytes": 148154,
+      "sha256": "b83a9ac8049eadc2d323fa91ff3fc79c9e261965cc05f852454134267d06ad63",
+      "editableSource": "assets/25d/cosmetics/cosmetic-content.blend",
+      "artNode": "obsidian_facet",
+      "dimensions": {
+        "width": 768,
+        "height": 192
+      }
+    },
+    "victory-pose.quiet-confidence": {
+      "kind": "victory-pose",
+      "pose": "quiet-confidence",
+      "verified": true,
+      "file": "assets/25d/cosmetics/victory-poses.json",
+      "bytes": 1362,
+      "sha256": "4fbba5e5e9364db5200949b4b382be04c630cf8640239ee39cbe37837c1626e3"
+    },
+    "victory-pose.arms-folded": {
+      "kind": "victory-pose",
+      "pose": "arms-folded",
+      "verified": true,
+      "file": "assets/25d/cosmetics/victory-poses.json",
+      "bytes": 1362,
+      "sha256": "4fbba5e5e9364db5200949b4b382be04c630cf8640239ee39cbe37837c1626e3"
+    },
+    "victory-pose.weapon-rest": {
+      "kind": "victory-pose",
+      "pose": "weapon-rest",
+      "verified": true,
+      "file": "assets/25d/cosmetics/victory-poses.json",
+      "bytes": 1362,
+      "sha256": "4fbba5e5e9364db5200949b4b382be04c630cf8640239ee39cbe37837c1626e3"
+    },
+    "victory-pose.champion-stance": {
+      "kind": "victory-pose",
+      "pose": "champion-stance",
+      "verified": true,
+      "file": "assets/25d/cosmetics/victory-poses.json",
+      "bytes": 1362,
+      "sha256": "4fbba5e5e9364db5200949b4b382be04c630cf8640239ee39cbe37837c1626e3"
+    },
+    "victory-pose.tactical-ready": {
+      "kind": "victory-pose",
+      "pose": "tactical-ready",
+      "verified": true,
+      "file": "assets/25d/cosmetics/victory-poses.json",
+      "bytes": 1362,
+      "sha256": "4fbba5e5e9364db5200949b4b382be04c630cf8640239ee39cbe37837c1626e3"
+    },
+    "victory-pose.over-the-shoulder": {
+      "kind": "victory-pose",
+      "pose": "over-the-shoulder",
+      "verified": true,
+      "file": "assets/25d/cosmetics/victory-poses.json",
+      "bytes": 1362,
+      "sha256": "4fbba5e5e9364db5200949b4b382be04c630cf8640239ee39cbe37837c1626e3"
+    }
+  },
+  "presentationPoseSource": "assets/25d/cosmetics/victory-poses.json"
+}

@@ -1,0 +1,828 @@
+{
+  "schema": 1,
+  "version": "weapon-mastery-4d15426891e2",
+  "units": "game-world-units",
+  "upAxis": "Y",
+  "frontAxis": "+Z",
+  "origin": "center",
+  "generator": "Blender 5.2.2 LTS; tools/blender_mastery.py",
+  "weaponSource": "game.js WEAPONS via dev/simulate.cjs; weapon-mastery.js weaponClass",
+  "badgeTiers": [
+    1,
+    3,
+    5,
+    7,
+    10
+  ],
+  "weapons": {
+    "AR-15": {
+      "class": "rifle"
+    },
+    "AK47": {
+      "class": "rifle"
+    },
+    "SMG-9": {
+      "class": "smg"
+    },
+    "Pump Shotgun": {
+      "class": "shotgun"
+    },
+    "Auto 12": {
+      "class": "shotgun"
+    },
+    "LR-762": {
+      "class": "marksman"
+    },
+    "LW Tundra": {
+      "class": "sniper"
+    },
+    "War Head LMG": {
+      "class": "lmg"
+    },
+    "P90": {
+      "class": "smg"
+    },
+    "9mm": {
+      "class": "sidearm"
+    },
+    "X16": {
+      "class": "sidearm"
+    },
+    "X-16 Auto": {
+      "class": "sidearm"
+    },
+    "SR-Aug": {
+      "class": "burst"
+    },
+    "SPAS-12": {
+      "class": "shotgun"
+    },
+    "FAL": {
+      "class": "rifle"
+    }
+  },
+  "defaultClass": "rifle",
+  "files": {
+    "weapon-mastery.glb": {
+      "sha256": "4d15426891e2f2b95c2ede0eb562e681ebc66a19db877212b9eb700a0013f0b1",
+      "bytes": 1986464
+    }
+  },
+  "models": [
+    {
+      "name": "mastery-rifle-tier-1",
+      "node": "mastery-rifle-tier-1",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "rifle",
+      "tier": 1,
+      "weapons": [
+        "AR-15",
+        "AK47",
+        "FAL"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-rifle-tier-3",
+      "node": "mastery-rifle-tier-3",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "rifle",
+      "tier": 3,
+      "weapons": [
+        "AR-15",
+        "AK47",
+        "FAL"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-rifle-tier-5",
+      "node": "mastery-rifle-tier-5",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "rifle",
+      "tier": 5,
+      "weapons": [
+        "AR-15",
+        "AK47",
+        "FAL"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-rifle-tier-7",
+      "node": "mastery-rifle-tier-7",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "rifle",
+      "tier": 7,
+      "weapons": [
+        "AR-15",
+        "AK47",
+        "FAL"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 58.82,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-rifle-tier-10",
+      "node": "mastery-rifle-tier-10",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "rifle",
+      "tier": 10,
+      "weapons": [
+        "AR-15",
+        "AK47",
+        "FAL"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 63.724,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-smg-tier-1",
+      "node": "mastery-smg-tier-1",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "smg",
+      "tier": 1,
+      "weapons": [
+        "SMG-9",
+        "P90"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-smg-tier-3",
+      "node": "mastery-smg-tier-3",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "smg",
+      "tier": 3,
+      "weapons": [
+        "SMG-9",
+        "P90"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-smg-tier-5",
+      "node": "mastery-smg-tier-5",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "smg",
+      "tier": 5,
+      "weapons": [
+        "SMG-9",
+        "P90"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-smg-tier-7",
+      "node": "mastery-smg-tier-7",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "smg",
+      "tier": 7,
+      "weapons": [
+        "SMG-9",
+        "P90"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 58.82,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-smg-tier-10",
+      "node": "mastery-smg-tier-10",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "smg",
+      "tier": 10,
+      "weapons": [
+        "SMG-9",
+        "P90"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 63.724,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-shotgun-tier-1",
+      "node": "mastery-shotgun-tier-1",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "shotgun",
+      "tier": 1,
+      "weapons": [
+        "Pump Shotgun",
+        "Auto 12",
+        "SPAS-12"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-shotgun-tier-3",
+      "node": "mastery-shotgun-tier-3",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "shotgun",
+      "tier": 3,
+      "weapons": [
+        "Pump Shotgun",
+        "Auto 12",
+        "SPAS-12"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-shotgun-tier-5",
+      "node": "mastery-shotgun-tier-5",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "shotgun",
+      "tier": 5,
+      "weapons": [
+        "Pump Shotgun",
+        "Auto 12",
+        "SPAS-12"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-shotgun-tier-7",
+      "node": "mastery-shotgun-tier-7",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "shotgun",
+      "tier": 7,
+      "weapons": [
+        "Pump Shotgun",
+        "Auto 12",
+        "SPAS-12"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 58.82,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-shotgun-tier-10",
+      "node": "mastery-shotgun-tier-10",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "shotgun",
+      "tier": 10,
+      "weapons": [
+        "Pump Shotgun",
+        "Auto 12",
+        "SPAS-12"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 63.724,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-marksman-tier-1",
+      "node": "mastery-marksman-tier-1",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "marksman",
+      "tier": 1,
+      "weapons": [
+        "LR-762"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-marksman-tier-3",
+      "node": "mastery-marksman-tier-3",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "marksman",
+      "tier": 3,
+      "weapons": [
+        "LR-762"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-marksman-tier-5",
+      "node": "mastery-marksman-tier-5",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "marksman",
+      "tier": 5,
+      "weapons": [
+        "LR-762"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-marksman-tier-7",
+      "node": "mastery-marksman-tier-7",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "marksman",
+      "tier": 7,
+      "weapons": [
+        "LR-762"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 58.82,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-marksman-tier-10",
+      "node": "mastery-marksman-tier-10",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "marksman",
+      "tier": 10,
+      "weapons": [
+        "LR-762"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 63.724,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-sniper-tier-1",
+      "node": "mastery-sniper-tier-1",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "sniper",
+      "tier": 1,
+      "weapons": [
+        "LW Tundra"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-sniper-tier-3",
+      "node": "mastery-sniper-tier-3",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "sniper",
+      "tier": 3,
+      "weapons": [
+        "LW Tundra"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-sniper-tier-5",
+      "node": "mastery-sniper-tier-5",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "sniper",
+      "tier": 5,
+      "weapons": [
+        "LW Tundra"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-sniper-tier-7",
+      "node": "mastery-sniper-tier-7",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "sniper",
+      "tier": 7,
+      "weapons": [
+        "LW Tundra"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 58.82,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-sniper-tier-10",
+      "node": "mastery-sniper-tier-10",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "sniper",
+      "tier": 10,
+      "weapons": [
+        "LW Tundra"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 63.724,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-lmg-tier-1",
+      "node": "mastery-lmg-tier-1",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "lmg",
+      "tier": 1,
+      "weapons": [
+        "War Head LMG"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-lmg-tier-3",
+      "node": "mastery-lmg-tier-3",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "lmg",
+      "tier": 3,
+      "weapons": [
+        "War Head LMG"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-lmg-tier-5",
+      "node": "mastery-lmg-tier-5",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "lmg",
+      "tier": 5,
+      "weapons": [
+        "War Head LMG"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-lmg-tier-7",
+      "node": "mastery-lmg-tier-7",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "lmg",
+      "tier": 7,
+      "weapons": [
+        "War Head LMG"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 58.82,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-lmg-tier-10",
+      "node": "mastery-lmg-tier-10",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "lmg",
+      "tier": 10,
+      "weapons": [
+        "War Head LMG"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 63.724,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-sidearm-tier-1",
+      "node": "mastery-sidearm-tier-1",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "sidearm",
+      "tier": 1,
+      "weapons": [
+        "9mm",
+        "X16",
+        "X-16 Auto"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-sidearm-tier-3",
+      "node": "mastery-sidearm-tier-3",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "sidearm",
+      "tier": 3,
+      "weapons": [
+        "9mm",
+        "X16",
+        "X-16 Auto"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-sidearm-tier-5",
+      "node": "mastery-sidearm-tier-5",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "sidearm",
+      "tier": 5,
+      "weapons": [
+        "9mm",
+        "X16",
+        "X-16 Auto"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-sidearm-tier-7",
+      "node": "mastery-sidearm-tier-7",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "sidearm",
+      "tier": 7,
+      "weapons": [
+        "9mm",
+        "X16",
+        "X-16 Auto"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 58.82,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-sidearm-tier-10",
+      "node": "mastery-sidearm-tier-10",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "sidearm",
+      "tier": 10,
+      "weapons": [
+        "9mm",
+        "X16",
+        "X-16 Auto"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 63.724,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-burst-tier-1",
+      "node": "mastery-burst-tier-1",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "burst",
+      "tier": 1,
+      "weapons": [
+        "SR-Aug"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-burst-tier-3",
+      "node": "mastery-burst-tier-3",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "burst",
+      "tier": 3,
+      "weapons": [
+        "SR-Aug"
+      ],
+      "dimensions": {
+        "x": 58.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-burst-tier-5",
+      "node": "mastery-burst-tier-5",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "burst",
+      "tier": 5,
+      "weapons": [
+        "SR-Aug"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 56.0,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-burst-tier-7",
+      "node": "mastery-burst-tier-7",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "burst",
+      "tier": 7,
+      "weapons": [
+        "SR-Aug"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 58.82,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    },
+    {
+      "name": "mastery-burst-tier-10",
+      "node": "mastery-burst-tier-10",
+      "file": "weapon-mastery.glb",
+      "weaponClass": "burst",
+      "tier": 10,
+      "weapons": [
+        "SR-Aug"
+      ],
+      "dimensions": {
+        "x": 66.0,
+        "y": 63.724,
+        "z": 8.8
+      },
+      "castShadow": false,
+      "presentationOnly": true,
+      "construction": "extruded chamfered service plate; formed enamel; mounted weapon silhouette and tier numeral"
+    }
+  ]
+}

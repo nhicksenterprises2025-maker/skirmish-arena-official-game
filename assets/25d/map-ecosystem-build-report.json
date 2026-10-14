@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "blender": "5.2.2 LTS",
+  "assets": 6,
+  "meshes": 25,
+  "triangles": 2748,
+  "glbBytes": 217120,
+  "maps": [
+    "foundry-crossing",
+    "relay-fields"
+  ],
+  "source": "editable local Blender authoring; current GLB and instancing pipeline"
+}

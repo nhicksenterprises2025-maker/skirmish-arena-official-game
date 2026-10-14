@@ -48,7 +48,12 @@ function externalReservations(db,userId,excluding){
  const used=new Set();for(const row of db.prepare("SELECT id,status,bracket_json,metadata_json FROM tournaments WHERE user_id=? AND id<>? AND deleted_at IS NULL AND status NOT IN ('COMPLETED','CANCELLED')").all(userId,excluding)){
   const m=JSON.parse(row.metadata_json||'{}');for(const id of m.scheduling?.reservations||[])used.add(id);
   if(row.status==='ACTIVE')for(const t of JSON.parse(row.bracket_json||'{}').teams||[])for(const p of t.participants||[])used.add(p.id);
- }return used;
+ }
+ // A scheduled event cannot borrow a persistent bot from an already-running
+ // shared human match. The compact lease inventory is persisted alongside the
+ // reference checkpoint, so the same exclusion survives a server restart.
+ if(db.prepare("SELECT 1 FROM sqlite_schema WHERE type='table' AND name='mp_matches'").get())for(const row of db.prepare("SELECT state_json FROM mp_matches WHERE status NOT IN ('ended','cancelled') AND json_extract(state_json,'$.ownerId')=? AND (?='' OR COALESCE(json_extract(state_json,'$.context.tournamentId'),'')<>?)").all(userId,excluding||'',excluding||''))for(const id of JSON.parse(row.state_json).botIds||[])used.add(id);
+ return used;
 }
 function availableBots(db,userId,t){
  const used=new Set(t.teams.flatMap(team=>team.participants.map(p=>p.id))),reserved=externalReservations(db,userId,t.id),owned=new Set(t.scheduling?.reservations||[]);
@@ -88,7 +93,7 @@ function advanceCustom(db,userId,eventId,now=Date.now()){
  return advanceScheduled(db,userId,eventId,now);
 }
 function advanceScheduled(db,userId,eventId,now=Date.now()){
- let t=circuit().getTournament(db,userId,eventId);if(!t.schedulePolicy||terminal.has(t.status))return t;supportedPolicy(t.schedulePolicy);
+ let t=circuit().getTournament(db,userId,eventId);userId=t.creatorId;if(!t.schedulePolicy||terminal.has(t.status))return t;supportedPolicy(t.schedulePolicy);
  t=prepareReservations(db,userId,eventId,now);
  if(now<t.startsAt)return t;
  if(t.status!=='ACTIVE'){
@@ -123,7 +128,7 @@ function advanceScheduled(db,userId,eventId,now=Date.now()){
 }
 function mutateGame(db,userId,eventId,gameId,now,fn){return transaction(db,()=>{const t=circuit().getTournament(db,userId,eventId);if(!t.schedulePolicy||t.status!=='ACTIVE')throw error('No active scheduled tournament');const m=metadata(db,eventId),g=m.scheduling?.games?.[gameId];if(!g)throw error('Scheduled game is not available');const value=fn(g,t,m);saveMetadata(db,eventId,m,now);return value??circuit().getTournament(db,userId,eventId);});}
 function checkIn(db,userId,eventId,{gameId},now=Date.now()){
- advanceScheduled(db,userId,eventId,now);return mutateGame(db,userId,eventId,gameId,now,(g,t)=>{const s=t.series.find(s=>s.id===g.seriesId);if(!s.teamIds.some(id=>t.teams.find(team=>team.id===id).participants.some(p=>p.id===userId&&p.kind==='user')))throw error('Your account does not occupy this game',403);if(g.checkIns[userId])return;if(now<g.checkInOpenAt||now>=g.checkInCloseAt)throw error('Check-in is closed');g.checkIns[userId]={at:now};});
+ const owner=circuit().getTournament(db,userId,eventId).creatorId;advanceScheduled(db,owner,eventId,now);return mutateGame(db,owner,eventId,gameId,now,(g,t)=>{const s=t.series.find(s=>s.id===g.seriesId);if(!s.teamIds.some(id=>t.teams.find(team=>team.id===id).participants.some(p=>p.id===userId&&p.kind==='user')))throw error('Your account does not occupy this game',403);if(g.checkIns[userId])return;if(now<g.checkInOpenAt||now>=g.checkInCloseAt)throw error('Check-in is closed');g.checkIns[userId]={at:now};});
 }
 function markScheduledPrepared(db,userId,eventId,gameId,now=Date.now()) {return mutateGame(db,userId,eventId,gameId,now,g=>{if(g.finalizedAt||g.error||!g.rostersLockedAt||now>=g.matchStartAt)throw error('Game preparation missed its deadline');g.readyAt??=now;});}
 function claimScheduledGame(db,userId,eventId,gameId,{owner,clientId,ttlMs=15000,resume=false}={},now=Date.now()) {return mutateGame(db,userId,eventId,gameId,now,(g,t)=>{

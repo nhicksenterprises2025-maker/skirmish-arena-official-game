@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "operators": 10,
+  "distinctHeadGeometry": 10,
+  "distinctTorsoGeometry": 10,
+  "icons": 12,
+  "banners": 8,
+  "rotationChecks": 250,
+  "rigStateChecks": 1050,
+  "weapons": 15,
+  "maxTriangles": 1064,
+  "maxMeshes": 12,
+  "cache": {
+    "residentItems": 6,
+    "activeItems": 0,
+    "idleItems": 6,
+    "pendingItems": 0,
+    "maxIdleItems": 6
+  }
+}

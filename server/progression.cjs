@@ -3,7 +3,7 @@ const XP=require('../progression.js'),Circuit=require('./tournaments.cjs');
 const {isDeepStrictEqual}=require('node:util');
 const fail=message=>Object.assign(new Error(message),{status:409,code:'SAVE_REJECTED'});
 const fresh=(p,old)=>Object.entries(p?.awards||{}).filter(([id])=>!Object.hasOwn(old?.awards||{},id));
-const ordinary=r=>r.kind==='standard'||r.kind==='ranked';
+const ordinary=r=>(r.kind==='standard'||r.kind==='ranked')&&(r.sessionType!=='ltm'||r.ltmDefinition?.statEligible===true);
 const record=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
 const statsKeys=['kills','deaths','assists','damage','headshots','timeAlive','shots','hits'];
 function validateProgression(world,previous){
@@ -12,22 +12,23 @@ function validateProgression(world,previous){
  if(!p)return; // Older installed clients may checkpoint before upgrading.
  const names=Object.keys(world.patchState.weaponStats),added=fresh(p,old),discoveries=new Set(added.flatMap(([,r])=>r.firstWeapons)),known=new Set(old?.usedWeapons||(previous?XP.legacyWeapons(previous):p.usedWeapons.filter(w=>!discoveries.has(w))));
  for(const [id,r]of added){
-  if(r.rulesVersion>=2&&(!r.participantId||r.transactionKey!==JSON.stringify([r.participantId,id,'xp'])||r.sessionType!==(r.kind==='official'?'tournament':r.kind)||r.eligible!==true||r.practice!==false))throw fail('XP requires canonical eligible participant and session identity');
+  if(r.rulesVersion>=2&&(!r.participantId||r.transactionKey!==JSON.stringify([r.participantId,id,'xp'])||r.sessionType!==(r.kind==='official'?'tournament':r.kind)&&!(r.kind==='standard'&&r.sessionType==='ltm'&&r.ltmDefinition?.xpEligible===true)||r.eligible!==true||r.practice!==false))throw fail('XP requires canonical eligible participant and session identity');
+  if(r.sessionType==='ltm'){try{require('../mode-rules.js').validateLTM(r.ltmDefinition,{weapons:world.patchState.weaponStats,maps:require('../map-data.js')});}catch(e){throw fail(e.message);}if(r.ltmDefinition.rules.baseMode!==r.mode)throw fail('Limited-time XP mode differs from its definition');}
   if(r.events.usedWeapons.some(w=>!names.includes(w)))throw fail('Unknown XP weapon');
   const expected=r.events.usedWeapons.filter(w=>!known.has(w)).sort();
   if(JSON.stringify(expected)!==JSON.stringify(r.firstWeapons))throw fail('First-use XP does not match account history');
   expected.forEach(w=>known.add(w));
   if(ordinary(r)){
    if(!id.startsWith('match:'))throw fail('Standard XP requires a standard match');
-   const career=r.mode==='deathmatch'?world.modeStats?.deathmatch?.player:world.playerCareer;
+   const career=r.mode==='tdm'?world.playerCareer:world.modeStats?.[r.mode]?.player;
    const record=career?.recentMatches?.find(m=>m.matchId===id);
    if(record){if(record.sessionType!==r.kind||record.mode!==r.mode||['kills','deaths','assists','damage','headshots'].some(k=>record[k]!==r.stats[k])||record.won!==(r.won===true))throw fail('XP differs from the completed match');for(const key of ['shots','hits'])if(r.stats[key]!==undefined&&record[key]!==undefined&&r.stats[key]!==record[key])throw fail('XP accuracy differs from the completed match');}
-   if(r.kind==='ranked'&&r.mode!=='tdm')throw fail('Ranked XP requires Team Deathmatch');
+   if(r.kind==='ranked'&&!['tdm','deathmatch'].includes(r.mode))throw fail('Ranked XP requires TDM or Deathmatch');
   }else if(!r.tournamentId||!r.seriesId||r.mode!=='tdm'||r.winStreak!==0)throw fail('Invalid tournament XP context');
  }
  if(p.usedWeapons.some(w=>!names.includes(w)||!known.has(w))||[...known].some(w=>!p.usedWeapons.includes(w)))throw fail('Weapon discovery history changed');
- for(const mode of ['tdm','deathmatch']){
-  const career=w=>mode==='tdm'?w?.playerCareer:w?.modeStats?.deathmatch?.player;
+ for(const mode of XP.STANDARD_MODES){
+  const career=w=>mode==='tdm'?w?.playerCareer:w?.modeStats?.[mode]?.player;
   const rows=added.filter(([,r])=>ordinary(r)&&r.mode===mode),games=(career(world)?.games||0)-(career(previous)?.games||0);
   if(rows.length>games)throw fail('XP requires newly completed standard games');
   if(rows.length&&old){let streak=career(previous)?.currentWinStreak||0;for(const [,r]of rows){streak=r.won?streak+1:0;if(r.winStreak!==streak)throw fail('XP win streak does not match standard results');}}
@@ -36,6 +37,11 @@ function validateProgression(world,previous){
 }
 function validateRankedProgression(world,previous){
  try{XP.validateRanked(world.ranked,previous?.ranked);}catch(e){throw fail(e.message);}
+ // Season resets originate in the server's immutable competitive projection.
+ // A first world/import must never turn a client-chosen reset into a trusted
+ // baseline. Preserve already stored historical receipts without accepting
+ // new client-created ones, even when their arithmetic is internally valid.
+ for(const [participantId,p]of Object.entries(world.ranked?.participants||{}))for(const [seasonId,receipt]of Object.entries(p.resets||{}))if(!isDeepStrictEqual(receipt,previous?.ranked?.participants?.[participantId]?.resets?.[seasonId]))throw fail('Ranked season resets are server-authoritative');
  const results=world.rankedResults,oldResults=previous?.rankedResults;
  for(const [id,r]of Object.entries(world.progression?.awards||{}))if(r.kind==='ranked'){
   const rows=results?.[id]?.rows;if(!Array.isArray(rows)||!rows.some(row=>row?.type==='human'&&row.participantId===r.participantId)||!world.ranked?.participants?.[r.participantId]?.awards?.[id])throw fail('Ranked XP lacks its immutable ELO result evidence');

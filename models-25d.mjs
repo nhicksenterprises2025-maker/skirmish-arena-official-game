@@ -2,8 +2,8 @@ import * as THREE from './vendor/three.module.js';
 import './team-presentation.js';
 import {mergeGeometries} from './vendor/addons/utils/BufferGeometryUtils.js';
 import {loadAssetLibrary} from './asset-loader-25d.mjs';
-import {readyCosmetic,attachCosmetic} from './cosmetics-25d.mjs';
-export {ensureCosmeticAssets,cosmeticKey,cosmeticDiagnostics} from './cosmetics-25d.mjs';
+import {readyCosmetic,attachCosmetic,readyVictoryPose} from './cosmetics-25d.mjs';
+export {ensureCosmeticAssets,ensureVictoryPoseAssets,cosmeticKey,cosmeticDiagnostics} from './cosmetics-25d.mjs';
 
 let detailLibrary;
 export function ensureModelAssets(){return loadAssetLibrary().then(library=>(detailLibrary=library));}
@@ -498,6 +498,29 @@ export function poseUnarmedShowcase(entity,{lobbyIdle=false}={}){
       else temp.b.set(arm.side===1?9:7,arm.side===1?32:14,arm.side*16);
       poseLimb(arm,temp.b,new THREE.Vector3(-1,-.2,arm.side*.4));arm.glove.position.copy(temp.b);arm.cuff.position.copy(temp.b).addScaledVector(temp.d,-2.3);arm.cuff.quaternion.copy(arm.lower.quaternion);
     }
+  }
+  return entity;
+}
+// End-screen/inspection instances only. Weapon poses derive hands from the
+// existing grip anchors; no hitbox, combat state or animation clock is changed.
+export function poseVictoryPresentation(entity,pose='quiet-confidence',weapon='AR-15',definition=readyVictoryPose(pose)){
+  if(!definition)throw new Error('Victory pose not loaded: '+pose);
+  poseUnarmedShowcase(entity);entity.victoryPose=pose;
+  const armed=!!definition.weapon;
+  entity.torso.rotation.z=definition.torsoZ;
+  for(const leg of entity.legs){
+    temp.b.set(2+leg.side*definition.footForward,3.2,leg.side*definition.feetSpread);
+    poseLimb(leg,temp.b,leg.bend);leg.foot.position.copy(temp.b);leg.kneePlate.position.copy(leg.knee.position);leg.kneePlate.position.x+=4.2;leg.kneePlate.quaternion.copy(leg.upper.quaternion);
+  }
+  if(armed){
+    const gun=setOperatorWeapon(entity,weapon),body=gun.userData.body;entity.gunMount.visible=true;
+    entity.gunMount.position.fromArray(definition.weapon.mount);
+    body.position.set(0,definition.weapon.height,0);body.rotation.set(0,0,definition.weapon.angle);body.updateMatrix();gun.userData.flash.visible=false;
+  }
+  for(const arm of entity.arms){
+    if(armed){temp.b.copy(entity.gun.userData.grips[arm.side===1?'rear':'support']);temp.b.y-=35;temp.b.applyMatrix4(entity.gun.userData.body.matrix).add(entity.gunMount.position);}
+    else temp.b.fromArray(definition.hands[arm.side===1?1:0]);
+    const bend=definition.bend||[1,-.8,.35];poseLimb(arm,temp.b,new THREE.Vector3(bend[0],bend[1],arm.side*bend[2]));arm.glove.position.copy(temp.b);arm.glove.rotation.set(0,0,armed?entity.gun.userData.body.rotation.z:0);arm.cuff.position.copy(temp.b).addScaledVector(temp.d,-2.3);arm.cuff.quaternion.copy(arm.lower.quaternion);
   }
   return entity;
 }

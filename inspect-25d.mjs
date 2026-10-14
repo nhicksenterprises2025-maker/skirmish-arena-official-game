@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import {buildWeapon,buildOperator,setOperatorWeapon,animateOperator,poseUnarmedShowcase,disposeModel,ensureModelAssets,ensureCosmeticAssets,cosmeticKey} from './models-25d.mjs';
+import {buildWeapon,buildOperator,setOperatorWeapon,animateOperator,poseUnarmedShowcase,poseVictoryPresentation,disposeModel,ensureModelAssets,ensureCosmeticAssets,ensureVictoryPoseAssets,cosmeticKey} from './models-25d.mjs';
 import {loadAssetLibrary} from './asset-loader-25d.mjs';
 
 // Presentation only: one on-demand WebGL context copies into ordinary card
@@ -8,6 +8,7 @@ let renderer,renderQueue=Promise.resolve(),frame=0,flushing=false,observer,resiz
 const cards=new Map(),pending=new Set(),staticModels=new Map(),thumbnails=new Map(),requests=new WeakMap();
 const metrics={renders:0,cacheHits:0,modelBuilds:0,disposedModels:0,frames:0,motionRenders:0,maxFrameMs:0,maxRenderMs:0,totalRenderMs:0};
 const rankManifest=new URL('./assets/25d/ranks/manifest.json',import.meta.url);
+const masteryManifest=new URL('./assets/25d/mastery/manifest.json',import.meta.url);
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const normalizedAngle=value=>((value+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;
 
@@ -17,7 +18,7 @@ function visibleBounds(object,view=null){
   return result;
 }
 function copyCanvas(target,source){const g=target.getContext('2d');g.save();g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,target.width,target.height);g.drawImage(source,0,0,target.width,target.height);g.restore();}
-function modelKey(options){return JSON.stringify([options.kind,options.weapon,options.skin??0,options.palette??null,!!options.unarmed,options.rankIndex,options.badge,cosmeticKey(options.cosmetic),!!options.lobbyIdle,options.motion??null,options.interactive??null]);}
+function modelKey(options){return JSON.stringify([options.kind,options.weapon,options.skin??0,options.palette??null,!!options.unarmed,options.rankIndex,options.badge,options.tier,options.weaponDef?.role,options.weaponDef?.type,options.weaponDef?.pellets,options.weaponDef?.burstCount,cosmeticKey(options.cosmetic),!!options.lobbyIdle,options.showcasePose??null,options.victoryPose??null,options.motion??null,options.interactive??null]);}
 function releaseEntry(entry){if(!entry)return;disposeModel(entry.pivot);metrics.disposedModels++;}
 function currentBackground(canvas){return typeof getComputedStyle==='function'?getComputedStyle(canvas||document.documentElement).getPropertyValue('--sky-panel-light').trim()||'#DFEBF5':'#DFEBF5';}
 function ensureRenderer(){
@@ -34,15 +35,23 @@ async function createEntry(options){
     const library=await loadAssetLibrary(rankManifest),entry=badge?library.entries.find(value=>value.name===badge):library.entries.find(value=>value.rankIndex===Number(rankIndex));
     if(!entry)throw new Error('Rank badge unavailable: '+(badge??rankIndex));
     object=library.cloneModel(entry.name);
+  }else if(kind==='mastery'){
+    const library=await loadAssetLibrary(masteryManifest);
+    const family=options.weaponDef?globalThis.SARWeaponMastery?.weaponClass(weapon,options.weaponDef):library.entries.find(value=>value.weapons?.includes(weapon))?.weaponClass;
+    const entry=library.entries.find(value=>value.weaponClass===family&&value.tier===Number(options.tier??1));
+    if(!entry)throw new Error('Weapon mastery badge unavailable: '+weapon+' tier '+options.tier);
+    object=library.cloneModel(entry.name);
   }else{
     await ensureModelAssets();
     if(kind==='phone')object=(await loadAssetLibrary()).cloneModel('phone-device');
     else if(kind==='operator'){
       if(options.cosmetic)await ensureCosmeticAssets(options.cosmetic);
       const entity=buildOperator(1,skin,palette,options.cosmetic);
+      if(['black-ice','aegis','monarch'].includes(options.showcasePose))entity.cosmeticLobbyPose=options.showcasePose;
       // The rig's face points +X. This existing preview-only pose rotates it
       // -90 degrees toward our +Z camera; zero card rotation is true front.
-      if(unarmed)poseUnarmedShowcase(entity,{lobbyIdle:!!options.lobbyIdle});
+      if(options.victoryPose){await ensureVictoryPoseAssets(options.victoryPose);poseVictoryPresentation(entity,options.victoryPose,weapon||'AR-15');}
+      else if(unarmed)poseUnarmedShowcase(entity,{lobbyIdle:!!options.lobbyIdle});
       else {setOperatorWeapon(entity,weapon);animateOperator(entity,{x:0,y:0,angle:0,vx:0,vy:0,adsBlend:0,weapon,skinIndex:skin},0,0);}
       object=entity.group;
       // This rig is a preview-owned instance. Only its chest/head/arms breathe;
@@ -55,16 +64,16 @@ async function createEntry(options){
   const bounds=visibleBounds(object),center=bounds.getCenter(new THREE.Vector3());
   if(bounds.isEmpty()){disposeModel(object);throw new Error('Model has no visible geometry: '+kind);}
   const pivot=new THREE.Group();object.position.sub(center);pivot.add(object);
-  const rank=kind==='rank',scene=new THREE.Scene();scene.add(pivot,new THREE.HemisphereLight(0xf0f4e9,0x384b3d,rank?1.1:1.55));
-  const sun=new THREE.DirectionalLight(0xfff1d6,rank?3.1:2.6);sun.position.set(rank?-80:80,150,140);scene.add(sun);
-  const rim=new THREE.DirectionalLight(0xc5dfe0,rank?1.25:1.8);rim.position.set(-130,65,-90);scene.add(rim);
-  const fill=new THREE.DirectionalLight(0xe6efd7,rank?.3:.65);fill.position.set(-100,5,160);scene.add(fill);
+  const emblem=kind==='rank'||kind==='mastery',scene=new THREE.Scene();scene.add(pivot,new THREE.HemisphereLight(0xf0f4e9,0x384b3d,emblem?1.1:1.55));
+  const sun=new THREE.DirectionalLight(0xfff1d6,emblem?3.1:2.6);sun.position.set(emblem?-80:80,150,140);scene.add(sun);
+  const rim=new THREE.DirectionalLight(0xc5dfe0,emblem?1.25:1.8);rim.position.set(-130,65,-90);scene.add(rim);
+  const fill=new THREE.DirectionalLight(0xe6efd7,emblem?.3:.65);fill.position.set(-100,5,160);scene.add(fill);
   metrics.modelBuilds++;
   return {key:modelKey(options),scene,pivot,kind,unarmed,breathing,framing:new Map()};
 }
 function cameraFor(entry,aspect){
   const camera=new THREE.OrthographicCamera(-1,1,1,-1,.1,2000);
-  camera.position.copy(entry.kind==='rank'?new THREE.Vector3(135,50,500):entry.kind==='phone'?new THREE.Vector3(0,0,500):entry.kind==='operator'?new THREE.Vector3(entry.unarmed?0:110,entry.unarmed?8:55,230):new THREE.Vector3(90,30,250));
+  camera.position.copy(entry.kind==='rank'||entry.kind==='mastery'?new THREE.Vector3(135,50,500):entry.kind==='phone'?new THREE.Vector3(0,0,500):entry.kind==='operator'?new THREE.Vector3(entry.unarmed?0:110,entry.unarmed?8:55,230):new THREE.Vector3(90,30,250));
   camera.lookAt(0,0,0);camera.updateMatrixWorld(true);
   const framingKey=aspect.toFixed(4);
   if(!entry.framing.has(framingKey)){
@@ -89,7 +98,7 @@ function renderEntry(canvas,entry,{rotation=0,zoom=1}={}){
   const viewSpan=span/clamp(Number(zoom)||1,.8,1.08);
   entry.pivot.rotation.y=rotation;
   camera.left=-viewSpan*aspect/2;camera.right=viewSpan*aspect/2;camera.top=viewSpan/2;camera.bottom=-viewSpan/2;camera.updateProjectionMatrix();
-  gl.setSize(width,height,false);gl.setClearColor(currentBackground(canvas),entry.kind==='rank'?0:1);gl.render(entry.scene,camera);copyCanvas(canvas,gl.domElement);metrics.renders++;
+  gl.setSize(width,height,false);gl.setClearColor(currentBackground(canvas),entry.kind==='rank'||entry.kind==='mastery'?0:1);gl.render(entry.scene,camera);copyCanvas(canvas,gl.domElement);metrics.renders++;
   const elapsed=performance.now()-started;metrics.maxRenderMs=Math.max(metrics.maxRenderMs,elapsed);metrics.totalRenderMs+=elapsed;
 }
 function serialize(task){const result=renderQueue.then(task);renderQueue=result.catch(()=>{});return result;}

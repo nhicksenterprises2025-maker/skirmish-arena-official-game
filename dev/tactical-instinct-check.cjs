@@ -8,7 +8,7 @@ function holdBackground(e){e.dev.inspect().state.matches.slice(0,4).forEach(m=>m
 function live(e,m){m.status='active';m.startedAt=e.dev.now();for(const a of m.participants){a.nextThink=Infinity;a.nextDecision=Infinity;a.nextAim=Infinity;}}
 function damage(e,owner,victim,amount){e.dev.applyDamage(victim,{owner,weapon:owner.slots[0].name,travel:100},amount,false,e.dev.now());}
 {
- const e=make(),w=e.context.SAR.getWeapons();assert.equal(e.dev.balanceFingerprint(),'b-b9bdf00b');assert.equal(e.context.SAR.getUniverse().patchState.balanceVersion,'8.0');assert.equal(w['SR-Aug'].burstSpacing,.065);pass('Balance 8.0 fingerprint and preserved real AUG cadence');
+ const e=make(),w=e.context.SAR.getWeapons(),baseline=JSON.parse(fs.readFileSync(require.resolve('./fixtures/balance-9.0-world-baseline.json'),'utf8'));assert.equal(e.dev.balanceFingerprint(),baseline.patch.fingerprint);assert.equal(e.context.SAR.getUniverse().patchState.balanceVersion,'9.0');assert.equal(w['SR-Aug'].burstSpacing,.065);pass('Balance 9.0 captured fingerprint and preserved real AUG cadence');
 }
 for(const mode of ['tdm','deathmatch'])for(const count of [0,1,2,9])for(const difficulty of Object.keys(T.presets)){
  const e=make();holdBackground(e);const before=official(e),names=Object.keys(e.context.SAR.getProfiles()),config={mode,difficulty,player:true,bots:names.slice(0,count).map((name,i)=>({name,team:i<4?0:1}))};

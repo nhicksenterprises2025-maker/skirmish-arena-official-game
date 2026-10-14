@@ -26,6 +26,7 @@ copy('server/migrations');
 // Existing authoritative server validation imports this exact engine harness.
 copy('dev/simulate.cjs');
 copy('node_modules/bcryptjs');
+copy('node_modules/ws');
 // Only the existing Node/CommonJS SDK runtime is shipped. No developer config,
 // environment files, type declarations or alternate browser SDK is required.
 const stripePackage=JSON.parse(fs.readFileSync(path.join(release,'node_modules/stripe/package.json'),'utf8'));
@@ -42,9 +43,23 @@ const shell = [
 ];
 shell.push('theme.css','skyline.css','phone-apps.css','skyline-tournaments.css','phone-apps.js','team-presentation.js','exit-game.js','assets/branding/wordmark.svg','assets/branding/wordmark-mono.svg','assets/branding/monogram.svg','assets/branding/monogram-mono.svg','assets/branding/app-256.png','assets/branding/app-512.png','match-modes.js','progression.js','boot.js','boot.css','tactical-instinct.js','desktop-entry.html','desktop-launch.html','desktop-launch.js','build-meta.js','tournaments-ui.js','assets/25d/live-circuit-details.glb');
 const audioManifest=JSON.parse(fs.readFileSync(path.join(release,'assets/audio/LICENSES.json'),'utf8'));
-shell.push('profile-stats.js','distance-units.js');
+shell.push('profile-stats.js','map-data.js','distance-units.js','mode-rules.js','assets/25d/map-ecosystem.glb');
+shell.push('multiplayer.js','multiplayer-ui.js','multiplayer-ui.css');
+shell.push('competitive-progression.js');
+shell.push('weapon-mastery.js','assets/25d/mastery/manifest.json','assets/25d/mastery/weapon-mastery.glb');
+shell.push('faction-identity.js','factions-ui.js','factions-ui.css');
+shell.push('replay-playback.js','replays-ui.js','replays-ui.css');
 shell.push('fonts.css','blue-circuit.css','assets/fonts/Inter-Variable.ttf','assets/fonts/Oxanium-Variable.ttf','assets/fonts/Inter-OFL.txt','assets/fonts/Oxanium-OFL.txt','assets/fonts/README.md','assets/fonts/manifest.json','assets/25d/ranks/manifest.json','assets/25d/ranks/blue-circuit-ranks.glb');
 shell.push('commerce.js','commerce.css','refined-ui.css','cosmetics-25d.mjs','assets/25d/cosmetics/manifest.json');
+shell.push('victory-presentation.js','assets/25d/cosmetics/content-manifest.json','assets/25d/cosmetics/victory-poses.json');
+const contentAssets=JSON.parse(fs.readFileSync(path.join(release,'assets/25d/cosmetics/content-manifest.json'),'utf8'));
+for(const asset of Object.values(contentAssets.content||{})){
+  const pose=asset.kind==='victory-pose';
+  if(!asset.verified||!(pose?asset.file==='assets/25d/cosmetics/victory-poses.json':/^assets\/25d\/cosmetics\/(?:icons|banners)\/[a-z0-9-]+\.png$/.test(asset.file)))throw Error('Invalid cosmetic content asset');
+  const bytes=fs.readFileSync(path.join(release,asset.file));
+  if(bytes.length!==asset.bytes||require('node:crypto').createHash('sha256').update(bytes).digest('hex')!==asset.sha256)throw Error('Cosmetic content asset hash mismatch: '+asset.file);
+  if(!pose)shell.push(asset.file);
+}
 const cosmetics=JSON.parse(fs.readFileSync(path.join(release,'assets/25d/cosmetics/manifest.json'),'utf8'));
 const cosmeticFiles=new Set();
 for(const item of Object.values(cosmetics.cosmetics||{}))for(const style of Object.values(item.styles||{})){
@@ -56,6 +71,9 @@ for(const item of Object.values(cosmetics.cosmetics||{}))for(const style of Obje
 shell.push(...cosmeticFiles);
 const rankAssets=JSON.parse(fs.readFileSync(path.join(release,'assets/25d/ranks/manifest.json'),'utf8'));
 for(const entry of rankAssets.models){if(!/^[a-z-]+\.png$/.test(entry.thumbnail))throw Error('Invalid rank thumbnail path');shell.push('assets/25d/ranks/'+entry.thumbnail);}
+const masteryAssets=JSON.parse(fs.readFileSync(path.join(release,'assets/25d/mastery/manifest.json'),'utf8'));
+const masteryBytes=fs.readFileSync(path.join(release,'assets/25d/mastery/weapon-mastery.glb'));
+if(masteryBytes.length!==masteryAssets.files['weapon-mastery.glb'].bytes||require('node:crypto').createHash('sha256').update(masteryBytes).digest('hex')!==masteryAssets.files['weapon-mastery.glb'].sha256)throw Error('Mastery asset hash mismatch');
 for(const asset of Object.values(audioManifest.assets)){if(!/^(weapons|handling|combat|impacts|movement|ui|match|ambience)\/[a-z0-9_]+\.(wav|ogg)$/.test(asset.file))throw Error('Invalid audio asset path');shell.push('assets/audio/'+asset.file);}
 for (const asset of shell) copy(asset);
 fs.writeFileSync(path.join(destination, 'desktop-shell.json'), JSON.stringify(shell));

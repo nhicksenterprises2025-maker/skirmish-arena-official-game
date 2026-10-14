@@ -54,6 +54,26 @@ test('Server projects individual accepted official ledger rows only and reopens 
   f.reopen();assert.deepEqual(Profiles.official(f.db,USER),p);
  }finally{f.close();}
 });
+test('Shared official events expose each guest\'s actual accepted rows and preserve ownership through archive and restart',()=>{
+ const f=fixture();try{
+  const acceptedGame=accepted(f,'Shared official guest fixture'),guest='human:official-guest',other='human:official-other';
+  f.db.prepare("UPDATE tournaments SET kind='official' WHERE id=?").run(acceptedGame.t.id);
+  const now=Date.now();for(const id of [guest,other])f.db.prepare('INSERT INTO users(id,username,username_key,password_hash,created_at,updated_at) VALUES(?,?,?,?,?,?)').run(id,id,id,'fixture-not-a-real-password',now,now);
+  // Fixture an accepted per-game guest row, independent of the administrator
+  // account and of the current roster after a later no-show replacement.
+  const match=f.db.prepare('SELECT * FROM tournament_matches WHERE id=?').get(acceptedGame.result.id),result=JSON.parse(match.result_json),owned=result.stats.find(row=>row.participantId===USER),guestRow={...owned,participantId:guest,kills:7,deaths:11,damage:1750};
+  result.stats.push(guestRow);result.teams=JSON.parse(f.db.prepare('SELECT bracket_json FROM tournaments WHERE id=?').get(acceptedGame.t.id).bracket_json).teams;result.teams[0].participants.push({id:guest,kind:'user'});
+  f.db.prepare('UPDATE tournament_matches SET result_json=? WHERE id=?').run(JSON.stringify(result),match.id);
+  f.db.prepare('INSERT INTO tournament_stats(tournament_id,participant_id,stats_json) VALUES(?,?,?)').run(acceptedGame.t.id,guest,JSON.stringify({...guestRow,games:1}));
+  const graphBefore=Object.fromEntries(['tournaments','tournament_matches','tournament_stats','worlds'].map(table=>[table,f.db.prepare('SELECT * FROM '+table).all()])),view=Profiles.official(f.db,guest);
+  assert.equal(view.owner,guest);assert.equal(view.records.length,1);assert.equal(view.records[0].participantId,guest);assert.equal(view.records[0].stats.kills,7);assert.equal(view.records[0].stats.damage,1750);assert.equal(view.missingGames,0);assert.equal(Profiles.official(f.db,other).records.length,0);assert.equal(Profiles.official(f.db,USER).records.length,1);
+  assert.deepEqual(Object.fromEntries(Object.keys(graphBefore).map(table=>[table,f.db.prepare('SELECT * FROM '+table).all()])),graphBefore);
+  const event=f.db.prepare('SELECT * FROM tournaments WHERE id=?').get(acceptedGame.t.id),matches=f.db.prepare('SELECT * FROM tournament_matches WHERE tournament_id=?').all(event.id),stats=f.db.prepare('SELECT * FROM tournament_stats WHERE tournament_id=?').all(event.id),reset='shared-guest-archive-fixture';
+  f.db.prepare('INSERT INTO tournament_state_resets VALUES(?,?,?,?)').run(reset,now,null,'{}');f.db.prepare('INSERT INTO tournament_reset_archives VALUES(?,?,?,?,?)').run(reset,event.id,USER,JSON.stringify({event,matches,stats}),now);
+  f.db.prepare('DELETE FROM tournament_matches WHERE tournament_id=?').run(event.id);f.db.prepare('DELETE FROM tournament_stats WHERE tournament_id=?').run(event.id);
+  assert.deepEqual(Profiles.official(f.db,guest),view);assert.equal(Profiles.official(f.db,other).records.length,0);f.reopen();assert.deepEqual(Profiles.official(f.db,guest),view);
+ }finally{f.close();}
+});
 test('Real HTTP participation query requires authentication, ignores foreign participant selectors and exposes no private state',async()=>{
  const f=fixture();let app;try{
   const official=accepted(f,'HTTP official fixture');f.db.prepare("UPDATE tournaments SET kind='official' WHERE id=?").run(official.t.id);
@@ -78,7 +98,7 @@ test('One-time reset archives preserve accepted official contributions without d
 test('Open Combined refreshes once from accepted games, preserves the saved world and restores account-owned official cache offline',()=>{
  const f=profileFixture(),e=engine({'sar-persistent-save':JSON.stringify(f.world)}),account={id:f.participantId,username:'CombinedFixture'};e.context.SARCloud={state:{account,available:false,localMode:true},now:e.context.SARCloud.now};
  e.context.SAR.openCombinedProfile();const before=JSON.stringify(e.context.SAR.getUniverse()),event=officialEvent('official:cached',f.participantId,f.now-1000);
- assert.equal(e.context.SAR.updateTournamentProfileRecords([event]),true);assert.equal(e.context.SAR.getProfileStats().totals.games,4);const html=e.ui.element('modalContent').innerHTML;assert.match(html,/TDM \+ Deathmatch \+ Ranked \+ Official Tournaments/);assert.match(html,/data-profile-metric="games"[\s\S]*?<strong>4<\/strong>/);
+ assert.equal(e.context.SAR.updateTournamentProfileRecords([event]),true);assert.equal(e.context.SAR.getProfileStats().totals.games,4);const html=e.ui.element('modalContent').innerHTML;for(const label of ['Casual TDM','Casual Deathmatch','Casual Gun Game','Casual Domination','Casual Hardpoint','Ranked TDM','Ranked Deathmatch','Official Tournaments','Eligible limited-time modes'])assert.ok(html.includes(label),'Combined identifies '+label);assert.match(html,/data-profile-metric="games"[\s\S]*?<strong>4<\/strong>/);
  assert.equal(e.context.SAR.updateTournamentProfileRecords([event,event]),false);assert.equal(e.ui.element('modalContent').innerHTML,html);assert.equal(JSON.stringify(e.context.SAR.getUniverse()),before);
  const restarted=engine(Object.fromEntries(e.data));restarted.context.SARCloud={state:{account,available:false,localMode:true},now:restarted.context.SARCloud.now};assert.deepEqual(restarted.context.SAR.getProfileStats(),e.context.SAR.getProfileStats());
  restarted.context.SARCloud.state.account={id:'foreign',username:'Foreign'};assert.equal(restarted.context.SAR.getProfileStats().totals.games,0);assert.equal(restarted.context.SAR.getProfileStats().coverage.authorized,false);

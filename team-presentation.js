@@ -10,7 +10,7 @@
   const key=value=>value===null||value===undefined?null:String(value);
   function identity(actor){return key(actor?.participantId??actor?.sessionParticipantId??actor?.accountId??actor?.sourceBotId??actor?.profile?.id??actor?.id);}
   function create({mode='tdm',teamIds=[0,1],participants=[],viewerId=null,followId=null,followTeam=false}={}){
-    const ffa=mode==='deathmatch',ids=teamIds.slice(),viewerKey=key(viewerId),followKey=key(followId);
+    const ffa=['deathmatch','gun-game'].includes(mode),ids=teamIds.slice(),viewerKey=key(viewerId),followKey=key(followId);
     const find=id=>id===null?null:participants.find(a=>identity(a)===id||key(a.id)===id)||null;
     const viewer=find(viewerKey),follow=find(followKey),focus=viewer||follow;
     const focusId=identity(focus),blueTeam=viewer?.team??(followTeam?follow?.team:null)??ids[0];

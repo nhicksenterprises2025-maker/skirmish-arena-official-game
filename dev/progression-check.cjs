@@ -2,6 +2,7 @@
 const fs=require('fs'),path=require('path'),assert=require('assert/strict'),os=require('os');
 const XP=require('../progression.js'),{engine}=require('./simulate.cjs'),{validateWorld,writeWorld,readWorld,migrateLocalWorld}=require('../server/world.cjs'),{createDatabase}=require('../server/db.cjs'),Circuit=require('../server/tournaments.cjs'),Runtime=require('../server/tournament-runtime.cjs');
 const clone=x=>JSON.parse(JSON.stringify(x)),checks=[],pass=s=>{checks.push(s);console.log('PASS '+s);};
+(async()=>{
 const tdmPatch=world=>{const patch=clone(world.patchState);for(const sample of Object.values(patch.participantAnalytics?.samples||{}))delete sample.deathmatch;return patch;};
 function receipt(overrides={}){return {kind:'standard',mode:'tdm',at:Date.now(),stats:{kills:0,deaths:0,assists:0,headshots:0,damage:0,timeAlive:0},events:XP.events(),leaders:{kills:false,assists:false,alive:false},firstWeapons:[],won:null,winStreak:0,...overrides};}
 const value=r=>XP.totals(r).units/100,key=(r,k)=>XP.breakdown(r).find(l=>l.key===k)?.units/100||0;
@@ -35,10 +36,28 @@ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sar-xp-')),dbFile=path.join(dir,
  let official=Circuit.scheduleOfficial(db,user,after.seasons.current,now)[0],custom=Circuit.createCustom(db,user,{name:'No XP',startsAt:now},now);
 
  let current=clone(after),revision=3;
- for(const [t,kind]of [[custom,'custom'],[official,'official']]){const ids=[user,...after.activeBotNames.slice(0,39).map(n=>after.bots[n].profile.id)];for(let i=0;i<8;i++)Circuit.registerTeam(db,user,t.id,{name:'Team '+i,participantIds:ids.slice(i*5,i*5+5)},now);Circuit.startTournament(db,user,t.id,Math.max(now,t.startsAt));const context=Runtime.playContext(db,user,t.id,Math.max(now,t.startsAt));assert.equal(context.tournamentKind,kind);const g=make({'sar-persistent-save':JSON.stringify(current)}),tm=g.context.SAR.startTournamentGame(context),human=tm.participants.find(a=>a.isPlayer);tm.status="active";g.dev.fire(human,0,10000);g.dev.tryDash(human,1,0,10000);tm.score[human.team]=1;human.stats.kills=1;g.dev.endMatch(tm,human.team,'time');const world=g.context.SAR.getUniverse();if(kind==='custom'){assert.deepEqual(world.progression,current.progression);const forged=clone(world);XP.award(forged.progression,{matchId:context.gameId,participantId:user,...receipt({kind:'official',tournamentId:t.id,seriesId:context.seriesId})});assert.throws(()=>writeWorld(db,user,forged,revision),/official tournament/);Circuit.deleteCustom(db,user,t.id,t.name);}else{const r=world.progression.awards[context.gameId];assert.equal(r.units,r.baseUnits*13/10);assert.match(g.context.SAR.xpSummaryHtml(r),/BASE XP[\s\S]*×1.3[\s\S]*FINAL XP/);assert.deepEqual(world.playerCareer,current.playerCareer);Circuit.recordGame(db,user,t.id,context.seriesId,tm.tournamentResult,Math.max(now,t.startsAt));writeWorld(db,user,world,revision++);writeWorld(db,user,world,revision++);assert.deepEqual(readWorld(db,user).save.progression,world.progression);current=world;}}
+ for(const [t,kind]of [[custom,'custom'],[official,'official']]){
+  const ids=[user,...after.activeBotNames.slice(0,39).map(n=>after.bots[n].profile.id)];for(let i=0;i<8;i++)Circuit.registerTeam(db,user,t.id,{name:'Team '+i,participantIds:ids.slice(i*5,i*5+5)},now);
+  const at=Math.max(now,t.startsAt);Circuit.startTournament(db,user,t.id,at);let context;
+  if(kind==='official'){
+   const event=Circuit.getTournament(db,user,t.id),series=event.series.find(s=>s.teamIds.some(id=>event.teams.find(team=>team.id===id).participants.some(p=>p.id===user))),gameId=series.id+':game1';
+   Circuit.checkIn(db,user,t.id,{gameId},at);Circuit.advanceScheduled(db,user,t.id,at+90000);
+   context=Runtime.playContext(db,user,t.id,at+90000,{clientId:'progression-fixture-client'});Circuit.markScheduledPrepared(db,user,t.id,gameId,at+90000);
+   for(const heartbeat of [100000,110000])Circuit.renewScheduledGame(db,user,t.id,gameId,context.leaseToken,at+heartbeat);Circuit.markScheduledStarted(db,user,t.id,gameId,context.leaseToken,at+120000);
+  }else context=Runtime.playContext(db,user,t.id,at);
+  assert.equal(context.tournamentKind,kind);const g=make({'sar-persistent-save':JSON.stringify(current)});if(kind==='official')g.context.SARCloud.now=()=>at+120001;
+  const tm=g.context.SAR.startTournamentGame(context),human=tm.participants.find(a=>a.isPlayer);tm.status="active";g.dev.fire(human,0,10000);g.dev.tryDash(human,1,0,10000);tm.score[human.team]=1;human.stats.kills=1;g.dev.endMatch(tm,human.team,'time');
+  if(kind==='official'){
+   assert.deepEqual(g.context.SAR.getUniverse().progression,current.progression,'Scheduled official XP waits for canonical acknowledgement');
+   const accepted=Circuit.recordGame(db,user,t.id,context.seriesId,tm.tournamentResult,at+120001).series.find(s=>s.id===context.seriesId).games.find(game=>game.id===context.gameId);
+   await g.context.SAR.acceptTournamentXP(context,accepted,tm.rewardResult);
+  }
+  const world=g.context.SAR.getUniverse();if(kind==='custom'){assert.deepEqual(world.progression,current.progression);const forged=clone(world);XP.award(forged.progression,{matchId:context.gameId,participantId:user,...receipt({kind:'official',tournamentId:t.id,seriesId:context.seriesId})});assert.throws(()=>writeWorld(db,user,forged,revision),/official tournament/);Circuit.deleteCustom(db,user,t.id,t.name);}else{const r=world.progression.awards[context.gameId];assert.equal(r.units,r.baseUnits*13/10);assert.match(g.context.SAR.xpSummaryHtml(r),/BASE XP[\s\S]*×1.3[\s\S]*FINAL XP/);assert.deepEqual(world.playerCareer,current.playerCareer);writeWorld(db,user,world,revision++);writeWorld(db,user,world,revision++);assert.deepEqual(readWorld(db,user).save.progression,world.progression);current=world;}
+ }
  pass('SQLite restart and repeated sync; tampering rejected; registered official ×1.3; custom tournament rejection; tournament/career isolation');
 }finally{db.close();assert.ok(path.resolve(dir).startsWith(path.resolve(os.tmpdir())+path.sep));fs.rmSync(dir,{recursive:true,force:true});}
 console.log(JSON.stringify({ok:true,groups:checks.length}));
+})().catch(error=>{console.error(error);process.exitCode=1;});
 
 
 

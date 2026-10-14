@@ -27,15 +27,18 @@ test('persisted unscheduled aggregate API preserves 128–136 advancement, autho
   const play=await request(route+'/play',{method:'POST',body:{}});assert.equal(play.status,200);let context=play.body.context;
   const sid=context.seriesId,q=t.series.find(s=>s.id===sid),foreign=t.series.find(s=>s.id!==sid&&s.round==='QF');assert.equal(q.teamIds[0],ownTeam.id);assert.equal(context.gameId,sid+':game1');assert.equal(context.requiredGames,3);
   const first=game(t,q,[56,30],{id:context.gameId});
-  const wrongGame=await request(route+'/result',{method:'POST',body:{seriesId:sid,result:{...first,id:sid+':game2'}}});assert.equal(wrongGame.status,409);assert.equal(f.db.prepare('SELECT count(*) n FROM tournament_matches WHERE series_id=?').get(sid).n,0);
-  const wrongSeries=await request(route+'/result',{method:'POST',body:{seriesId:foreign.id,result:first}});assert.equal(wrongSeries.status,409);
+  const wrongGame=await request(route+'/result',{method:'POST',body:{seriesId:sid,result:{...first,id:sid+':game2'}}});assert.equal(wrongGame.status,403);assert.equal(f.db.prepare('SELECT count(*) n FROM tournament_matches WHERE series_id=?').get(sid).n,0);
+  const wrongSeries=await request(route+'/result',{method:'POST',body:{seriesId:foreign.id,result:first}});assert.equal(wrongSeries.status,403);
   assert.equal((await request(route+'/result',{method:'POST',body:{seriesId:sid,result:first},authenticated:false})).status,401);
   const scores=[[56,30],[52,46],[20,60]],results=[];
   for(let i=0;i<scores.length;i++){
    t=Circuit.getTournament(f.db,USER,t.id);const current=t.series.find(s=>s.id===sid),result=game(t,current,scores[i],{id:context.gameId});results.push(result);
-   const received=await request(route+'/result',{method:'POST',body:{seriesId:sid,result}});assert.equal(received.status,200);t=received.body.tournament;
+   const received=await request(route+'/result',{method:'POST',body:{seriesId:sid,result}});assert.equal(received.status,403,'A client cannot finalize even a correctly shaped result');
+   // Resolved-game fixtures enter through the server-only finalization path;
+   // playable network coverage independently verifies real combat completion.
+   t=Circuit.recordGame(f.db,USER,t.id,sid,result,Date.now());
    const s=t.series.find(s=>s.id===sid);assert.equal(s.completedGames,i+1);assert.equal(s.remainingGames,2-i);
-   if(i<2){assert.equal(s.winnerTeamId,null);assert.equal((await request(route+'/play',{method:'POST',body:{}})).status,200);context=(await request(route+'/play',{method:'POST',body:{}})).body.context;assert.equal(context.gameId,sid+':game'+(i+2));}
+   if(i<2){assert.equal(s.winnerTeamId,null);context={...context,gameId:sid+':game'+(s.completedGames+1)};assert.equal(context.gameId,sid+':game'+(i+2));}
   }
   const finished=t.series.find(s=>s.id===sid);same(finished.wins,[2,1]);same(finished.aggregateKills,[128,136]);assert.equal(finished.winnerTeamId,q.teamIds[1]);assert.equal(finished.games.length,3);assert.equal(finished.advancement.status,'decided');assert.ok(t.series.filter(s=>s.round==='SF').some(s=>s.teamIds.includes(q.teamIds[1])));
   const seriesRow=f.db.prepare('SELECT * FROM tournament_series WHERE id=?').get(sid),gameRows=f.db.prepare('SELECT * FROM tournament_matches WHERE series_id=? ORDER BY id').all(sid),statRows=f.db.prepare('SELECT * FROM tournament_stats WHERE tournament_id=? AND participant_id IN (SELECT participant_id FROM tournament_registrations WHERE team_id IN (?,?)) ORDER BY participant_id').all(t.id,...q.teamIds);
@@ -45,7 +48,7 @@ test('persisted unscheduled aggregate API preserves 128–136 advancement, autho
   const changed={...results[2],winnerTeamId:q.teamIds[0],score:[999,0],stats:[]};
   const replays=await Promise.all([results[0],results[2],changed].map(result=>request(route+'/result',{method:'POST',body:{seriesId:sid,result}})));assert.ok(replays.every(r=>r.status===200));
   assert.equal((await request(route+'/result',{method:'POST',body:{seriesId:foreign.id,result:results[2]}})).status,409);
-  assert.equal((await request(route+'/result',{method:'POST',body:{seriesId:sid,result:{...results[2],id:sid+':game4'}}})).status,409);
+  assert.equal((await request(route+'/result',{method:'POST',body:{seriesId:sid,result:{...results[2],id:sid+':game4'}}})).status,403);
   for(let i=0;i<3;i++){const read=await request(route);assert.equal(read.status,200);same(read.body.tournament.series.find(s=>s.id===sid),finished,'Reopening tournament UI cannot advance its series');}
   same(f.db.prepare('SELECT * FROM tournament_series WHERE id=?').get(sid),seriesRow);same(f.db.prepare('SELECT * FROM tournament_matches WHERE series_id=? ORDER BY id').all(sid),gameRows);same(f.db.prepare('SELECT * FROM tournament_stats WHERE tournament_id=? AND participant_id IN (SELECT participant_id FROM tournament_registrations WHERE team_id IN (?,?)) ORDER BY participant_id').all(t.id,...q.teamIds),statRows);
   same(snapshot(f.db),f.before,'Authenticated tournament APIs preserve normal account world, careers, XP, seasons and meta');assert.equal(f.db.prepare('SELECT count(*) n FROM tournament_earnings WHERE tournament_id=?').get(t.id).n,0);

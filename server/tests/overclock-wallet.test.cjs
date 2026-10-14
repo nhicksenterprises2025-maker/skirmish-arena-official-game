@@ -21,15 +21,15 @@ function readyFixture(fn){const original=Catalog.assetReadiness;Catalog.assetRea
 const receipt=(id,kind='standard',extra={})=>({participantId:id,participantType:'human',kind,sessionType:kind,mode:'tdm',eligible:true,practice:false,completed:true,activeParticipation:true,at:Date.now(),...extra});
 function saveReceipt(db,id,matchId,value,revision=2){const save={progression:{totalXPUnits:98765,awards:{[matchId]:{...value,transactionKey:JSON.stringify([id,matchId,'xp'])}}},unchanged:{level:12,career:18}};db.prepare('INSERT INTO worlds(user_id,revision,schema_version,save_json,updated_at,season_start_at,season_end_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET revision=excluded.revision,save_json=excluded.save_json').run(id,revision,17,JSON.stringify(save),Date.now(),1,9999999999999);return save;}
 
-test('catalog preserves all 35 ownership definitions but offers only the three distinct modeled outfits',()=>{
+test('catalog preserves all 35 legacy ownership definitions and the three retained modeled outfits',()=>{
   assert.deepEqual(Catalog.packs.map(p=>[p.id,p.moneyCents,p.creditUnits]),[['ac-500',699,50000],['ac-1000',1099,100000],['ac-1500',1499,150000],['ac-3000',2499,300000],['ac-7500',4999,750000],['ac-17500',9999,1750000]]);
-  assert.equal(Catalog.cosmetics.length,35);assert.equal(new Set(Catalog.cosmetics.map(c=>c.id)).size,35);
-  assert.deepEqual([50000,100000,150000,250000].map(price=>Catalog.cosmetics.filter(c=>c.priceUnits===price).length),[24,4,4,3]);
-  for(const operator of Catalog.operators)assert.equal(Catalog.cosmetics.filter(c=>c.operatorId===operator.id&&c.priceUnits===50000).length,3);
-  for(const item of Catalog.cosmetics){assert.ok(item.id.startsWith(item.operatorId+'.'));assert.ok(Catalog.operators.some(o=>o.id===item.operatorId));assert.equal(item.styles.length,item.priceUnits===250000?2:1);assert.equal(!!item.lobbyPose,item.priceUnits===250000);}
-  const live=Catalog.catalog('test');assert.equal(live.checkoutAvailable,false);assert.equal(live.earningStatus,'validation-required');assert.equal(live.cosmetics.length,35);
+  const legacy=Catalog.cosmetics.filter(c=>!c.newOperator);assert.equal(legacy.length,35);assert.equal(new Set(legacy.map(c=>c.id)).size,35);
+  assert.deepEqual([50000,100000,150000,250000].map(price=>legacy.filter(c=>c.priceUnits===price).length),[24,4,4,3]);
+  for(const operator of Catalog.operators.slice(0,8))assert.equal(legacy.filter(c=>c.operatorId===operator.id&&c.priceUnits===50000).length,3);
+  for(const item of legacy){assert.ok(item.id.startsWith(item.operatorId+'.'));assert.ok(Catalog.operators.some(o=>o.id===item.operatorId));assert.equal(item.styles.length,item.priceUnits===250000?2:1);assert.equal(!!item.lobbyPose,item.priceUnits===250000);}
+  const live=Catalog.catalog('test');assert.equal(live.checkoutAvailable,false);assert.equal(live.earningStatus,'validation-required');assert.equal(live.cosmetics.filter(c=>!c.newOperator).length,35);
   const kept=['urban-assault.containment','steel-recon.aegis','crimson-guard.monarch'];
-  assert.deepEqual(live.cosmetics.filter(row=>row.storeListed).map(row=>row.id),kept);
+  assert.deepEqual(live.cosmetics.filter(row=>row.storeListed&&!row.newOperator).map(row=>row.id),kept);
   assert.equal(live.cosmetics.filter(row=>row.saleStatus==='retired').length,32);
   for(const item of live.cosmetics){assert.equal(item.storeListed,item.saleStatus==='active');assert.equal(item.available,item.storeListed&&item.assetStatus==='READY');}
   assert.equal(live.cosmetics.find(row=>row.id==='urban-assault.polar-camo').saleStatus,'retired');
@@ -65,12 +65,12 @@ test('standard and ranked units are exact, exclusions pay zero, identity and ret
   const db=createDatabase(':memory:'),id=seedUser(db,'earner');
   try{
     assert.equal(Wallet.snapshot(db,id,'test').balanceUnits,0);
-    for(const [kind,mode,expected] of [['standard','tdm',100],['standard','deathmatch',100],['ranked','tdm',150]]){
+    for(const [kind,mode,expected] of [['standard','tdm',100],['standard','deathmatch',100],['ranked','tdm',150],['ranked','deathmatch',150]]){
       const matchId='match:'+kind+mode,r=receipt(id,kind,{mode});assert.equal(Wallet.rewardForParticipation(r,id),expected);
       assert.equal(Wallet.settleVerifiedMatch(db,id,matchId,r,'test').replayed,false);assert.equal(Wallet.settleVerifiedMatch(db,id,matchId,{...r,codeVersion:'future'},'test').replayed,true);
     }
-    assert.equal(Wallet.snapshot(db,id,'test').balanceUnits,350);
-    for(const extra of [{kind:'official',sessionType:'tournament'},{kind:'custom',sessionType:'custom'},{practice:true},{eligible:false},{spectating:true},{cancelled:true},{completed:false},{participantType:'bot'},{participantId:'other'}, {kind:'ranked',sessionType:'ranked',mode:'deathmatch'}])assert.equal(Wallet.rewardForParticipation(receipt(id,'standard',extra),id),0);
+    assert.equal(Wallet.snapshot(db,id,'test').balanceUnits,500);
+    for(const extra of [{kind:'official',sessionType:'tournament'},{kind:'custom',sessionType:'custom'},{practice:true},{eligible:false},{spectating:true},{cancelled:true},{completed:false},{participantType:'bot'},{participantId:'other'}])assert.equal(Wallet.rewardForParticipation(receipt(id,'standard',extra),id),0);
     assert.equal(Wallet.settleVerifiedMatch(db,id,'match:afk',receipt(id,'standard',{activeParticipation:false}),'test').credited,false);
     assert.throws(()=>Wallet.settleVerifiedMatch(db,id,'match:standardtdm',receipt(id,'ranked'),'test'),e=>e.code==='MATCH_CONFLICT');
     for(const env of ['production','sandbox'])assert.throws(()=>Wallet.settleVerifiedMatch(db,id,'match:real',receipt(id),env),e=>e.code==='RESULT_VALIDATION_UNAVAILABLE');

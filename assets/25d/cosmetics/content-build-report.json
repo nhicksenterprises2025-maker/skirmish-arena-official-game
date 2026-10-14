@@ -1,0 +1,63 @@
+{
+  "status": "EXPORTED_AND_RUNTIME_RIG_VALIDATED",
+  "blender": "5.2.2 LTS",
+  "operators": 10,
+  "icons": 12,
+  "banners": 8,
+  "operatorBytes": 737796,
+  "artworkBytes": 2136277,
+  "maxTriangles": 1064,
+  "construction": {
+    "field-ranger": {
+      "parts": 16,
+      "connectedParts": 16,
+      "toleranceWorld": 0.3
+    },
+    "metro-unit": {
+      "parts": 19,
+      "connectedParts": 19,
+      "toleranceWorld": 0.3
+    },
+    "frontier": {
+      "parts": 18,
+      "connectedParts": 18,
+      "toleranceWorld": 0.3
+    },
+    "sentinel": {
+      "parts": 14,
+      "connectedParts": 14,
+      "toleranceWorld": 0.3
+    },
+    "nightfall": {
+      "parts": 14,
+      "connectedParts": 14,
+      "toleranceWorld": 0.3
+    },
+    "hazard": {
+      "parts": 16,
+      "connectedParts": 16,
+      "toleranceWorld": 0.3
+    },
+    "vector": {
+      "parts": 15,
+      "connectedParts": 15,
+      "toleranceWorld": 0.3
+    },
+    "obsidian": {
+      "parts": 17,
+      "connectedParts": 17,
+      "toleranceWorld": 0.3
+    },
+    "aegis-prime": {
+      "parts": 16,
+      "connectedParts": 16,
+      "toleranceWorld": 0.3
+    },
+    "specter": {
+      "parts": 14,
+      "connectedParts": 14,
+      "toleranceWorld": 0.3
+    }
+  },
+  "source": "assets/25d/cosmetics/cosmetic-content.blend"
+}

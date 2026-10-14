@@ -6,7 +6,7 @@ const {DatabaseSync}=require('node:sqlite');
 const startup=require('./startup-status.cjs');
 
 const MIGRATIONS=path.join(__dirname,'migrations');
-const LATEST_DB_SCHEMA=11;
+const LATEST_DB_SCHEMA=17;
 const isoNow=()=>Date.now();
 const encoded=value=>JSON.stringify(value??{});
 
@@ -32,12 +32,12 @@ function createDatabase(file=process.env.SAR_DB_PATH||path.join(__dirname,'data'
     }catch(error){db.close();startup.forDatabase(file,'failed');throw error;}
   }
   for(let next=version+1;next<=LATEST_DB_SCHEMA;next++){
-    const name=String(next).padStart(3,'0')+({1:'_core.sql',2:'_social.sql',3:'_local_ai.sql',4:'_live_circuit.sql',5:'_tactical_instinct.sql',6:'_overclock_commerce.sql',7:'_overclock_payments.sql',8:'_sandbox_skin_offer.sql',9:'_retire_messages.sql',10:'_tournament_cancellation.sql',11:'_tournament_reliability_reset.sql'}[next]);
+    const name=String(next).padStart(3,'0')+({1:'_core.sql',2:'_social.sql',3:'_local_ai.sql',4:'_live_circuit.sql',5:'_tactical_instinct.sql',6:'_overclock_commerce.sql',7:'_overclock_payments.sql',8:'_sandbox_skin_offer.sql',9:'_retire_messages.sql',10:'_tournament_cancellation.sql',11:'_tournament_reliability_reset.sql',12:'_human_multiplayer.sql',13:'_map_ecosystem.sql',14:'_competitive_progression.sql',15:'_weapon_mastery.sql',16:'_factions.sql',17:'_replays.sql'}[next]);
     const sql=fs.readFileSync(path.join(MIGRATIONS,name),'utf8');
     // SQLite's documented table-rebuild sequence: disable enforcement before
     // BEGIN, preserve child references, then check the completed graph before
     // committing. Deferring DROP's violations alone cannot validate a new table.
-    const rebuildTables=next===8||next===10;
+    const rebuildTables=next===8||next===10||next===14;
     if(rebuildTables)db.exec('PRAGMA foreign_keys=OFF');
     db.exec('BEGIN IMMEDIATE');
     try{
@@ -55,6 +55,7 @@ function createDatabase(file=process.env.SAR_DB_PATH||path.join(__dirname,'data'
     if(rebuildTables)db.exec('PRAGMA foreign_keys=ON');
   }
   db.exec('PRAGMA foreign_keys=ON');
+  if(file===':memory:'){const close=db.close.bind(db);db.close=()=>{try{require('./replays.cjs').closeEphemeral(db);}finally{close();}};}
   return db;
 }
 

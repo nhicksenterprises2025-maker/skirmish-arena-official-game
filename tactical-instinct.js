@@ -1,6 +1,6 @@
 (function(root){
  'use strict';
- const revision='tactical-adaptation-1';
+ const revision='gameplay-quality-1';
  const presets=Object.freeze({Easy:{reaction:1.28,decision:1.22,error:1.25},Medium:{reaction:1,decision:1,error:1},Hard:{reaction:.90,decision:.90,error:.80},Pro:{reaction:.80,decision:.82,error:.62}});
  const clamp=(v,l=0,h=1)=>Math.max(l,Math.min(h,v)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
  function quality(power){return .28+.72*clamp((power-20)/79);}

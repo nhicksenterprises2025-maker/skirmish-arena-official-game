@@ -19,10 +19,42 @@ function legacy(file){
  db.prepare('INSERT INTO messages(id,user_id,bot_id,direction,type,body,created_at,source) VALUES(?,?,?,?,?,?,?,?)').run('fixture-message','startup-fixture','bot_fixture','player','PLAYER_REPLY','private retired message: never-log-body',1,'fixture');
  db.close();
 }
+function schemaEleven(file){
+ legacy(file);let db=new DatabaseSync(file),reader;try{db.exec('PRAGMA foreign_keys=ON');
+ for(const name of fs.readdirSync(MIGRATIONS).filter(name=>/^0(?:09|10|11)_/.test(name)).sort()){
+  const version=Number(name.slice(0,3));if(version===10)db.exec('PRAGMA foreign_keys=OFF');db.exec('BEGIN IMMEDIATE');
+  const archive=version===9?require('../retirement-archive.cjs').archiveMessages(db,file):null;
+  db.exec(fs.readFileSync(path.join(MIGRATIONS,name),'utf8'));
+  if(archive)db.prepare('INSERT INTO retired_feature_archives VALUES(?,?,?,?,?,?,?)').run('messages',9,archive.file,archive.sha256,archive.bytes,JSON.stringify(archive.rowCounts),archive.createdAt);
+  if(version===11)require('../tournament-reset.cjs').apply(db,{now:1});
+  assert.deepEqual(db.prepare('PRAGMA foreign_key_check').all(),[]);db.prepare('INSERT INTO save_migrations VALUES(?,?,?)').run(version,1,name);db.exec('PRAGMA user_version='+version+'; COMMIT; PRAGMA foreign_keys=ON');
+ }
+ const world=JSON.parse(JSON.stringify(require('../../dev/simulate.cjs').engine().context.SAR.getUniverse()));
+ world.progression.totalXPUnits=150000;world.playerCareer.games=17;world.playerCareer.kills=123;
+ const bot=Object.values(world.bots)[0];bot.career.kills=42;bot.familiarity.FAL=3;
+ db.prepare('INSERT INTO worlds VALUES(?,?,?,?,?,?,?)').run('startup-fixture',1,11,JSON.stringify(world),1,world.seasons.current.startAt,world.seasons.current.endAt);require('../db.cjs').upsertWorldTables(db,'startup-fixture',world,1);
+ db.prepare('INSERT INTO ac_wallets VALUES(?,?,?,?,?,?)').run('startup-fixture','test',0,1,1,1);
+ const ledger=db.prepare('INSERT INTO ac_ledger VALUES(?,?,?,?,?,?,?,?)');ledger.run('fixture-funding','startup-fixture','test','fixture-funding',500000,'test-fixture','private-startup-fixture',1);ledger.run('fixture-purchase','startup-fixture','test','fixture-purchase',-50000,'cosmetic-purchase','fixture-order',2);
+ db.prepare('INSERT INTO cosmetic_orders VALUES(?,?,?,?,?,?,?,?,?)').run('fixture-order','startup-fixture','test','fixture-purchase','urban-assault.polar-camo',50000,'fixture-purchase','COMPLETED',2);
+ db.prepare('INSERT INTO cosmetic_entitlements(user_id,environment,cosmetic_id,order_id,purchased_at) VALUES(?,?,?,?,?)').run('startup-fixture','test','urban-assault.polar-camo','fixture-order',2);
+ db.prepare('INSERT INTO cosmetic_equipment VALUES(?,?,?,?,?,?)').run('startup-fixture','test','urban-assault','urban-assault.polar-camo','main',2);
+ assert.equal(db.prepare('SELECT balance_units FROM ac_wallets').get().balance_units,450000);
+ db.close();db=new DatabaseSync(file);db.exec('PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA wal_autocheckpoint=0');
+ reader=new DatabaseSync(file,{readOnly:true});reader.exec('BEGIN');assert.equal(reader.prepare('SELECT COUNT(*) n FROM world_backups').get().n,0);
+ world.startupFixture={committedWal:'must survive backup and migration'};
+ db.prepare('UPDATE worlds SET revision=2,save_json=?,updated_at=2 WHERE user_id=?').run(JSON.stringify(world),'startup-fixture');
+ db.prepare('INSERT INTO world_backups(user_id,revision,save_json,reason,created_at) VALUES(?,?,?,?,?)').run('startup-fixture',1,JSON.stringify(world),'committed WAL fixture',2);
+ assert(fs.statSync(file+'-wal').size>0);const before=preservedRows(db);db.close();return {reader,before};
+ }catch(error){if(reader?.isOpen)reader.close();if(db.isOpen)db.close();throw error;}
+}
+function preservedRows(db){
+ const tables=['users','worlds','world_backups','bots','bot_careers','bot_weapon_stats','user_career_stats','user_weapon_stats','seasons','balance_patches','weapon_patch_stats','bot_competition_profiles','ac_wallets','ac_ledger','cosmetic_orders','cosmetic_entitlements','cosmetic_equipment','retired_feature_archives','tournament_state_resets'];
+ return Object.fromEntries(tables.map(table=>[table,db.prepare('SELECT * FROM '+table).all().map(row=>({...row}))]));
+}
 async function freePort(){const s=net.createServer();await new Promise(resolve=>s.listen(0,'127.0.0.1',resolve));const port=s.address().port;await new Promise(resolve=>s.close(resolve));return port;}
 function preload(options){
  const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{DatabaseSync}=require('node:sqlite');
- const {modulePath,trace,exercisePath,slow,failure}=options,marker=path.join(process.env.SAR_SERVICE_ROOT,'desktop-startup.json');
+ const {modulePath,trace,exercisePath,slow,failure,snapshotFailure}=options,marker=path.join(process.env.SAR_SERVICE_ROOT,'desktop-startup.json');
  const rename=fs.renameSync;let exercised=false;
  fs.renameSync=function(source,target){
   if(failure&&String(target).endsWith('.jsonl'))throw Error('never-log-failure-secret');
@@ -40,13 +72,14 @@ function preload(options){
   }
   return out;
  };
- if(slow){
+ if(slow||snapshotFailure){
   const prepare=DatabaseSync.prototype.prepare;
   DatabaseSync.prototype.prepare=function(sql,...args){
    const statement=prepare.call(this,sql,...args);
    if(String(sql).startsWith('VACUUM INTO')){
     const run=statement.run.bind(statement);
     statement.run=function(...parameters){
+     if(snapshotFailure)throw Object.assign(Error('Fixture snapshot write denied'),{code:'ENOSPC'});
      const initial=process.cpuUsage(),end=Date.now()+16000,crypto=require('node:crypto'),bytes=Buffer.alloc(4096,7);
      while(Date.now()<end)crypto.createHash('sha256').update(bytes).digest();
      fs.writeFileSync(path.join(process.env.SAR_SERVICE_ROOT,'cpu-work.json'),JSON.stringify(process.cpuUsage(initial)));
@@ -57,9 +90,9 @@ function preload(options){
   };
  }
 }
-function probe(dir,{slow=false,failure=false}={}){
+function probe(dir,{slow=false,failure=false,snapshotFailure=false}={}){
  const file=path.join(dir,'probe.cjs'),modulePath=path.resolve(__dirname,'../startup-status.cjs'),trace=path.join(dir,'trace.jsonl'),exercises=path.join(dir,'exercises.json');
- fs.writeFileSync(file,'('+preload.toString()+')('+JSON.stringify({modulePath,trace,exercisePath:exercises,slow,failure})+');');return {file,trace,exercises};
+ fs.writeFileSync(file,'('+preload.toString()+')('+JSON.stringify({modulePath,trace,exercisePath:exercises,slow,failure,snapshotFailure})+');');return {file,trace,exercises};
 }
 async function launch(dir,options={}){
  const databasePath=path.join(dir,'fixture.sqlite');if(!fs.existsSync(databasePath))legacy(databasePath);
@@ -143,5 +176,29 @@ test('an existing schema10 desktop reports verified recovery and schema11 reset 
   fs.unlinkSync(first.trace);second=await launch(dir);await ready(second);const reopened=fs.readFileSync(second.trace,'utf8').trim().split('\n').map(line=>JSON.parse(line).stage);assert(!reopened.includes('snapshot')&&!reopened.includes('migration-11'));
   raw=new DatabaseSync(file,{readOnly:true});try{assert.equal(raw.prepare('SELECT COUNT(*) n FROM tournament_state_resets').get().n,1);assert.equal(raw.prepare('SELECT value FROM startup_preserved_fixture').get().value,'unchanged');assert.deepEqual(raw.prepare('PRAGMA foreign_key_check').all(),[]);}finally{raw.close();}
  }finally{if(first)await stop(first);if(second)await stop(second);cleanup(dir);}
+});
+test('schema11 saved accounts retry a failed snapshot, migrate committed WAL through12–17 and reopen without duplicate backups or awards',async()=>{
+ const dir=directory(),file=path.join(dir,'fixture.sqlite');let retained,failed,retried,reopened;
+ try{
+  retained=schemaEleven(file);
+  // A main-file-only copy deliberately lacks the committed WAL values. The
+  // production snapshot must recover those values, not merely copy the file.
+  const mainOnly=path.join(dir,'main-only.sqlite');fs.copyFileSync(file,mainOnly);let raw=new DatabaseSync(mainOnly,{readOnly:true});
+  try{assert.equal(raw.prepare('SELECT revision FROM worlds').get().revision,1);assert.equal(raw.prepare('SELECT COUNT(*) n FROM world_backups').get().n,0);}finally{raw.close();}
+  failed=await launch(dir,{snapshotFailure:true});assert.equal((await failed.exited).code,1);
+  const failure=JSON.parse(fs.readFileSync(failed.marker));assert.equal(failure.stage,'failed');assert.match(failure.message,/snapshot/);assert(!fs.existsSync(path.join(dir,'desktop-service.json')));
+  raw=new DatabaseSync(file,{readOnly:true});try{assert.equal(raw.prepare('PRAGMA user_version').get().user_version,11);assert.deepEqual(preservedRows(raw),retained.before);assert.equal(raw.prepare("SELECT COUNT(*) n FROM save_migrations WHERE version>11").get().n,0);}finally{raw.close();}
+  retried=await launch(dir);await ready(retried);assert.notEqual(retried.nonce,failed.nonce);
+  const stages=fs.readFileSync(retried.trace,'utf8').trim().split('\n').map(JSON.parse).filter(row=>row.attempt===retried.nonce).map(row=>row.stage);
+  assert.deepEqual([...new Set(stages)],['opening-database','snapshot','snapshot-verify','migration-12','migration-13','migration-14','migration-15','migration-16','migration-17','listening','ready']);
+  const backups=fs.readdirSync(dir).filter(name=>name.includes('.pre-schema11-')&&name.endsWith('.sqlite'));assert.equal(backups.length,1);
+  raw=new DatabaseSync(path.join(dir,backups[0]),{readOnly:true});try{assert.equal(raw.prepare('PRAGMA integrity_check').get().integrity_check,'ok');assert.equal(raw.prepare('PRAGMA user_version').get().user_version,11);assert.deepEqual(preservedRows(raw),retained.before);}finally{raw.close();}
+  raw=new DatabaseSync(file,{readOnly:true});try{assert.equal(raw.prepare('PRAGMA user_version').get().user_version,17);assert.deepEqual(preservedRows(raw),retained.before);assert.deepEqual(raw.prepare('PRAGMA foreign_key_check').all(),[]);for(let version=12;version<=17;version++)assert.equal(raw.prepare('SELECT COUNT(*) n FROM save_migrations WHERE version=?').get(version).n,1);}finally{raw.close();}
+  retained.reader.exec('ROLLBACK');retained.reader.close();retained.reader=null;await stop(retried);
+  reopened=await launch(dir);await ready(reopened);
+  const reopenStages=fs.readFileSync(reopened.trace,'utf8').trim().split('\n').map(JSON.parse).filter(row=>row.attempt===reopened.nonce).map(row=>row.stage);
+  assert.deepEqual([...new Set(reopenStages)],['opening-database','listening','ready']);assert.deepEqual(fs.readdirSync(dir).filter(name=>name.includes('.pre-schema11-')&&name.endsWith('.sqlite')),backups);
+  raw=new DatabaseSync(file,{readOnly:true});try{assert.deepEqual(preservedRows(raw),retained.before);assert.equal(raw.prepare('SELECT COUNT(*) n FROM save_migrations').get().n,17);assert.equal(raw.prepare('SELECT balance_units FROM ac_wallets').get().balance_units,450000);assert.equal(raw.prepare('SELECT COUNT(*) n FROM cosmetic_orders').get().n,1);assert.equal(raw.prepare('SELECT COUNT(*) n FROM tournament_state_resets').get().n,1);for(const table of ['mp_results','ranked_reward_claims','weapon_mastery_events','weapon_mastery_claims','replay_records'])assert.equal(raw.prepare('SELECT COUNT(*) n FROM '+table).get().n,0);}finally{raw.close();}
+ }finally{if(retained?.reader){retained.reader.exec('ROLLBACK');retained.reader.close();}for(const app of [failed,retried,reopened])if(app)await stop(app);cleanup(dir);}
 });
 

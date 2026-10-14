@@ -1,12 +1,12 @@
 # Road to Release — completion handoff
 
-Baseline: 1.14.0 ARENA REFINED. Current candidate: **1.15.0 ARENA REFINED**;
+Baseline: 1.14.0 ARENA REFINED. Published release: **1.15.0 ARENA REFINED**;
 Weapon Balance **9.0** (`b-59670f2d`); AI revision **gameplay-quality-1**;
 match ruleset **core-gameplay-1** (unchanged).
 Normal match rules, progression, account IDs and storage keys remain unchanged.
 The gameplay-only 1.14.1 candidate below was not published; its fixes are retained
 in 1.15.0. Multiplayer protocol/ruleset **human-multiplayer-1** and database
-schema **12** are separate from application, balance and tactical-AI identifiers.
+schema **17** are separate from application, balance and tactical-AI identifiers.
 
 ## COMPLETED
 
